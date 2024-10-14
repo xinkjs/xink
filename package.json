@@ -1,7 +1,12 @@
 {
   "name": "@xinkjs/xink",
   "version": "0.1.0",
-  "module": "index.js",
+  "description": "A javascript API router",
+  "files": [
+    "lib",
+    "index.js",
+    "types.d.ts"
+  ],
   "devDependencies": {
     "@types/bun": "latest",
     "@xinkjs/xin": "^0.1.1",
@@ -17,5 +22,15 @@
     }
   },
   "type": "module",
-  "types": "types.d.ts"
+  "types": "types.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xinkjs/xink.git"
+  },
+  "keywords": ["api", "router", "xink"],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/xinkjs/xink/issues"
+  },
+  "homepage": "https://github.com/xinkjs/xink#readme"
 }
