@@ -46,7 +46,7 @@ For the xink plugin configuration, you must pass in a value for `runtime`, so we
 ```ts
 /* vite.config.js */
 
-import { xink } from '@xink-sh/xink'
+import { xink } from '@xinkjs/xink'
 import { defineConfig } from 'vite'
 
 export default defineConfig(async function () {
