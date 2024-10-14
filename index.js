@@ -244,7 +244,7 @@ export class Router {
     this._matchers = new Map()
     this._default_matchers = new Map([
       ['string', stringMatcher],
-      ['letter', letterMatcher]
+      ['letter', letterMatcher],
       ['number', numberMatcher]
     ])
   }
