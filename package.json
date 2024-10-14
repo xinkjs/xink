@@ -2,6 +2,7 @@
   "name": "@xinkjs/xin",
   "version": "0.1.0",
   "description": "An enhanced javascript URL router",
+  "type": "module",
   "contributors": [
     {
       "name": "Nathan Woltman",
