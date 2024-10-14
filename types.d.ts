@@ -1,4 +1,4 @@
-import type { Router } from "./lib/_router.js"
+import type { Router } from "@xinkjs/xin"
 import type { Params, Route } from "./lib/types/internal.js"
 import type { CookieSerializeOptions } from "cookie"
 import type { Plugin } from 'vite'
