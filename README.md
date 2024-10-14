@@ -68,6 +68,26 @@ type XinkConfig = {
 }
 ```
 
+## Use
+
+In your project root, create an `index.{js|ts}` file that uses the xink plugin.
+
+> At this time, we are expecting a default export from this file, so you can't explicitly use `Bun.serve()` or `Deno.serve()`.
+
+```ts
+/* index.ts */
+import { Xink } from '@xinkjs/xink'
+
+const api = new Xink()
+await api.init()
+
+export default {
+  fetch(req: Request) {
+    return api.fetch(req)
+  }
+}
+```
+
 ## Create Routes
 
 By default, routes should be created in `src/routes`. Each folder under this path represents a route segment.
@@ -106,26 +126,6 @@ export const GET = ({ cookies }: RequestEvent) => {
   const cookie_value = cookies.get('xink')
   const all_cookies = cookies.getAll()
   cookies.delete('xink')
-}
-```
-
-## Use
-
-In your project root, create an `index.{js|ts}` file that uses the xink plugin.
-
-> At this time, we are expecting a default export from this file, so you can't explicitly use `Bun.serve()` or `Deno.serve()`.
-
-```ts
-/* index.ts */
-import { xink } from '@xinkjs/xink'
-
-const api = new xink()
-await api.init()
-
-export default {
-  fetch(req: Request) {
-    return api.fetch(req)
-  }
 }
 ```
 
