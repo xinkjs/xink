@@ -9,15 +9,17 @@ export type DefaultConfig = {
   params: string;
   routes: string;
 }
-export type Handler = (event: RequestEvent) => MaybePromise<Response> | null
+export type Handler = (event: RequestEvent) => MaybePromise<Response>;
 export type Handlers = {
   [key: string]: Handler;
 }
 export type MaybePromise<T> = T | Promise<T>
-export type Params = { [key: string]: string; }
 export type ValidatedConfig = {
+  middleware: string;
+  outdir: string;
   params: string;
   routes: string;
+  runtime: 'node' | 'bun' | 'deno';
 }
 
 /* Router */

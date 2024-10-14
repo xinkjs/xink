@@ -1,4 +1,4 @@
-import type { Router } from "./lib/router.js"
+import type { Router } from "./lib/_router.js"
 import type { Params, Route } from "./lib/types/internal.js"
 import type { CookieSerializeOptions } from "cookie"
 import type { Plugin } from 'vite'
@@ -22,8 +22,10 @@ export type RequestEvent = {
 }
 export type ResolveEvent = (event: RequestEvent) => MaybePromise<Response>
 export type XinkConfig = {
+  runtime: 'node' | 'bun' | 'deno';
   csrf?: { check?: boolean; origins?: string[]; }
   middleware?: string;
+  outdir?: string;
   params?: string;
   routes?: string;
 }
@@ -37,4 +39,5 @@ export function sequence(...handlers: Handle[]): Handle
 export class Xink {
   constructor() {}
   async fetch(request: Request): Promise<Response>
+  async init()
 }
