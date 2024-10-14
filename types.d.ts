@@ -1,4 +1,6 @@
-export type Middleware = () => Promise<any> | any | void;
+export type Handler = () => MaybePromise<Response>;
+export type MaybePromise<T> = T | Promise<T>
+export type Middleware = () => MaybePromise<any> | void;
 export type Matcher = ((param: string) => boolean) | null;
 export type MatcherType = string | null;
 export type Node = {
