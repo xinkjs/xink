@@ -17,12 +17,10 @@ import { fileURLToPath } from 'url'
  * @returns {Promise<import('vite').Plugin>}
  */
 export async function xink(xink_config) {
-  console.log('init xink plugin')
   //let config_file_exists = false
   ///** @type {XinkConfig} */
   //let xink_config = {}
   const cwd = process.cwd()
-  console.log('plugin cwd', cwd)
   //const config_path = path.join(cwd, 'xink.config.js')
   //try {
   //  console.log('trying to load xink config')
@@ -34,10 +32,9 @@ export async function xink(xink_config) {
   //   console.log('loading config')
   //   xink_config = await import(`${url.pathToFileURL(config_path)}`)
   // }
-  console.log('xink config', xink_config)
+
   const validated_config = validateConfig(xink_config)
   const runtime = validated_config.runtime
-  console.log('config', validated_config)
 
   /** @type {ModuleRunner} */
   let runner
@@ -47,7 +44,6 @@ export async function xink(xink_config) {
   return {
     name: 'vite-plugin-xink',
     async config(config, env) {
-      console.log('vite config', config)
       mode = env.mode
       config.build = {
         rollupOptions: {
@@ -59,7 +55,7 @@ export async function xink(xink_config) {
           }
         }
       }
-      console.log('post config', config)
+
       return {
         define: {
           'process.env.XINK_VITE_MODE': JSON.stringify(mode)
@@ -77,13 +73,11 @@ export async function xink(xink_config) {
       }
     },
     async configureServer(server) {
-      console.log('########## CONFIGURING SERVER ##########')
       runner = createServerModuleRunner(server.environments.ssr)
 
       await createManifest(runner, validated_config, mode)
 
       server.middlewares.use(async (req, res) => {
-        console.log('running vite middlewares')
         /** @type {{ default: { fetch: (request: Request) => Promise<Response> }}} */
         const api = await runner.import(path.join(cwd, 'index.ts'))
         const base = `${server.config.server.https ? 'https' : 'http'}://${req.headers[':authority'] || req.headers.host}`
