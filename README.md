@@ -2,34 +2,52 @@
 
 An enhanced javascript URL router.
 
-> xin (zen) is a shortened spelling of our API router [xink](https://github.com/xinkjs/xink). It also resembles [a Chinese word](https://en.wikipedia.org/wiki/Xin_(heart-mind)) that's translated as "heart-mind". This is fitting, since xin is the heart of the xink router.
+Like it's forked predecessor, xin is a building block on which you can create other router features. Its main purpose is to register and match routes. We've enhanced it by adding helper functions to extend the `matcher` route functionality and set/get global middleware.
 
-### Features
-
-- Route types from @medleyjs/router:
-  - static: /hello/there/world
-  - specific: /hello/miss-:name
-  - dynamic: /hello/:name
-  - wildcard: /hello/*
-- Route types added by xin:
-  - matcher: /hello/:name=string (where 'string' references a function, which tests if the value of the `name` parameter matches)
-
-> An optional route - e.g. :lang? - feature is planned. We may also consider allowing a wildcrad to be in the middle of a route. Contributions welcome!
+> xin (zen) is a shortened spelling of our API router [xink](https://github.com/xinkjs/xink) (zinc). It also resembles [a Chinese word](https://en.wikipedia.org/wiki/Xin_(heart-mind)) that's translated as "heart-mind". This is fitting, since xin is the heart of the xink router.
 
 ## Install
 
-```sh
-npm install @xinkjs/xin
 ```
+bun add @xinkjs/xin
+deno add npm:@xinkjs/xin
+[p]npm add @xinkjs/xin
+```
+
+## QuickStart
+
+```js
+import { Router } from '@xink/xin'
+
+const router = new Router()
+
+const addRoute = (method, path, handler) => {
+  const store = router.register(path)
+  store[method] = handler
+}
+
+addRoute('GET', '/', () => { /* ... */})
+addRoute('GET', '/users', () => { /* ... */})
+addRoute('POST', '/users', () => { /* ... */})
+```
+
+> Wouldn't it be great if you didn't need to create the `addRoute` function? Stay tuned.
+
+### Route conventions
+
+- A path must start with a `/`.
+- *parameters* - leading colon, e.g. `/blog/:slug`
+- *matcher* - equals sign separator followed by a word label, e.g. `/user/:id=number`
+- *wildcard* - trailing asterick, e.g. `/thing/*`
 
 ## API
 
-### `new Router(options)`
+### `new Router(options?)`
 
 Constructs a new router instance.
 
-- `options` (*object*) - Optional object that may have any of the following options:
-  - `storeFactory` (*function*) - Used to create a route store when a route is registered. Default is `() => Object.create(null)`.
+- `options?` *object*
+- Returns a *class* instance.
 
 ```js
 import { Router } from '@xinkjs/xin'
@@ -38,26 +56,27 @@ const router = new Router()
 ```
 
 #### Options
-Use the `storeFactory` option to customize the route store.
 
-```js
-import { Router } from '@xinkjs/xin'
+- `storeFactory?` *function* `() => Object.create(null)` - Used to create a route store when a route is registered. By default, returns `{}` with a null prototype (no access to methods like toString(), etc).
 
-const router = new Router({
-  storeFactory() {
-    return { handlers: new Map(), middlewares: [] }
-  }
-});
+  ```js
+  import { Router } from '@xinkjs/xin'
 
-const store = router.register('/')
-console.log(store) // { handlers: Map {}, middlewares: [] }
-```
+  const router = new Router({
+    storeFactory() {
+      return { handlers: new Map(), middlewares: [] }
+    }
+  })
+
+  const store = router.register('/')
+  console.log(store) // { handlers: Map {}, middlewares: [] }
+  ```
 
 ### `router.register(path)`
 
-Registers a route and returns the route store object. If the route has already been registered, it just returns the route store.
+Registers a route. If the route has already been registered, it returns the existing route store.
 
-- `path` (*string*) - The route path.
+- `path` *string* - The route path.
 - Returns: *object* - The route store.
 
 ```js
@@ -68,138 +87,104 @@ const store = router.register('/users/:id')
 console.log(store) // [Object: null prototype] {}
 ```
 
-HTTP example:
+#### Route and Segment Types
 
-```js
-import { Router } from '@xinkjs/xin'
-const router = new Router()
+- *Static* - an exact match of the path.
 
-function addRoute(method, path, handler) {
-  const store = router.register(path)
-  store[method] = handler
-}
+  ```js
+  '/'
+  '/about'
+  '/api/login'
+  ```
 
-addRoute('GET', '/', () => { /* ... */})
-addRoute('GET', '/users', () => { /* ... */})
-addRoute('POST', '/users', () => { /* ... */})
-```
+- *Specific* - a mix of static content and a parameter.
 
-#### Route Types
+  ```js
+  '/v:version' // Matches '/v1'
+  '/on-:event'     // Matches '/on-click'
+  ```
 
-##### 1. Static
+- *Matcher* -  applies a matcher function to the parameter.
 
-Static routes match exactly the path provided.
+  These segments reference a function which the parameter is tested against. So, you can think of the function as a validator for the parameter. For the purpose of the example below, the matcher function tests against a regular expression of `/^\d+$/`, so it has to be a number.
 
-```
-/
-/about
-/api/login
-```
+  ```js
+  '/api/user/:id=number' // Matches  '/api/user/42
+  '/api/v:version=number' // Matches '/api/v1', but not '/api/vONE'
+  ```
 
-##### 2. Specific
+  xin provides three built-in matcher functions:
 
-Parameters may start anywhere in the path. For example, the following are valid routes:
+  - letter `(param) => /^[a-z]+$/i.test(param)`
+  - number `(param) => /^\d+$/.test(param)`
+  - word `(param) => /^\w+$/.test(param)`
 
-```js
-'/api/v:version' // Matches '/api/v1'
-'/on-:event'     // Matches '/on-click'
-```
+  > You can override the built-in matchers, or create your own, by registering them with [setMatcher()](#routersetmatcher).
 
-##### 3. Matcher
+- *Dynamic* - a segment that begins with a `:`, and will match anything up to the next `/` or to the end of the path. The text within these bounds defines the name of the parameter.
 
-These routes reference a function which the parameter is tested against. So, you can think of the  function as a validator for the parameter. For the purpose of the example, the matcher function tests against a regular expression of `/^[0-9]+$/`, so it has to be a number.
+  ```js
+  '/user/:id' // Matches /user/42
+  '/user/:id/post' // Matches /user/42/post
+  '/user/:userId/post/:postId' // Matches /user/42/post/1
+  ```
 
-```js
-'/api/v:version=number' // Matches '/api/v1', but not '/api/vONE'
-```
+  ```js
+  import { Router } from '@xinkjs/xin'
+  const router = new Router()
 
-xin provides three built-in matcher functions.
+  router.register('/user/:id')
 
-1. letter `(param) => /^[a-z]+$/i.test(param)`
-2. number `(param) => /^[0-9]+$/.test(param)`
-3. string `(param) => /^[a-z0-9]+$/i.test(param)`
+  const route = router.find('/user/42')
+  console.log(route.params) // { id: '42' }
+  ```
 
-You can override the built-in matchers, or create your own, by registering them with [setMatcher()](#routersetmatcher). The matcher function has to return a `boolean`.
+  If multiple routes have a parameter in the same part of the route, the
+  parameter names must be the same. For example, registering the following two
+  routes would be an error because the `:id` and `:userId` parameters conflict
+  with each other:
 
-```js
-import { Router } from '@xinkjs/xin'
-const router = new Router()
+  ```js
+  '/user/:id'
+  '/user/:userId/post'
+  ```
 
-router.setMatcher('fruit', (param) => {
-  const fruits = new Set(['apple', 'orange', 'grape'])
-  return fruits.has(param)
-})
-```
+- *Wildcard* - path ends with a `*`. This will match any characters in the rest of the path, including `/` characters or no characters. The wildcard value will be set in the route `params` object with `'*'` as the key.
 
-##### 4. Dynamic
+  For example, the following route:
 
-Path segments that begin with a `:` denote a parameter and will match anything
-up to the next `/` or to the end of the path.
+  ```
+  /static/*
+  ```
 
-```
-/users/:userID
-/users/:userID/posts
-/users/:userID/posts/:postID
-```
+  will match all of these URLs:
 
-Everything after the `:` character will be the name of the parameter in the
-route `params` object.
+  ```
+  /static/
+  /static/favicon.ico
+  /static/js/main.js
+  /static/css/vendor/bootstrap.css
+  ```
 
-```js
-router.register('/users/:userID')
+  ```js
+  import { Router } from '@xinkjs/xin'
+  const router = new Router()
 
-const route = router.find('/users/100')
-console.log(route.params) // { userID: '100' }
-```
+  router.register('/static/*')
 
-If multiple routes have a parameter in the same part of the route, the
-parameter names must be the same. For example, registering the following two
-routes would be an error because the `:id` and `:userID` parameters conflict
-with each other:
+  let route = router.find('/static/favicon.ico')
+  console.log(route.params) // { '*': 'favicon.ico' }
 
-```
-/users/:id
-/users/:userID/posts
-```
-
-##### 5. Wildcard
-
-Routes that end with a `*` are wildcard routes. The `*` will match any
-characters in the rest of the path, including `/` characters or no characters.
-
-For example, the following route:
-
-```
-/static/*
-```
-
-will match all of these URLs:
-
-```
-/static/
-/static/favicon.ico
-/static/js/main.js
-/static/css/vendor/bootstrap.css
-```
-
-The wildcard value will be set in the route `params` object with `'*'` as the key.
-
-```js
-router.register('/static/*')
-
-let route = router.find('/static/favicon.ico')
-console.log(route.params) // { '*': 'favicon.ico' }
-
-route = router.find('/static/')
-console.log(route.params) // { '*': '' }
-```
+  route = router.find('/static/')
+  console.log(route.params) // { '*': '' }
+  ```
 
 ### `router.find(path)`
 
-Finds a route that matches the provided path. Returns `null` if no route matches the path.
+Attempts to find a route.
 
-- `path` (*string*) - The route path to be matched.
-- Returns: *{store: object, params: object}* | *null* - The route store and matching parameters; or `null` if the path did not match any registered routes.
+- `path` *string* - The route path to be matched.
+- Returns *{ store, params }* | *null*
 
 ```js
 import { Router } from '@xinkjs/xin'
@@ -211,9 +196,9 @@ function addRoute(method, path, handler) {
 }
 
 addRoute('GET', '/', () => {})
-addRoute('GET', '/users', () => {})
-addRoute('POST', '/users', () => {})
-addRoute('GET', '/users/:id', () => {})
+addRoute('GET', '/user', () => {})
+addRoute('POST', '/user', () => {})
+addRoute('GET', '/user/:id', () => {})
 addRoute('GET', '/static/*', () => {})
 
 router.find('/')
@@ -222,16 +207,16 @@ router.find('/')
 //   params: {}
 // }
 
-router.find('/users')
+router.find('/user')
 // {
 //   store: { GET: [Function], POST: [Function] },
 //   params: {}
 // }
 
-router.find('/users/100')
+router.find('/user/42')
 // {
 //   store: { GET: [Function] },
-//   params: { id: '100'}
+//   params: { id: '42'}
 // }
 
 router.find('/static/js/common.js')
@@ -254,17 +239,17 @@ The matching order goes from more specific to less specific.
 4. Dynamic
 5. Wildcard
 
-For example, an incoming path of "/static/v2" will be matched in the below order; where the regex for the "string" matcher is /[a-z0-9]/
+For example, an incoming path of "/static/v2" will be matched in the below order; where the regex for the "number" matcher is `/^\d+$/`.
 
 ```sh
 /static/v2  //static
 /static/v:number  //specific: because the "v" makes it partially static
-/static/:verison=string  //matcher: aka dynamic with a validator, so it is more specific than dynamic
+/static/:version=number  //matcher: aka dynamic with a validator, so it is more specific than dynamic
 /static/:version  //dynamic
 /static/*  //wildcard
 ```
 
-Another example would be that "/static/TWO" would match the dynamic route. It's not a "string" in this case, since uppercase letters are not allowed in the regex.
+Another example would be that "/static/two" would match the dynamic route, because it's not a number; so, it wouldn't match the matcher route.
 
 It's also worth noting that the wildcard route would never match any two-segment path that starts with "/static/", because either the matcher or dynamic route will match them first; especially since the dynamic route will accept anything as the second path segment.
 
@@ -285,8 +270,8 @@ const tree = router.getTree()
 
 Sets a matcher, to be used with matcher route types.
 
-- `type` _(string)_ - The name of the matcher.
-- Returns: _void_
+- `type` *string* - The name of the matcher.
+- `matcher` *(param: string) => boolean* - The function which is used to test params against. 
 
 ```js
 import { Router } from '@xinkjs/xin'
@@ -302,27 +287,27 @@ router.setMatcher('fruit', (param) => {
 
 Returns a specific matcher function.
 
-- Returns: _Matcher_ | _null_ - The matcher function, if it exists. 
+- Returns: *Matcher* | *null*
 
 ```js
 import { Router } from '@xinkjs/xin'
 const router = new Router()
 
-const matcher = router.getMatcher('string')
+const matcher = router.getMatcher('word')
 ```
 
 ### `router.setMiddleware(function)`
 
-Sets the middleware function. This must be a singular function, but in theory it could handle multiple functions itself.
+Sets the global middleware function. This must be a single function, but in theory it could handle multiple functions itself.
 
-- function _((): Promise<any> | any | void)_ - A middleware function that runs on every request.
+- function *() => Promise\<Response\> | Response* - A global middleware function that runs on every request.
 
 ```js
 import { Router } from '@xinkjs/xin'
 const router = new Router()
 
 router.setMiddleware((req) => {
-  return new Response()
+  return new Response('Hello, from middleware')
 })
 ```
 
@@ -330,4 +315,4 @@ router.setMiddleware((req) => {
 
 Returns the middleware function.
 
-- Returns: _(): Promise<any> | any | void_ - The middleware function.
+- Returns: *() => Promise\<Response\> | Response*
