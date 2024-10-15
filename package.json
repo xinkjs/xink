@@ -1,8 +1,17 @@
 {
   "name": "@xinkjs/xin",
   "version": "0.1.2",
-  "description": "An enhanced javascript URL router",
-  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xinkjs/xin.git"
+  },
+  "exports": {
+    ".": {
+      "import": "./index.js",
+      "types": "./types.d.ts"
+    }
+  },
+  "bugs": "https://github.com/xinkjs/xin/issues",
   "contributors": [
     {
       "name": "Nathan Woltman",
@@ -14,26 +23,17 @@
       "url": "https://github.com/j4w8n"
     }
   ],
-  "license": "MIT",
+  "description": "An enhanced javascript URL router",
   "files": [
     "index.js",
     "types.d.ts"
   ],
-  "exports": {
-    ".": {
-      "import": "./index.js",
-      "types": "./types.d.ts"
-    }
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/xinkjs/xin.git"
-  },
   "homepage": "https://github.com/xinkjs/xin#readme",
-  "bugs": "https://github.com/xinkjs/xin/issues",
   "keywords": [
     "url",
     "router",
     "xin"
-  ]
+  ],
+  "license": "MIT",
+  "type": "module"
 }

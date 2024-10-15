@@ -1,4 +1,4 @@
-/** @import { Matcher, MatcherFn, MatcherType, Middleware, Node, Params, ParametricNode, Route, Store, StoreFactory } from './types.d.ts' */
+/** @import { Matcher, MatcherFn, MatcherType, Middleware, Node, Params, ParametricNode, Route, Store, StoreFactory, Handler } from './types.d.ts' */
 
 /**
  * 
@@ -527,5 +527,93 @@ export class Router {
     const path_length = query_index >= 0 ? query_index : path.length
 
     return matchRoute(path, path_length, this._root, 0)
+  }
+
+  /**
+   * Register a GET route.
+   * 
+   * @param {string} path
+   * @param {Handler} handler
+   */
+  get(path, handler) {
+    const store = this.register(path)
+    store['GET'] = handler
+  }
+
+  /**
+   * Register a POST route.
+   * 
+   * @param {string} path
+   * @param {Handler} handler
+   */
+  post(path, handler) {
+    const store = this.register(path)
+    store['POST'] = handler
+  }
+
+  /**
+   * Register a PUT route.
+   * 
+   * @param {string} path
+   * @param {Handler} handler
+   */
+  put(path, handler) {
+    const store = this.register(path)
+    store['PUT'] = handler
+  }
+
+  /**
+   * Register a PATCH route.
+   * 
+   * @param {string} path
+   * @param {Handler} handler
+   */
+  patch(path, handler) {
+    const store = this.register(path)
+    store['PATCH'] = handler
+  }
+
+  /**
+   * Register a DELETE route.
+   * 
+   * @param {string} path
+   * @param {Handler} handler
+   */
+  delete(path, handler) {
+    const store = this.register(path)
+    store['DELETE'] = handler
+  }
+
+  /**
+   * Register a HEAD route.
+   * 
+   * @param {string} path
+   * @param {Handler} handler
+   */
+  head(path, handler) {
+    const store = this.register(path)
+    store['HEAD'] = handler
+  }
+
+  /**
+   * Register an OPTIONS route.
+   * 
+   * @param {string} path
+   * @param {Handler} handler
+   */
+  options(path, handler) {
+    const store = this.register(path)
+    store['OPTIONS'] = handler
+  }
+
+  /**
+   * Register a fallback route, to match any methods not registered for a path.
+   * 
+   * @param {string} path
+   * @param {Handler} handler
+   */
+  fallback(path, handler) {
+    const store = this.register(path)
+    store['fallback'] = handler
   }
 }
