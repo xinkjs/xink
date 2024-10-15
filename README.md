@@ -17,7 +17,7 @@ deno add npm:@xinkjs/xin
 ## QuickStart
 
 ```js
-import { Router } from '@xink/xin'
+import { Router } from '@xinkjs/xin'
 
 const router = new Router()
 
