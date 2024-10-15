@@ -21,17 +21,10 @@ import { Router } from '@xinkjs/xin'
 
 const router = new Router()
 
-const addRoute = (method, path, handler) => {
-  const store = router.register(path)
-  store[method] = handler
-}
-
-addRoute('GET', '/', () => { /* ... */})
-addRoute('GET', '/users', () => { /* ... */})
-addRoute('POST', '/users', () => { /* ... */})
+router.get('/', () => { /* ... */})
+router.get('/user', () => { /* ... */})
+router.post('/user', () => { /* ... */})
 ```
-
-> Wouldn't it be great if you didn't need to create the `addRoute` function? Stay tuned.
 
 ### Route conventions
 
@@ -72,9 +65,27 @@ const router = new Router()
   console.log(store) // { handlers: Map {}, middlewares: [] }
   ```
 
+### `router.[method](path, handler)`
+
+Registers a route with the given HTTP method.
+
+- `path` *string* - The route path.
+- `handler` *function* - The route handler for the method.
+
+xin supports these methods: `get`, `post`, `put`, `patch`, `delete`, `head`, `options`, `fallback` - fallback being returned from a `router.find(path)` call for any method not defined for the route.
+
+```js
+import { Router } from '@xinkjs/xin'
+const router = new Router()
+
+router.get('/', () => new Response('Hello xin!'))
+```
+
 ### `router.register(path)`
 
-Registers a route. If the route has already been registered, it returns the existing route store.
+An alternative to `router.[method]()`.
+
+Registers a route and returns it's store for further configuration. If the route has already been registered, it returns the existing route store. Use this method for full control over the store, which is typically used to store route handlers and other information.
 
 - `path` *string* - The route path.
 - Returns: *object* - The route store.
@@ -83,8 +94,9 @@ Registers a route. If the route has already been registered, it returns the exis
 import { Router } from '@xinkjs/xin'
 const router = new Router()
 
-const store = router.register('/users/:id')
+const store = router.register('/user/:id')
 console.log(store) // [Object: null prototype] {}
+store['GET'] = () => new Response('Hello xin!')
 ```
 
 #### Route and Segment Types
@@ -133,7 +145,7 @@ console.log(store) // [Object: null prototype] {}
   import { Router } from '@xinkjs/xin'
   const router = new Router()
 
-  router.register('/user/:id')
+  router.get('/user/:id', () => {})
 
   const route = router.find('/user/42')
   console.log(route.params) // { id: '42' }
@@ -153,8 +165,8 @@ console.log(store) // [Object: null prototype] {}
 
   For example, the following route:
 
-  ```
-  /static/*
+  ```js
+  '/static/*'
   ```
 
   will match all of these URLs:
@@ -170,7 +182,7 @@ console.log(store) // [Object: null prototype] {}
   import { Router } from '@xinkjs/xin'
   const router = new Router()
 
-  router.register('/static/*')
+  router.get('/static/*', () => {})
 
   let route = router.find('/static/favicon.ico')
   console.log(route.params) // { '*': 'favicon.ico' }
@@ -190,16 +202,11 @@ Attempts to find a route.
 import { Router } from '@xinkjs/xin'
 const router = new Router()
 
-function addRoute(method, path, handler) {
-  const store = router.register(path)
-  store[method] = handler
-}
-
-addRoute('GET', '/', () => {})
-addRoute('GET', '/user', () => {})
-addRoute('POST', '/user', () => {})
-addRoute('GET', '/user/:id', () => {})
-addRoute('GET', '/static/*', () => {})
+router.get('/', () => {})
+router.get('/user', () => {})
+router.post('/user', () => {})
+router.get('/user/:id', () => {})
+router.get('/static/*', () => {})
 
 router.find('/')
 // {
@@ -241,12 +248,12 @@ The matching order goes from more specific to less specific.
 
 For example, an incoming path of "/static/v2" will be matched in the below order; where the regex for the "number" matcher is `/^\d+$/`.
 
-```sh
-/static/v2  //static
-/static/v:number  //specific: because the "v" makes it partially static
-/static/:version=number  //matcher: aka dynamic with a validator, so it is more specific than dynamic
-/static/:version  //dynamic
-/static/*  //wildcard
+```js
+'/static/v2'  //static
+'/static/v:number'  //specific: because the "v" makes it partially static
+'/static/:version=number'  //matcher: aka dynamic with a validator, so it is more specific than dynamic
+'/static/:version'  //dynamic
+'/static/*'  //wildcard
 ```
 
 Another example would be that "/static/two" would match the dynamic route, because it's not a number; so, it wouldn't match the matcher route.
