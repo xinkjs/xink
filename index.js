@@ -1,4 +1,4 @@
-/** @import { Matcher, MatcherFn, MatcherType, Middleware, Node, Params, ParametricNode, Route, Store, StoreFactory, Handler } from './types.d.ts' */
+/** @import { Handler, Matcher, MatcherFn, MatcherType, Middleware, Node, Params, ParametricNode, Route, Router, Store, StoreFactory } from './types.d.ts' */
 
 /**
  * 
@@ -211,18 +211,20 @@ const matchRoute = (path, path_length, node, start_index) => {
 
 /**
  * A xin URL Router.
+ * 
+ * @type {Router}
  */
 export class Router {
   /** @type {Node} */
-  _root
+  #root
   /** @type {StoreFactory} */
-  _storeFactory
+  #storeFactory
   /** @type {Map<string, Matcher>} */
-  _matchers
+  #matchers
   /** @type {Map<string, Matcher>} */
-  _default_matchers
+  #default_matchers
   /** @type {string | null} */
-  _middleware = null
+  #middleware = null
 
   /**
    * @param {Object} RouterArgs
@@ -237,10 +239,10 @@ export class Router {
       throw new Error('Custom `storeFactory` must not return `null`.')
     }
 
-    this._root = createNode('/')
-    this._storeFactory = storeFactory
-    this._matchers = new Map()
-    this._default_matchers = new Map([
+    this.#root = createNode('/')
+    this.#storeFactory = storeFactory
+    this.#matchers = new Map()
+    this.#default_matchers = new Map([
       ['word', wordMatcher],
       ['letter', letterMatcher],
       ['number', numberMatcher]
@@ -253,7 +255,7 @@ export class Router {
    * @returns {Node}
    */
   getTree() {
-    return this._root
+    return this.#root
   }
 
   /**
@@ -263,7 +265,7 @@ export class Router {
    * @param {Matcher} matcher
    */
   setMatcher(type, matcher) {
-    this._matchers.set(type, matcher)
+    this.#matchers.set(type, matcher)
   }
 
   /**
@@ -273,7 +275,7 @@ export class Router {
    * @returns {Matcher}
    */
   getMatcher(type) {
-    const matcher = this._matchers.get(type) ?? this._default_matchers.get(type) ?? null
+    const matcher = this.#matchers.get(type) ?? this.#default_matchers.get(type) ?? null
 
     return matcher
   }
@@ -286,7 +288,7 @@ export class Router {
    * @param {Middleware} handle 
    */
   setMiddleware(handle) {
-    this._middleware = handle
+    this.#middleware = handle
   }
 
   /**
@@ -295,7 +297,7 @@ export class Router {
    * @returns {any | null}
    */
   getMiddleware() {
-    return this._middleware
+    return this.#middleware
   }
 
   /**
@@ -325,7 +327,7 @@ export class Router {
     if (static_segments[static_segments.length - 1] === '')
       static_segments.pop()
 
-    let node = this._root
+    let node = this.#root
     let param_segments_index = 0
 
     for (let i = 0; i < static_segments.length; ++i) {
@@ -494,7 +496,7 @@ export class Router {
       /* We know that this will not be `undefined`, because of the `.set` above. */
       const current_parametric_child = node.parametric_children.get(param_name)
       if (current_parametric_child?.store === null)
-        current_parametric_child.store = this._storeFactory()
+        current_parametric_child.store = this.#storeFactory()
 
       // @ts-ignore
       return current_parametric_child.store
@@ -502,14 +504,14 @@ export class Router {
 
     if (ends_with_wildcard) { // The final part is a wildcard
       if (node.wildcard_store === null)
-        node.wildcard_store = this._storeFactory()
+        node.wildcard_store = this.#storeFactory()
 
       return node.wildcard_store
     }
 
     // The final part is static
     if (node.store === null)
-      node.store = this._storeFactory()
+      node.store = this.#storeFactory()
 
     return node.store
   }
@@ -526,7 +528,7 @@ export class Router {
     const query_index = path.indexOf('?')
     const path_length = query_index >= 0 ? query_index : path.length
 
-    return matchRoute(path, path_length, this._root, 0)
+    return matchRoute(path, path_length, this.#root, 0)
   }
 
   /**
