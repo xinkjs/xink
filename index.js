@@ -1,4 +1,4 @@
-/** @import { Matcher, MatcherType, Middleware, Node, Params, ParametricNode, Route, Store, StoreFactory } from './types.d.ts' */
+/** @import { Matcher, MatcherFn, MatcherType, Middleware, Node, Params, ParametricNode, Route, Store, StoreFactory } from './types.d.ts' */
 
 /**
  * 
@@ -77,25 +77,23 @@ const sortMap = (data) => {
 }
 
 /**
+ * Equivalent Character Class - /^[a-zA-Z0-9_]$/
  * 
- * @param {string} param 
- * @returns {boolean}
+ * @type {MatcherFn}
  */
-const stringMatcher = (param) => /^[a-z0-9]+$/i.test(param)
+const wordMatcher = (param) => /^\w+$/.test(param)
 
 /**
  * 
- * @param {string} param 
- * @returns {boolean}
+ * @type {MatcherFn}
  */
 const letterMatcher = (param) => /^[a-z]+$/i.test(param)
 
 /**
  * 
- * @param {string} param 
- * @returns {boolean}
+ * @type {MatcherFn}
  */
-const numberMatcher = (param) => /^[0-9]+$/.test(param)
+const numberMatcher = (param) => /^\d+$/.test(param)
 
 /**
  * 
@@ -243,7 +241,7 @@ export class Router {
     this._storeFactory = storeFactory
     this._matchers = new Map()
     this._default_matchers = new Map([
-      ['string', stringMatcher],
+      ['word', wordMatcher],
       ['letter', letterMatcher],
       ['number', numberMatcher]
     ])
