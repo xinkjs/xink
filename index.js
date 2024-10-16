@@ -73,7 +73,7 @@ export async function xink(xink_config) {
       }
     },
     async configureServer(server) {
-      runner = createServerModuleRunner(server.environments.ssr)
+      runner = server.environments.ssr.runner
 
       await createManifest(runner, validated_config, mode)
 
@@ -106,11 +106,15 @@ export async function xink(xink_config) {
     // },
     async hotUpdate(context) {
       if (context.type === 'create' && context.file.includes('route.ts'))
+        /**
+          * TODO - only update the manifest, instead of recreating the whole thing.
+          */
         await createManifest(runner, validated_config, mode)
     },
     load(id) {
-      if (id.includes('vite-plugin-xink-bun'))
-        console.log('loaded id is', id)
+      if (id.includes('vite-plugin-xink-bun')) {
+        //console.log('loaded id is', id)
+      }
     }
   }
 }
