@@ -1,26 +1,20 @@
 {
   "name": "@xinkjs/xink",
   "version": "0.1.3",
-  "description": "A javascript API router",
-  "files": [
-    "lib",
-    "index.js",
-    "types.d.ts"
-  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xinkjs/xink.git"
+  },
   "devDependencies": {
     "@types/bun": "latest",
-    "@xinkjs/xin": "^0.1.1",
+    "@xinkjs/xin": "^0.2.0",
     "cookie": "^0.6.0",
     "glob": "^11.0.0",
     "set-cookie-parser": "^2.7.0",
-    "vite": "^6.0.0-beta.2"
+    "vite": "^6.0.0-beta.3"
   },
   "peerDependencies": {
-    "@xinkjs/xin": "0.1.1",
-    "cookie": "0.6.0",
-    "glob": "11.0.0",
-    "set-cookie-parser": "2.7.0",
-    "vite": "6.0.0-beta.2"
+    "vite": "^6.0.0-beta.3"
   },
   "exports": {
     ".": {
@@ -28,16 +22,18 @@
       "types": "./types.d.ts"
     }
   },
-  "type": "module",
-  "types": "types.d.ts",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/xinkjs/xink.git"
-  },
-  "keywords": ["api", "router", "xink"],
-  "license": "MIT",
   "bugs": {
     "url": "https://github.com/xinkjs/xink/issues"
   },
-  "homepage": "https://github.com/xinkjs/xink#readme"
+  "description": "A javascript API router",
+  "files": [
+    "lib",
+    "index.js",
+    "types.d.ts"
+  ],
+  "homepage": "https://github.com/xinkjs/xink#readme",
+  "keywords": ["api", "router", "xink"],
+  "license": "MIT",
+  "type": "module",
+  "types": "types.d.ts"
 }
