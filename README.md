@@ -5,7 +5,7 @@ A Vite plugin for the xink API router; in early development, so expect changes. 
 ## Road to Alpha
 
 - [x] `dev` working with Bun.
-- [ ] `build` working with Bun.
+- [x] `build` working with Bun.
 - [ ] `dev` working with Deno.
 - [ ] `build` working with Deno.
 - [ ] `dev` working with Node.
@@ -41,8 +41,24 @@ npm install -D vite@beta @xinkjs/xink
 
 Create or ensure there is a "vite.config.js" file in your project's root directory.
 
-For the xink plugin configuration, you must pass in a value for `runtime`, so we know how to handle things correctly; and there is currently no default for it.
+For the xink plugin configuration:
+- you must provide a `runtime` value
+- `entrypoint` is optional, but should be the server file at the root of your project. Below are the defaults for each supported runtime; so, you only need to set this if you're using something different.
+  - `app.js` for node
+  - `index.ts` for bun
+  - `main.ts` for deno
 
+```ts
+type XinkConfig = {
+  runtime: 'node' | 'bun' | 'deno';
+  csrf?: { check?: boolean; origins?: string[]; } // not currently functional
+  entrypoint?: string;
+  middleware_dir?: string;
+  out_dir?: string;
+  params_dir?: string;
+  routes_dir?: string;
+}
+```
 ```ts
 /* vite.config.js */
 
@@ -57,16 +73,6 @@ export default defineConfig(async function () {
   }
 })
 ```
-```ts
-type XinkConfig = {
-  runtime: 'node' | 'bun' | 'deno';
-  csrf?: { check?: boolean; origins?: string[]; } // not currently functional
-  middleware?: string;
-  outdir?: string;
-  params?: string;
-  routes?: string;
-}
-```
 
 ## Use
 
@@ -75,7 +81,7 @@ In your project root, create an `index.{js|ts}` file that uses the xink plugin.
 > At this time, we are expecting a default export from this file, so you can't explicitly use `Bun.serve()` or `Deno.serve()`.
 
 ```ts
-/* index.ts */
+/* entrypoint file */
 import { Xink } from '@xinkjs/xink'
 
 const api = new Xink()
