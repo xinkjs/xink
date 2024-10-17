@@ -37,54 +37,46 @@ export async function xink(xink_config) {
   /** @type {ModuleRunner} */
   let runner
 
-  let mode = ''
-
-  // const modules_path = join('.', cwd, validated_config.routes_dir, '**/route.{js|ts}')
-  // console.log('path', modules_path)
-  // const modules = import.meta.glob(modules_path)
-  // console.log(modules)
-
   return {
     name: 'vite-plugin-xink',
     async config(config, env) {
-      mode = env.mode
+      const mode = env.mode
 
       if (mode == 'production') {
         const routes_glob = new Glob(join(cwd, validated_config.routes_dir, '**', 'route.{js,ts}'), {})
         const params_glob = new Glob(join(cwd, validated_config.params_dir, '**', '*.{js,ts}'), {})
         const middleware_glob = new Glob(join(cwd, validated_config.middleware_dir, '**', 'middleware.{js,ts}'), {})
         const entrypoint_glob = new Glob(join(cwd, 'index.{js,ts}'), {})
-        const input = []
+        const input = {}
 
         for (const file of routes_glob) {
-          input.push(file)
+          const path = file.split(cwd)[1].slice(1).split('.')[0]
+          input[path] = file
         }
 
         for (const file of params_glob) {
-          input.push(file)
+          const path = file.split(cwd)[1].slice(1).split('.')[0]
+          input[path] = file
         }
 
         for (const file of middleware_glob) {
-          input.push(file)
+          const path = file.split(cwd)[1].slice(1).split('.')[0]
+          input[path] = file
           break // there should only be one middleware file
         }
 
         for (const file of entrypoint_glob) {
-          input.push(file)
+          const path = file.split(cwd)[1].slice(1).split('.')[0]
+          input[path] = file
           break // there should only be one entrypoint file
         }
 
         config.build = {
           outDir: validated_config.out_dir,
           ssr: true,
-          target: 'node16',
+          target: 'esnext',
           rollupOptions: {
-            input,
-            output: {
-              dir: validated_config.out_dir,
-              preserveModules: true,
-              preserveModulesRoot: cwd
-            },
+            input
           }
         }
       }
@@ -113,11 +105,22 @@ export async function xink(xink_config) {
     async configureServer(server) {
       runner = server.environments.ssr.runner
 
-      await createManifest(runner, validated_config, mode)
+      await createManifest(runner, validated_config)
 
       server.middlewares.use(async (req, res) => {
         /** @type {{ default: { fetch: (request: Request) => Promise<Response> }}} */
         const api = await runner.import(join(cwd, entrypoint))
+        const base = `${server.config.server.https ? 'https' : 'http'}://${req.headers[':authority'] || req.headers.host}`
+        const request = await getRequest(base, req)
+        const response = await api.default.fetch(request)
+
+        setResponse(res, response)
+      })
+    },
+    async configurePreviewServer(server) {
+      server.middlewares.use(async (req, res) => {
+        /** @type {{ default: { fetch: (request: Request) => Promise<Response> }}} */
+        const api = await import(/* @vite-ignore */join(cwd, validated_config.out_dir, `${entrypoint.split('.')[0]}.js`))
         const base = `${server.config.server.https ? 'https' : 'http'}://${req.headers[':authority'] || req.headers.host}`
         const request = await getRequest(base, req)
         const response = await api.default.fetch(request)
@@ -130,12 +133,7 @@ export async function xink(xink_config) {
         /**
           * TODO - only update the manifest, instead of recreating the whole thing.
           */
-        await createManifest(runner, validated_config, mode)
-    },
-    load(id) {
-      if (id.includes('vite-plugin-xink-bun')) {
-        //console.log('loaded id is', id)
-      }
+        await createManifest(runner, validated_config)
     }
   }
 }
