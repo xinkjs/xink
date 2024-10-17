@@ -43,31 +43,25 @@ export async function xink(xink_config) {
       const mode = env.mode
 
       if (mode == 'production') {
-        const routes_glob = new Glob(join(cwd, validated_config.routes_dir, '**', 'route.{js,ts}'), {})
-        const params_glob = new Glob(join(cwd, validated_config.params_dir, '**', '*.{js,ts}'), {})
+        const routes_glob = new Glob(join(cwd, validated_config.routes_dir, '**/route.{js,ts}'), {})
+        const params_glob = new Glob(join(cwd, validated_config.params_dir, '**/*.{js,ts}'), {})
         const middleware_glob = new Glob(join(cwd, validated_config.middleware_dir, '**', 'middleware.{js,ts}'), {})
         const entrypoint_glob = new Glob(join(cwd, 'index.{js,ts}'), {})
-        const input = {}
+        const input = []
 
-        for (const file of routes_glob) {
-          const path = file.split(cwd)[1].slice(1).split('.')[0]
-          input[path] = file
-        }
+        for (const file of routes_glob)
+          input.push(file)
 
-        for (const file of params_glob) {
-          const path = file.split(cwd)[1].slice(1).split('.')[0]
-          input[path] = file
-        }
+        for (const file of params_glob)
+          input.push(file)
 
         for (const file of middleware_glob) {
-          const path = file.split(cwd)[1].slice(1).split('.')[0]
-          input[path] = file
+          input.push(file)
           break // there should only be one middleware file
         }
 
         for (const file of entrypoint_glob) {
-          const path = file.split(cwd)[1].slice(1).split('.')[0]
-          input[path] = file
+          input.push(file)
           break // there should only be one entrypoint file
         }
 
@@ -76,7 +70,25 @@ export async function xink(xink_config) {
           ssr: true,
           target: 'esnext',
           rollupOptions: {
-            input
+            input,
+            output: {
+              entryFileNames: (chunk) => {
+                /**
+                 * 2nd `split` only at word boundary (\b);
+                 * otherwise, we'd split the rest segments too,
+                 * instead of just the filename extension.
+                 */
+                return `${
+                  chunk.facadeModuleId.split(cwd)[1].slice(1).split(/\b\./)[0]
+                    .replace(/\[{1}(\.{3}[\w.~-]+?)\]{1}/g, '_$1_') // wildcards
+                    .replace(/\[{1}([\w.~-]+?=[a-zA-Z]+?)\]{1}/g, '_$1_') // matchers
+                    .replace(/=/g, '_') // from matchers
+                    .replace(/\[{2}([\w.~-]+?)\]{2}/g, '__$1__') // optionals
+                    .replace(/\[{1}/g, '_') // - specifics/dynamics
+                    .replace(/\]{1}/g, '_')  // - specifics/dynamics
+                }.js`
+              }
+            }
           }
         }
       }
