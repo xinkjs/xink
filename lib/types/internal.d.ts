@@ -15,10 +15,11 @@ export type Handlers = {
 }
 export type MaybePromise<T> = T | Promise<T>
 export type ValidatedConfig = {
-  middleware: string;
-  outdir: string;
-  params: string;
-  routes: string;
+  entrypoint: string;
+  middleware_dir: string;
+  out_dir: string;
+  params_dir: string;
+  routes_dir: string;
   runtime: 'node' | 'bun' | 'deno';
 }
 

@@ -23,11 +23,12 @@ export type RequestEvent = {
 export type ResolveEvent = (event: RequestEvent) => MaybePromise<Response>
 export type XinkConfig = {
   runtime: 'node' | 'bun' | 'deno';
-  csrf?: { check?: boolean; origins?: string[]; }
-  middleware?: string;
-  outdir?: string;
-  params?: string;
-  routes?: string;
+  csrf?: { check?: boolean; origins?: string[]; };
+  entrypoint?: string; 
+  middleware_dir?: string;
+  out_dir?: string;
+  params_dir?: string;
+  routes_dir?: string;
 }
 
 export function xink(xink_config?: XinkConfig): Promise<Plugin>
