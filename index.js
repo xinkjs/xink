@@ -1,16 +1,11 @@
 /** @import { XinkConfig } from './types.js' */
 /** @import { ModuleRunner } from 'vite/module-runner' */
-import { CONFIG } from './lib/constants.js'
-import { Xink } from './lib/xink.js'
+
 import { validateConfig } from './lib/utils/config.js'
 import { getRequest, setResponse } from './lib/utils/vite.js'
 import { createManifest } from './lib/shared/manifest.js'
-import { createBunDevEnvironment } from './lib/environments/index.js'
-import { createServerHotChannel, createServerModuleRunner, build, transformWithEsbuild } from 'vite'
-import * as url from 'node:url'
-import { statSync, copyFileSync } from 'node:fs'
+import { copyFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { fileURLToPath } from 'url'
 import { Glob } from 'glob'
 
 /**
@@ -82,16 +77,14 @@ export async function xink(xink_config) {
         config.build = {
           outDir: validated_config.out_dir,
           ssr: true,
-          target: 'esnext',
+          target: 'node16',
           rollupOptions: {
             input,
-            output: [
-              {
-                dir: validated_config.out_dir,
-                preserveModules: true,
-                preserveModulesRoot: cwd
-              },
-            ]
+            output: {
+              dir: validated_config.out_dir,
+              preserveModules: true,
+              preserveModulesRoot: cwd
+            },
           }
         }
       }
@@ -116,26 +109,6 @@ export async function xink(xink_config) {
     async writeBundle() {
       /* Copy routes manifest to out directory. */
       copyFileSync(join(cwd, '.xink/manifest.json'), join(cwd, validated_config.out_dir, 'manifest.json'))
-
-      
-
-      // await transformWithEsbuild(
-
-      // )
-      // await build({
-      //   build: {
-      //     outDir: validated_config.out_dir,
-      //     ssr: true,
-      //     target: 'esnext',
-      //     rollupOptions: {
-      //       input,
-      //       output: [{
-      //         preserveModules: true,
-      //         preserveModulesRoot: validated_config.routes_dir
-      //       }]
-      //     }
-      //   }
-      // })
     },
     async configureServer(server) {
       runner = server.environments.ssr.runner
@@ -152,23 +125,6 @@ export async function xink(xink_config) {
         setResponse(res, response)
       })
     },
-    // async configurePreviewServer(server) {
-    //   console.log('########## CONFIGURING PREVIEW SERVER ##########')
-    //   runner = createServerModuleRunner(server.environment.ssr)
-
-    //   await createManifest(runner, validated_config, true)
-
-    //   server.middlewares.use(async (req, res) => {
-    //     console.log('running vite middlewares')
-    //     /** @type {{ default: { fetch: (request: Request) => Promise<Response> }}} */
-    //     const api = await runner.import(join(cwd, 'index.ts'))
-    //     const base = `${server.config.server.https ? 'https' : 'http'}://${req.headers[':authority'] || req.headers.host}`
-    //     const request = await getRequest(base, req)
-    //     const response = await api.default.fetch(request)
-
-    //     setResponse(res, response)
-    //   })
-    // },
     async hotUpdate(context) {
       if (context.type === 'create' && route_file_regex.test(context.file))
         /**
