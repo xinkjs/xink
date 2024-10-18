@@ -3,6 +3,11 @@ import type { Params, Route } from "./lib/types/internal.js"
 import type { CookieSerializeOptions } from "cookie"
 import type { Plugin } from 'vite'
 
+export type Cookie = {
+  name: string;
+  value: string;
+  options: CookieSerializeOptions;
+}
 export type Cookies = {
   delete(name: string, options?: CookieSerializeOptions): void;
   get(name: string, options?: CookieParseOptions): string | undefined;
@@ -40,5 +45,5 @@ export function sequence(...handlers: Handle[]): Handle
 export class Xink {
   constructor() {}
   async fetch(request: Request): Promise<Response>
-  async init()
+  async init(): Promise<void>;
 }
