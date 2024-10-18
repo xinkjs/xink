@@ -165,6 +165,19 @@ xink provides the following built-in matchers, but they can be overridden by cre
 (param) => /^[0-9]+$/.test(param)
 ```
 
+## Rest (Wildcard) Segments
+
+Because of the way the xin URL router works, params for rest segments are accessed with `'*'`.
+
+```ts
+/* src/routes/hello/[...rest]/route.ts */
+import type { RequestEvent } from '@xinkjs/xink'
+
+export const GET = ({ params }) => {
+  return new Response(`Hello ${params['*']}!`) // not `params.rest`
+}
+```
+
 ## Helper Functions
 
 ### html
