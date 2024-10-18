@@ -95,8 +95,8 @@ export async function xink(xink_config) {
 
       return {
         define: {
-          'process.env.XINK_VITE_MODE': JSON.stringify(mode),
-          'process.env.XINK_OUT_DIR': JSON.stringify(validated_config.out_dir)
+          'XINK_VITE_MODE': JSON.stringify(mode),
+          'XINK_OUT_DIR': JSON.stringify(validated_config.out_dir)
         },
         // environments: {
         //   bun: {
