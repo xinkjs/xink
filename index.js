@@ -201,7 +201,7 @@ const matchRoute = (path, path_length, node, start_index) => {
     return {
       store: node.wildcard_store,
       params: {
-        '*': url.slice(start_index, url_length)
+        '*': path.slice(start_index, url_length)
       }
     }
   }
