@@ -20,7 +20,7 @@ export type ValidatedConfig = {
   out_dir: string;
   params_dir: string;
   routes_dir: string;
-  runtime: 'node' | 'bun' | 'deno';
+  runtime: 'bun' | 'deno' | 'node';
 }
 
 /* Router */
