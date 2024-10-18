@@ -35,5 +35,6 @@
   "keywords": ["api", "router", "xink"],
   "license": "MIT",
   "type": "module",
-  "types": "types.d.ts"
+  "types": "types.d.ts",
+  "sideEffects": false
 }
