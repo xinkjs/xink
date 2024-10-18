@@ -3,7 +3,7 @@
 
 import { validateConfig } from './lib/utils/config.js'
 import { getRequest, setResponse } from './lib/utils/vite.js'
-import { createManifest } from './lib/shared/manifest.js'
+import { createManifest } from './lib/utils/manifest.js'
 import { copyFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { Glob } from 'glob'
