@@ -25,7 +25,7 @@
   "bugs": {
     "url": "https://github.com/xinkjs/xink/issues"
   },
-  "description": "A javascript API router",
+  "description": "A directory-based javascript API router",
   "files": [
     "lib",
     "index.js",
