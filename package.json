@@ -7,7 +7,7 @@
   },
   "devDependencies": {
     "@types/bun": "latest",
-    "@xinkjs/xin": "^0.2.3",
+    "@xinkjs/xin": "0.2.4",
     "cookie": "^1.0.1",
     "glob": "^11.0.0",
     "set-cookie-parser": "^2.7.0",
