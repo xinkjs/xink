@@ -32,7 +32,7 @@ export class Router {
   setMatcher(type: string, matcher: Matcher): void;
   getMatcher(type: string): Matcher;
   setMiddleware(handle: Middleware): void;
-  getMiddlware(): Middleware;
+  getMiddleware(): Middleware;
   register(path: string): Store;
   find(path: string): Route;
   get(path: string, handler: Handler): void;
