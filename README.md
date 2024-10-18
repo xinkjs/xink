@@ -1,26 +1,27 @@
 # @xinkjs/xink
 
-A Vite plugin for the xink API router; in early development, so expect changes. The hope of a plugin is that it will enable developers to run xink in multiple runtimes.
+xink is a directory-based API router, and is a Vite plugin. The hope of a plugin is that it will enable developers to run xink in multiple runtimes.
+
+- requires Vite v6, which is currently in beta.
 
 ## Road to Alpha
 
-- [x] `dev` working with Bun.
-- [x] `build` working with Bun.
-- [ ] `dev` working with Deno.
-- [ ] `build` working with Deno.
-- [ ] `dev` working with Node.
-- [ ] `build` working with Node.
+- [x] Bun
+- [x] Deno
+- [ ] `dev` for Node
+- [ ] `build` for Node
+- [ ] `preview` for Node
 
 ## Route Types
 
-xink uses the [xin](https://github.com/xinkjs/xin) URL router, which was forked from @medleyjs/router. However, since xink is designed for file-based routing, for compatibility, we use brackets to define special route segments for parameters, etc.
+xink uses the [xin](https://github.com/xinkjs/xin) URL router, which was forked from @medleyjs/router. However, since xink is designed for directory-based routing, we use brackets to define special route segments for parameters, etc.
 
 xin's currently supported route types, in order of match priority:
 - static: `/hello/there/world`
 - specific: `/hello/miss-[name]`
-- dynamic: `/hello/[name]`
-- rest: `/hello/[...rest]`
 - matcher: `/hello/[name=string]` (where 'string' references a function, which tests if the value of the `name` parameter matches)
+- dynamic: `/hello/[name]`
+- rest: `/hello/[...rest]` (essentially a wildcard, but must be at the end of a route)
 
 ## Additional Features
 
@@ -30,8 +31,6 @@ xin's currently supported route types, in order of match priority:
 ## Setup
 
 Create a new project, then install Vite v6 and xink as dev dependencies. Also be sure to install your runtime.
-
-> xink uses Vite v6, which is currently in beta.
 
 ```sh
 npm install -D vite@beta @xinkjs/xink
@@ -43,18 +42,18 @@ Create or ensure there is a "vite.config.js" file in your project's root directo
 
 For the xink plugin configuration:
 - you must provide a `runtime` value
-- `entrypoint` is optional, but should be the server file at the root of your project. Below are the defaults for each supported runtime; so, you only need to set this if you're using something different.
-  - `app.js` for node
-  - `index.ts` for bun
-  - `main.ts` for deno
+- `entrypoint` is optional, but should be the name of the server file in the root of your project. Below are the defaults for each supported runtime; so, you only need to set this if you're using something different.
+  - Bun, `index.ts`
+  - Deno, `main.ts`
+  - Node, `app.js`
 
 ```ts
 type XinkConfig = {
-  runtime: 'node' | 'bun' | 'deno';
+  runtime: 'bun' | 'deno' | 'node';
   csrf?: { check?: boolean; origins?: string[]; } // not currently functional
   entrypoint?: string;
   middleware_dir?: string;
-  out_dir?: string;
+  build_dir?: string;
   params_dir?: string;
   routes_dir?: string;
 }
@@ -76,7 +75,7 @@ export default defineConfig(async function () {
 
 ## Use
 
-In your project root, create an `index.{js|ts}` file that uses the xink plugin.
+In your project root, create your server's entrypoint file, e.g. `index.{js|ts}`, that uses the xink plugin.
 
 > At this time, we are expecting a default export from this file, so you can't explicitly use `Bun.serve()` or `Deno.serve()`.
 
@@ -96,7 +95,7 @@ export default {
 
 ## Create Routes
 
-By default, routes should be created in `src/routes`. Each folder under this path represents a route segment.
+Routes should be created in `src/routes`, but this is configurable. Each folder under this path represents a route segment.
 
 At the end of a route segment, a javascript or typescript `route` file should export one or more functions for each HTTP method it will serve. You can also define a `fallback`, for any unhandled request methods.
 
@@ -139,7 +138,7 @@ export const GET = ({ cookies }: RequestEvent) => {
 
 You can think of these as validators for dynamic (aka, parameter) route segments.
 
-You can validate route params by creating files in `src/params`. The file needs to export a `match` function that takes in a string and returns a boolean. When `true` is returned, the param matches and the router either continues to try and match the rest of the route or returns the route if this is the last segment. Returning `false` indicates the param does not match, and the router keeps searching for a route.
+You can validate route params by creating files in `src/params`, again, configurable. The file needs to export a `match` function that takes in a string and returns a boolean. When `true` is returned, the param matches and the router either continues to try and match the rest of the route or returns the route if this is the last segment. Returning `false` indicates the param does not match, and the router keeps searching for a route.
 
 ```ts
 /* src/params/fruit.ts */
