@@ -10,6 +10,19 @@ xink is a directory-based API router, and is a Vite plugin. The hope of a plugin
 - [x] Deno
 - [ ] Vitest tests
 
+## Road to Beta
+
+- [ ] ???
+
+## Wishlist
+
+- [ ] Support {Bun,Deno}.serve
+- [ ] Cloudflare runtime
+- [ ] CORS
+- [ ] CSRF origins
+- [ ] Publish to JSR
+- [ ] OpenAPI integration
+
 ## Route Types
 
 xink uses the [xin](https://github.com/xinkjs/xin) URL router, which was forked from @medleyjs/router. However, since xink is designed for directory-based routing, we use brackets to define special route segments for parameters, etc.
