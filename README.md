@@ -246,19 +246,15 @@ The matching order goes from more specific to less specific.
 4. Dynamic
 5. Wildcard
 
-For example, an incoming path of "/static/v2" will be matched in the below order; where the regex for the "number" matcher is `/^\d+$/`.
+For example, an incoming path of "/static/v2" will be matched in the below order; where the regex for the "word" matcher is `/^\w+$/`.
 
 ```js
 '/static/v2'  //static
 '/static/v:number'  //specific: because the "v" makes it partially static
-'/static/:version=number'  //matcher: aka dynamic with a validator, so it is more specific than dynamic
+'/static/:version=word'  //matcher: aka dynamic with a validator, so it is more specific than dynamic
 '/static/:version'  //dynamic
 '/static/*'  //wildcard
 ```
-
-Another example would be that "/static/two" would match the dynamic route, because it's not a number; so, it wouldn't match the matcher route.
-
-It's also worth noting that the wildcard route would never match any two-segment path that starts with "/static/", because either the matcher or dynamic route will match them first; especially since the dynamic route will accept anything as the second path segment.
 
 ### `router.getTree()`
 
