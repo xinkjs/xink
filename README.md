@@ -8,9 +8,7 @@ xink is a directory-based API router, and is a Vite plugin. The hope of a plugin
 
 - [x] Bun
 - [x] Deno
-- [ ] `dev` for Node
-- [ ] `build` for Node
-- [ ] `preview` for Node
+- [ ] Vitest tests
 
 ## Route Types
 
