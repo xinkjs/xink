@@ -12,6 +12,7 @@ xink is a directory-based API router, and is a Vite plugin. The hope of a plugin
 
 ## Road to Beta
 
+- [ ] node?
 - [ ] ???
 
 ## Wishlist
@@ -161,11 +162,11 @@ export const match = (param: string) => {
 
 The above would be used in your route segment like so: `/src/routes/[fruits=fruit]`, where the right-side name should equal the filename (minus the extension) in `src/params`.
 
-xink provides the following built-in matchers, but they can be overridden by creating your own file definitions:
+xin provides the following built-in matchers, but they can be overridden by creating your own file definitions:
 
 ```js
-/* string */
-(param) => /^[a-z0-9]+$/i.test(param)
+/* word */
+(param) => /^\w+$/.test(param)
 ```
 ```js
 /* letter */
@@ -173,7 +174,7 @@ xink provides the following built-in matchers, but they can be overridden by cre
 ```
 ```js
 /* number */
-(param) => /^[0-9]+$/.test(param)
+(param) => //^\d+$/.test(param)
 ```
 
 ## Rest (Wildcard) Segments
