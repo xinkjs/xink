@@ -174,7 +174,7 @@ xin provides the following built-in matchers, but they can be overridden by crea
 ```
 ```js
 /* number */
-(param) => //^\d+$/.test(param)
+(param) => /^\d+$/.test(param)
 ```
 
 ## Rest (Wildcard) Segments
