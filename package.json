@@ -11,11 +11,13 @@
     "cookie": "^1.0.1",
     "glob": "^11.0.0",
     "set-cookie-parser": "^2.7.0",
-    "vite": "^6.0.0-beta.3"
+    "vite": "^6.0.0-beta.3",
+    "vitest": "^2.1.3"
   },
   "peerDependencies": {
     "vite": "^6.0.0-beta.3"
   },
+  "scripts": { "test": "vitest" },
   "exports": {
     ".": {
       "import": "./lib/exports/index.js",
