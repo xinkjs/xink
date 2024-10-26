@@ -14,8 +14,8 @@ export type Cookies = {
   getAll(options?: CookieParseOptions): Array<{ name: string, value: string }>;
   set(name: string, value: string, options?: CookieSerializeOptions): void;
 }
-export type Handle = (event: RequestEvent, resolve: ResolveEvent) => MaybePromise<Response>
-export type MaybePromise<T> = T | Promise<T>
+export type Handle = (event: RequestEvent, resolve: ResolveEvent) => MaybePromise<Response>;
+export type MaybePromise<T> = T | Promise<T>;
 export type RequestEvent = {
   cookies: Cookies;
   headers: Omit<Headers, 'toJSON' | 'count' | 'getAll'>;
@@ -23,9 +23,10 @@ export type RequestEvent = {
   params: Params;
   request: Request;
   route: Route;
+  setHeaders: (headers: { [key: string]: any; }) => void;
   url: Omit<URL, 'createObjectURL' | 'revokeObjectURL' | 'canParse'>;
 }
-export type ResolveEvent = (event: RequestEvent) => MaybePromise<Response>
+export type ResolveEvent = (event: RequestEvent) => MaybePromise<Response>;
 export type XinkConfig = {
   runtime: 'bun' | 'cloudflare' | 'deno';
   csrf?: { check?: boolean; origins?: string[]; };
@@ -36,14 +37,14 @@ export type XinkConfig = {
   routes_dir?: string;
 }
 
-export function xink(xink_config?: XinkConfig): Promise<Plugin>
-export function html(data: any, init?: ResponseInit | undefined): Response
-export function json(data: any, init?: ResponseInit | undefined): Response
-export function redirect(status: number, location: string): never
-export function text(data: string, init?: ResponseInit | undefined): Response
-export function sequence(...handlers: Handle[]): Handle
+export function xink(xink_config?: XinkConfig): Promise<Plugin>;
+export function html(data: any, init?: ResponseInit | undefined): Response;
+export function json(data: any, init?: ResponseInit | undefined): Response;
+export function redirect(status: number, location: string): never;
+export function text(data: string, init?: ResponseInit | undefined): Response;
+export function sequence(...handlers: Handle[]): Handle;
 export class Xink {
   constructor() {}
-  async fetch(request: Request): Promise<Response>
+  async fetch(request: Request): Promise<Response>;
   async init(): Promise<void>;
 }
