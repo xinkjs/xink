@@ -129,7 +129,7 @@ export const fallback = ({ req }: RequestEvent) => {
 
 ## Cookie Handling
 
-xink provides `event.cookies` inside of your route handlers, with methods `delete`, `get`, `getAll`, and `set`.
+xink provides `event.cookies` inside of middleware and your route handlers, with methods `delete`, `get`, `getAll`, and `set`.
 
 ```ts
 /* src/routes/route.ts */
@@ -138,6 +138,26 @@ export const GET = ({ cookies }: RequestEvent) => {
   const cookie_value = cookies.get('xink')
   const all_cookies = cookies.getAll()
   cookies.delete('xink')
+}
+```
+
+## Locals
+
+`event.locals` is available for you to define custom information per server request. This is an object where you can simply set the property and value.
+
+This is often used in middleware, which then passes the values to routes.
+
+```ts
+/* src/middleware.ts */
+export const handle: Handle = (event, resolve) => {
+  event.locals.xink = "some value"
+
+  return resolve(event)
+}
+
+/* src/routes/route.ts */
+export const GET = (event) => {
+  console.log(event.locals.xink) // "some value"
 }
 ```
 
