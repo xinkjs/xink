@@ -46,7 +46,7 @@ export async function xink(xink_config) {
         const routes_glob = new Glob(join(cwd, validated_config.routes_dir, '**/route.{js,ts}'), {})
         const params_glob = new Glob(join(cwd, validated_config.params_dir, '**/*.{js,ts}'), {})
         const middleware_glob = new Glob(join(cwd, validated_config.middleware_dir, '**', 'middleware.{js,ts}'), {})
-        const entrypoint_glob = new Glob(join(cwd, 'index.{js,ts}'), {})
+        const entrypoint_glob = new Glob(join(cwd, entrypoint), {})
         const input = []
 
         for (const file of routes_glob)
