@@ -43,7 +43,7 @@ export function redirect(status: number, location: string): never;
 export function text(data: string, init?: ResponseInit | undefined): Response;
 export function sequence(...handlers: Handle[]): Handle;
 export class Xink {
-  constructor() {}
-  async fetch(request: Request): Promise<Response>;
-  async init(): Promise<void>;
+  constructor()
+  fetch(request: Request): Promise<Response>;
+  init(): Promise<void>;
 }
