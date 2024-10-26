@@ -1,5 +1,3 @@
-import type { CookieSerializeOptions } from 'cookie'
-
 export type DefaultConfig = {
   middleware_dir: string;
   out_dir: string;

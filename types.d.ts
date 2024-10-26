@@ -1,18 +1,17 @@
-import type { Router } from "@xinkjs/xin"
-import type { Params, Route } from "./lib/types/internal.js"
-import type { CookieSerializeOptions } from "cookie"
+import type { Store, Params } from "@xinkjs/xin"
+import type { SerializeOptions, ParseOptions } from "cookie"
 import type { Plugin } from 'vite'
 
 export type Cookie = {
   name: string;
   value: string;
-  options: CookieSerializeOptions;
+  options: SerializeOptions;
 }
 export type Cookies = {
-  delete(name: string, options?: CookieSerializeOptions): void;
-  get(name: string, options?: CookieParseOptions): string | undefined;
-  getAll(options?: CookieParseOptions): Array<{ name: string, value: string }>;
-  set(name: string, value: string, options?: CookieSerializeOptions): void;
+  delete(name: string, options?: SerializeOptions): void;
+  get(name: string, options?: ParseOptions): string | undefined;
+  getAll(options?: ParseOptions): Array<{ name: string, value: string }>;
+  set(name: string, value: string, options?: SerializeOptions): void;
 }
 export type Handle = (event: RequestEvent, resolve: ResolveEvent) => MaybePromise<Response>;
 export type MaybePromise<T> = T | Promise<T>;
@@ -22,7 +21,7 @@ export type RequestEvent = {
   locals: { [key: string]: string },
   params: Params;
   request: Request;
-  route: Route;
+  store: Store;
   setHeaders: (headers: { [key: string]: any; }) => void;
   url: Omit<URL, 'createObjectURL' | 'revokeObjectURL' | 'canParse'>;
 }
