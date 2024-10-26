@@ -262,17 +262,16 @@ export const GET = () => {
 
 ## Types
 
-> `RequestEvent.route` is largely used internally, and not currently useful to developers.
-
 ```ts
 type Cookies = {
-  delete(name: string, options?: CookieSerializeOptions): void;
-  get(name: string, options?: CookieParseOptions): string | undefined;
-  getAll(options?: CookieParseOptions): Array<{ name: string, value: string }>;
-  set(name: string, value: string, options?: CookieSerializeOptions): void;
+  delete(name: string, options?: SerializeOptions): void;
+  get(name: string, options?: ParseOptions): string | undefined;
+  getAll(options?: ParseOptions): Array<{ name: string, value: string }>;
+  set(name: string, value: string, options?: SerializeOptions): void;
 }
+type Handle = (event: RequestEvent, resolve: ResolveEvent) => MaybePromise<Response>;
 type Params = { [key: string]: string };
-type Route = { store: Store; params: Params; } | null;
+type Store = { [key: string]: Handle };
 
 type RequestEvent = {
   cookies: Cookies;
@@ -280,14 +279,14 @@ type RequestEvent = {
   locals: { [key: string]: string },
   params: Params;
   request: Request;
-  route: Route;
+  store: Store; // HTTP methods and cooresponding handlers; used internally.
   setHeaders: (headers: { [key: string]: any; }) => void;
   url: Omit<URL, 'createObjectURL' | 'revokeObjectURL' | 'canParse'>;
 }
 ```
 
 ## Attributions
-xink stands on the shoulders of giants. A special shoutout and tip of the hat goes to [SvelteKit](https://github.com/sveltejs/kit), as I used some of their code for various things but it was not feasible to fork their code directly. Therefore, I've added a copyright for them and marked relevant code with a short attribution.
+xink stands on the shoulders of giants. A special shoutout and tip of the hat goes to [SvelteKit](https://github.com/sveltejs/kit), as I used some of their code for various things; as it was not feasible to fork their code directly, and there's no reason to re-invent the wheel. Therefore, I've added a copyright for them in the license and marked relevant code with a short attribution.
 
 ## Origins
 Pronounced "zinc", the name is based on the Georgian word [khinkali](https://en.wikipedia.org/wiki/Khinkali); which is a type of dumpling in the country of Georgia. The transcription is /ˈxink'ali/. To be clear: khinkali's beginning proununciation is dissimilar from "zinc".
