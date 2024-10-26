@@ -112,7 +112,7 @@ export async function xink(xink_config) {
     },
     async writeBundle() {
       /* Copy routes manifest to out directory. */
-      copyFileSync(join(cwd, '.xink/manifest.json'), join(cwd, validated_config.out_dir, 'manifest.json'))
+      copyFileSync(join(cwd, '.xink/manifest.js'), join(cwd, validated_config.out_dir, 'manifest.js'))
     },
     async configureServer(server) {
       runner = server.environments.ssr.runner
