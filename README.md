@@ -127,6 +127,19 @@ export const fallback = ({ req }: RequestEvent) => {
 }
 ```
 
+## Setting Headers
+
+Use `event.setHeaders()` to set response headers. Be aware that you cannot set cookies using this method, but should instead use [`event.cookies`](#cookie-handling).
+
+```ts
+/* src/routes/route.ts */
+export const GET = ({ setHeaders }: RequestEvent) => {
+  setHeaders({
+    'Powered-By': 'xink'
+  })
+}
+```
+
 ## Cookie Handling
 
 xink provides `event.cookies` inside of middleware and your route handlers, with methods `delete`, `get`, `getAll`, and `set`.
@@ -268,6 +281,7 @@ type RequestEvent = {
   params: Params;
   request: Request;
   route: Route;
+  setHeaders: (headers: { [key: string]: any; }) => void;
   url: Omit<URL, 'createObjectURL' | 'revokeObjectURL' | 'canParse'>;
 }
 ```
