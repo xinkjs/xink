@@ -95,19 +95,8 @@ export async function xink(xink_config) {
 
       return {
         define: {
-          'XINK_VITE_MODE': JSON.stringify(mode),
-          'XINK_OUT_DIR': JSON.stringify(validated_config.out_dir)
-        },
-        // environments: {
-        //   bun: {
-        //     dev: {
-        //       createEnvironment: (name, config) =>
-        //         createBunDevEnvironment(name, config, {
-        //           hot: createServerHotChannel()
-        //         })
-        //     }
-        //   }
-        // }
+          'XINK_VITE_MODE': JSON.stringify(mode)
+        }
       }
     },
     async writeBundle() {

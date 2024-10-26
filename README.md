@@ -10,15 +10,10 @@ xink is a directory-based API router, and is a Vite plugin. The hope of a plugin
 - [x] Deno
 - [ ] Vitest tests
 
-## Road to Beta
-
-- [ ] node?
-- [ ] ???
-
 ## Wishlist
 
 - [ ] Support {Bun,Deno}.serve
-- [ ] Cloudflare runtime
+- [x] Cloudflare runtime
 - [ ] CORS
 - [ ] CSRF origins
 - [ ] Publish to JSR
@@ -56,12 +51,12 @@ For the xink plugin configuration:
 - you must provide a `runtime` value
 - `entrypoint` is optional, but should be the name of the server file in the root of your project. Below are the defaults for each supported runtime; so, you only need to set this if you're using something different.
   - Bun, `index.ts`
+  - Cloudflare, `index.ts`
   - Deno, `main.ts`
-  - Node, `app.js`
 
 ```ts
 type XinkConfig = {
-  runtime: 'bun' | 'deno' | 'node';
+  runtime: 'bun' | 'cloudflare' | 'deno';
   csrf?: { check?: boolean; origins?: string[]; } // not currently functional
   entrypoint?: string;
   middleware_dir?: string;

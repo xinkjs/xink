@@ -13,5 +13,5 @@ export type ValidatedConfig = {
   out_dir: string;
   params_dir: string;
   routes_dir: string;
-  runtime: 'bun' | 'deno' | 'node';
+  runtime: 'bun' | 'cloudflare' | 'deno';
 }
