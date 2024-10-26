@@ -279,7 +279,7 @@ type RequestEvent = {
   locals: { [key: string]: string },
   params: Params;
   request: Request;
-  store: Store; // HTTP methods and cooresponding handlers; used internally.
+  store: Store | null; // HTTP methods and cooresponding handlers; used internally.
   setHeaders: (headers: { [key: string]: any; }) => void;
   url: Omit<URL, 'createObjectURL' | 'revokeObjectURL' | 'canParse'>;
 }

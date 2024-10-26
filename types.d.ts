@@ -21,7 +21,7 @@ export type RequestEvent = {
   locals: { [key: string]: string },
   params: Params;
   request: Request;
-  store: Store;
+  store: Store | null;
   setHeaders: (headers: { [key: string]: any; }) => void;
   url: Omit<URL, 'createObjectURL' | 'revokeObjectURL' | 'canParse'>;
 }
