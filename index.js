@@ -162,7 +162,7 @@ const matchRoute = (path, path_length, node, start_index) => {
 
     if (slash_index !== start_index) { // Params cannot be empty
       for (const parametric_node of parametric_children) {
-        const [ key, node ] = parametric_node
+        const [ _key, node ] = parametric_node
 
         if (node.matcher) {
           const type_match = node.matcher(path.slice(start_index))
@@ -498,7 +498,7 @@ export class Router {
       if (current_parametric_child?.store === null)
         current_parametric_child.store = this.#storeFactory()
 
-      // @ts-ignore
+      // @ts-ignore we know this is defined at this point
       return current_parametric_child.store
     }
 
