@@ -97,10 +97,7 @@ export async function xink(xink_config) {
         define: {
           'XINK_VITE_MODE': JSON.stringify(mode)
         },
-        ssr: { 
-          noExternal: true,
-          external: [ 'cookie', 'glob', 'set-cookie-parser' ]
-        }
+        ssr: { noExternal: [ '@xinkjs/xink' ] }
       }
     },
     async writeBundle() {
