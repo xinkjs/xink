@@ -1,8 +1,8 @@
 # @xinkjs/xink
 
-xink is a directory-based API router, and is a Vite plugin. The hope of a plugin is that it will enable developers to run xink in multiple runtimes.
+xink is a directory-based API router and a Vite plugin.
 
-- requires Vite v6, which is currently in beta.
+It requires Vite v6, which is currently in beta.
 
 ## Road to Alpha
 
@@ -30,22 +30,33 @@ xin's currently supported route types, in order of match priority:
 - dynamic: `/hello/[name]`
 - rest: `/hello/[...rest]` (essentially a wildcard, but must be at the end of a route)
 
-## Additional Features
-
-- CSRF protection: checks content type and origin ([ref](https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html#disallowing-simple-content-types)).
-- etag helper: returns 304 with no body, instead of 200 with body, if request etag equals response etag.
-
 ## Setup
 
 Create a new project, then install Vite v6 and xink as dev dependencies. Also be sure to install your runtime.
 
-```sh
-npm install -D vite@beta @xinkjs/xink
+```
+bun add -D vite@beta @xinkjs/xink
+deno add -D npm:vite@beta npm:@xinkjs/xink
+[p]npm add -D vite@beta @xinkjs/xink
 ```
 
 ### Vite plugin configuration
 
 Create or ensure there is a "vite.config.js" file in your project's root directory.
+
+```ts
+/* vite.config.js */
+import { xink } from '@xinkjs/xink'
+import { defineConfig } from 'vite'
+
+export default defineConfig(async function () {
+  return {
+    plugins: [
+      await xink({ runtime: 'bun' })
+    ]
+  }
+})
+```
 
 For the xink plugin configuration:
 - you must provide a `runtime` value
@@ -57,27 +68,12 @@ For the xink plugin configuration:
 ```ts
 type XinkConfig = {
   runtime: 'bun' | 'cloudflare' | 'deno';
-  csrf?: { check?: boolean; origins?: string[]; } // not currently functional
   entrypoint?: string;
-  middleware_dir?: string;
-  build_dir?: string;
-  params_dir?: string;
-  routes_dir?: string;
+  middleware_dir?: string; // src/middleware
+  out_dir?: string; // build
+  params_dir?: string; // src/params
+  routes_dir?: string; // src/routes
 }
-```
-```ts
-/* vite.config.js */
-
-import { xink } from '@xinkjs/xink'
-import { defineConfig } from 'vite'
-
-export default defineConfig(async function () {
-  return {
-    plugins: [
-      await xink({ runtime: 'bun' })
-    ]
-  }
-})
 ```
 
 ## Use
@@ -102,38 +98,88 @@ export default {
 
 ## Create Routes
 
-Routes should be created in `src/routes`, but this is configurable. Each folder under this path represents a route segment.
+By default, routes should be created in `src/routes`. Each folder under this path represents a route segment.
 
 At the end of a route segment, a javascript or typescript `route` file should export one or more functions for each HTTP method it will serve. You can also define a `fallback`, for any unhandled request methods.
 
 xink supports these verbs and function names: 'GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS', 'fallback'
 
 ```ts
-/* src/routes/article/[slug]/route.ts */
+/* src/routes/blog/[article]/route.ts */
 import { json, text, type RequestEvent } from '@xinkjs/xink'
 
 export const GET = async ({ params }: RequestEvent) => {
-  const article = await getArticle(params.slug)
+  const article = await getArticle(params.article)
 
-  return text(`Here is the ${article.title} post!`)
+  return text(`You asked for ${article.title}`)
 }
 
-export const POST = async ({ req }: RequestEvent) => {
-  return json(await req.json())
+export const POST = async ({ request }: RequestEvent) => {
+  return json(await request.json())
 }
 
-export const fallback = ({ req }: RequestEvent) => {
-  return text(`Hello ${req.method}`)
+export const fallback = ({ request }: RequestEvent) => {
+  return text(`Hello ${request.method}`)
 }
+```
+
+## Middleware
+xink uses the same middleware strategy as SvelteKit. You export a single function named `handle`. The default middleware directory is `src/middleware`, so you can place all of your middleware files in this directory and import them into `middleware.[js|ts]`.
+
+```ts
+/* src/middleware/middleware.ts */
+import { type Handle } from '@xinkjs/xink'
+
+export const handle: Handle = (event, resolve) => {
+  /** 
+   * You can handle requests to endpoints that don't
+   * exist in src/routes.
+   */
+  if (event.url.pathname === '/synthetic')
+    return new Response('Hit synthetic route.')
+
+  /* Let the router determine a response. */
+  const response = resolve(event)
+
+  /* You can do something with the response here, before returning it. */
+
+  return response
+}
+```
+
+For multiple middleware, use the `sequence` helper. Each middleware function should take in an `event` and `resolve` function, and return `resolve(event)`. For this example, we're defining each middleware in `middleware.ts`, but these could easily be in another file and imported.
+
+```ts
+/* src/middleware/middleware.ts */
+import { type Handle, sequence } from '@xinkjs/xink'
+
+const first: Handle = (event, resolve) => {
+  console.log('hit first middleware')
+
+  // do something
+
+  return resolve(event)
+}
+
+const second: Handle = (event, resolve) => {
+  console.log('hit second middleware')
+  
+  // do something
+
+  return resolve(event)
+}
+
+/* Middleware is handled in series. */
+export const handle: Handle = sequence(first, second)
 ```
 
 ## Setting Headers
 
 Use `event.setHeaders()` to set response headers. Be aware that you cannot set cookies using this method, but should instead use [`event.cookies`](#cookie-handling).
 
-```ts
-/* src/routes/route.ts */
-export const GET = ({ setHeaders }: RequestEvent) => {
+```js
+/* src/routes/route.js */
+export const GET = ({ setHeaders }) => {
   setHeaders({
     'Powered-By': 'xink'
   })
@@ -144,9 +190,9 @@ export const GET = ({ setHeaders }: RequestEvent) => {
 
 xink provides `event.cookies` inside of middleware and your route handlers, with methods `delete`, `get`, `getAll`, and `set`.
 
-```ts
-/* src/routes/route.ts */
-export const GET = ({ cookies }: RequestEvent) => {
+```js
+/* src/routes/route.js */
+export const GET = ({ cookies }) => {
   cookies.set('xink', 'is awesome', { maxAge: 60 * 60 * 24 * 365 })
   const cookie_value = cookies.get('xink')
   const all_cookies = cookies.getAll()
@@ -156,9 +202,7 @@ export const GET = ({ cookies }: RequestEvent) => {
 
 ## Locals
 
-`event.locals` is available for you to define custom information per server request. This is an object where you can simply set the property and value.
-
-This is often used in middleware, which then passes the values to routes.
+`event.locals` is available for you to define custom information per server request. This is an object where you can simply set the property and value, and then use it later in the request. This is often used in middleware, which then passes the values to routes.
 
 ```ts
 /* src/middleware.ts */
@@ -169,7 +213,8 @@ export const handle: Handle = (event, resolve) => {
 }
 
 /* src/routes/route.ts */
-export const GET = (event) => {
+import { type RequestEvent } from '@xinkjs/xink'
+export const GET = (event: RequestEvent) => {
   console.log(event.locals.xink) // "some value"
 }
 ```
@@ -178,7 +223,7 @@ export const GET = (event) => {
 
 You can think of these as validators for dynamic (aka, parameter) route segments.
 
-You can validate route params by creating files in `src/params`, again, configurable. The file needs to export a `match` function that takes in a string and returns a boolean. When `true` is returned, the param matches and the router either continues to try and match the rest of the route or returns the route if this is the last segment. Returning `false` indicates the param does not match, and the router keeps searching for a route.
+You can validate route params by creating files in `src/params`. Each file in this directory needs to export a `match` function that takes in a string and returns a boolean. When `true` is returned, the param matches and the router either continues to try and match the rest of the route or returns the route if this is the last segment. Returning `false` indicates the param does not match, and the router keeps searching for a route.
 
 ```ts
 /* src/params/fruit.ts */
@@ -207,12 +252,10 @@ xin provides the following built-in matchers, but they can be overridden by crea
 
 ## Rest (Wildcard) Segments
 
-Because of the way the xin URL router works, params for rest segments are accessed with `'*'`.
+Because of the way the xin URL router works, the rest segment's param is accessed with `'*'`.
 
 ```ts
-/* src/routes/hello/[...rest]/route.ts */
-import type { RequestEvent } from '@xinkjs/xink'
-
+/* src/routes/hello/[...rest]/route.js */
 export const GET = ({ params }) => {
   return new Response(`Hello ${params['*']}!`) // not `params.rest`
 }
@@ -222,7 +265,7 @@ export const GET = ({ params }) => {
 
 ### html
 Returns an html response. It sends a `Content-Length` header and a `Content-Type` header of `text/html`.
-```ts
+```js
 import { html } from '@xinkjs/xink'
 
 export const GET = (event) => { 
@@ -232,7 +275,7 @@ export const GET = (event) => {
 
 ### text
 Returns a text response. By default, it sends a `Content-Length` header and a `Content-Type` header of `text/plain`.
-```ts
+```js
 import { text } from '@xinkjs/xink'
 
 export const GET = () => {
@@ -242,7 +285,7 @@ export const GET = () => {
 
 ### json
 Returns a json response. By default, it sends a `Content-Length` header and a `Content-Type` header of `application/json`.
-```ts
+```js
 import { json } from '@xinkjs/xink'
 
 export const GET = () => {
@@ -252,13 +295,18 @@ export const GET = () => {
 
 ### redirect
 Returns a redirect response.
-```ts
+```js
 import { redirect } from '@xinkjs/xink'
 
 export const GET = () => {
   return redirect(status: number, location: string)
 }
 ```
+
+## Additional Features
+
+- CSRF protection: checks content type and origin ([ref](https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html#disallowing-simple-content-types)).
+- etag helper: returns 304 with no body, instead of 200 with body, if request etag equals response etag.
 
 ## Types
 
