@@ -221,19 +221,19 @@ export const GET = (event: RequestEvent) => {
 
 ## Parameter Matchers
 
-You can think of these as validators for dynamic (aka, parameter) route segments.
+You can think of these as validators for parameter route segments.
 
 You can validate route params by creating files in `src/params`. Each file in this directory needs to export a `match` function that takes in a string and returns a boolean. When `true` is returned, the param matches and the router either continues to try and match the rest of the route or returns the route if this is the last segment. Returning `false` indicates the param does not match, and the router keeps searching for a route.
 
 ```ts
-/* src/params/fruit.ts */
+/* src/params/fruits.ts */
 export const match = (param: string) => {
   const fruits = new Set(['apple', 'orange', 'grape'])
   return fruits.has(param)
 } 
 ```
 
-The above would be used in your route segment like so: `/src/routes/[fruits=fruit]`, where the right-side name should equal the filename (minus the extension) in `src/params`.
+The above would be used in your route segment like so: `/src/routes/[fruit=fruits]/route.ts`, where the right-side name should equal the filename (minus the extension) in `src/params`.
 
 xin provides the following built-in matchers, but they can be overridden by creating your own file definitions:
 
@@ -269,7 +269,7 @@ Returns an html response. It sends a `Content-Length` header and a `Content-Type
 import { html } from '@xinkjs/xink'
 
 export const GET = (event) => { 
-  return html(`<div>You chose ${event.params.fruits}</div>`)
+  return html(`<div>You chose ${event.params.fruit}</div>`)
 }
 ```
 
@@ -289,7 +289,7 @@ Returns a json response. By default, it sends a `Content-Length` header and a `C
 import { json } from '@xinkjs/xink'
 
 export const GET = () => {
-  return json({ hello: world })
+  return json({ hello: 'world' })
 }
 ```
 
