@@ -8,12 +8,13 @@ It requires Vite v6, which is currently in beta.
 
 - [x] Bun
 - [x] Deno
+- [x] Cloudflare Workers - `request` only; no bindings (`env`) or context (`ctx`)
 - [ ] Vitest tests
 
 ## Wishlist
 
 - [ ] Support {Bun,Deno}.serve
-- [x] Cloudflare runtime
+- [ ] Cloudflare Workers
 - [ ] CORS
 - [ ] CSRF origins
 - [ ] Publish to JSR
