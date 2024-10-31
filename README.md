@@ -63,7 +63,7 @@ For the xink plugin configuration:
 - you must provide a `runtime` value
 - `entrypoint` is optional, but should be the name of the server file in the root of your project. Below are the defaults for each supported runtime; so, you only need to set this if you're using something different.
   - Bun, `index.ts`
-  - Cloudflare, `index.ts`
+  - Cloudflare, `src/index.ts`
   - Deno, `main.ts`
 
 ```ts
