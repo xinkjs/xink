@@ -8,7 +8,7 @@ It requires Vite v6, which is currently in beta.
 
 - [x] Bun
 - [x] Deno
-- [x] Cloudflare Workers - `request` only; no bindings (`env`) or context (`ctx`)
+- [ ] Cloudflare Workers - `request` only; no bindings (`env`) or context (`ctx`)
 - [ ] Vitest tests
 
 ## Wishlist
@@ -103,17 +103,6 @@ Setup your package.json or deno.json scripts. If you change your build output di
   "dev": "vite",
   "build": "vite build",
   "preview": "deno serve build/main.js"
-}
-```
-
-#### Cloudflare Worker
-
-```js
-/* package.json */
-"scripts": {
-  "dev": "vite",
-  "build": "vite build",
-  "preview": "wrangler dev build/src/index.js"
 }
 ```
 
