@@ -34,6 +34,7 @@ export type XinkConfig = {
   out_dir?: string;
   params_dir?: string;
   routes_dir?: string;
+  serve_options?: { [key: string]: any; };
 }
 
 export function xink(xink_config?: XinkConfig): Promise<Plugin>;

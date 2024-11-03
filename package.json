@@ -13,7 +13,9 @@
     "@xinkjs/xin": "0.2.4",
     "cookie": "^1.0.1",
     "glob": "^11.0.0",
+    "magic-string": "^0.30.12",
     "set-cookie-parser": "^2.7.0",
+    "stringify-object": "^5.0.0",
     "vite": "^6.0.0-beta.5"
   },
   "peerDependencies": {

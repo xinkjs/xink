@@ -7,6 +7,8 @@ import { createManifest } from './lib/utils/manifest.js'
 import { copyFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { Glob } from 'glob'
+import stringifyObject from 'stringify-object'
+import MagicString from 'magic-string'
 
 /**
  * @param {XinkConfig} [xink_config]
@@ -33,12 +35,31 @@ export async function xink(xink_config) {
   const validated_config = validateConfig(xink_config)
   const runtime = validated_config.runtime
   const entrypoint = validated_config.entrypoint
+  const serve_options = validated_config.serve_options
 
   /** @type {ModuleRunner} */
   let runner
 
   return {
     name: 'vite-plugin-xink',
+    transform(src, id) {
+      if (id === join(cwd, entrypoint) && serve_options && new Set(['bun', 'deno']).has(runtime)) {
+        let options = stringifyObject(serve_options, { indent: '  ' })
+
+        const o = new MagicString(options)
+        /* Remove leading and trailing braces. */
+        o.remove(0, 1)
+        o.remove(o.toString().lastIndexOf('}'))
+
+        const s = new MagicString(src)
+        s.replace(
+          /export default {\n(.*)\n};/s, 
+          runtime.charAt(0).toLocaleUpperCase() + runtime.slice(1) + `.serve({\n$1,${o.toString()}\n});`
+        )
+
+        return s.toString()
+      }
+    },
     async config(config, env) {
       const mode = env.mode
 
