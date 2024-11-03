@@ -13,7 +13,7 @@ It requires Vite v6, which is currently in beta.
 
 ## Wishlist
 
-- [ ] Support {Bun,Deno}.serve
+- [x] Support {Bun,Deno}.serve
 - [ ] Cloudflare Workers
 - [ ] CORS
 - [ ] CSRF origins
@@ -74,6 +74,46 @@ type XinkConfig = {
   out_dir?: string; // build
   params_dir?: string; // src/params
   routes_dir?: string; // src/routes
+  serve_options?: { [key: string]: any; };
+}
+```
+
+### Scripts/Tasks
+
+Setup your package.json or deno.json scripts. If you change your build output directory, be sure to adjust accordingly.
+
+> In the future, hope to have a cli installer which sets these automatically.
+
+#### Bun
+
+```js
+/* package.json */
+"scripts": {
+  "dev": "vite",
+  "build": "vite build",
+  "preview": "bun run build/index.js"
+},
+```
+
+#### Deno
+
+```js
+/* deno.json */
+"tasks": {
+  "dev": "vite",
+  "build": "vite build",
+  "preview": "deno serve build/main.js"
+}
+```
+
+#### Cloudflare Worker
+
+```js
+/* package.json */
+"scripts": {
+  "dev": "vite",
+  "build": "vite build",
+  "preview": "wrangler dev build/src/index.js"
 }
 ```
 
@@ -81,7 +121,9 @@ type XinkConfig = {
 
 In your project root, create your server's entrypoint file, e.g. `index.{js|ts}`, that uses the xink plugin.
 
-> At this time, we are expecting a default export from this file, so you can't explicitly use `Bun.serve()` or `Deno.serve()`.
+We are expecting a default export from this file, so you can't explicitly use `Bun.serve()` or `Deno.serve()`. However, you can declare options for `.serve()` in the xink plugin config.
+
+> Bun does support declaring serve options within a default export, if you'd like to add them below `fetch {}`.
 
 ```ts
 /* entrypoint file */
@@ -172,6 +214,31 @@ const second: Handle = (event, resolve) => {
 
 /* Middleware is handled in series. */
 export const handle: Handle = sequence(first, second)
+```
+
+## `.serve()` options
+
+For Bun and Deno users, you can declare serve options in xink's plugin configuration. Any other runtimes will ignore these options.
+
+> Bun supports adding these within your entrypoint's default export, if you'd like to declare them there.
+
+```ts
+/* vite.config.js */
+import { xink } from '@xinkjs/xink'
+import { defineConfig } from 'vite'
+
+export default defineConfig(async function () {
+  return {
+    plugins: [
+      await xink({ 
+        runtime: 'bun',
+        serve_options: {
+          port:3500
+        }
+      })
+    ]
+  }
+})
 ```
 
 ## Setting Headers
