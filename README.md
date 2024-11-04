@@ -9,7 +9,6 @@ It requires Vite v6, which is currently in beta.
 - [x] Bun
 - [x] Deno
 - [x] Cloudflare Workers - `request` only; no bindings (`env`) or context (`ctx`)
-- [ ] Vitest tests
 
 ## Wishlist
 
@@ -19,6 +18,8 @@ It requires Vite v6, which is currently in beta.
 - [ ] CSRF origins
 - [ ] Publish to JSR
 - [ ] OpenAPI integration
+- [ ] Vitest tests
+- [ ] CLI tool to setup project
 
 ## Route Types
 
