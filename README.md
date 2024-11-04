@@ -8,7 +8,7 @@ It requires Vite v6, which is currently in beta.
 
 - [x] Bun
 - [x] Deno
-- [ ] Cloudflare Workers - `request` only; no bindings (`env`) or context (`ctx`)
+- [x] Cloudflare Workers - `request` only; no bindings (`env`) or context (`ctx`)
 - [ ] Vitest tests
 
 ## Wishlist
@@ -61,9 +61,9 @@ export default defineConfig(async function () {
 
 For the xink plugin configuration:
 - you must provide a `runtime` value
-- `entrypoint` is optional, but should be the name of the server file in the root of your project. Below are the defaults for each supported runtime; so, you only need to set this if you're using something different.
+- `entrypoint` is optional, but should be the name of the server file in the root of your project. Below are the defaults for each supported runtime; so, you only need to set this if you're using something different. Note that these must only be filenames, not paths - your entrypoint must always be in the root directory of your project.
   - Bun, `index.ts`
-  - Cloudflare, `src/index.ts`
+  - Cloudflare, `index.ts`
   - Deno, `main.ts`
 
 ```ts
@@ -84,14 +84,14 @@ Setup your package.json or deno.json scripts. If you change your build output di
 
 > In the future, hope to have a cli installer which sets these automatically.
 
-#### Bun
+#### Bun/Cloudflare
 
 ```js
 /* package.json */
 "scripts": {
   "dev": "vite",
   "build": "vite build",
-  "preview": "bun run build/index.js"
+  "preview": "vite preview"
 },
 ```
 
@@ -102,7 +102,7 @@ Setup your package.json or deno.json scripts. If you change your build output di
 "tasks": {
   "dev": "vite",
   "build": "vite build",
-  "preview": "deno serve build/main.js"
+  "preview": "vite preview"
 }
 ```
 
