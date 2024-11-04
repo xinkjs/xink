@@ -4,7 +4,7 @@
 import { validateConfig } from './lib/utils/config.js'
 import { getRequest, setResponse } from './lib/utils/vite.js'
 import { createManifest } from './lib/utils/manifest.js'
-import { copyFileSync } from 'node:fs'
+import { copyFileSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 import { Glob } from 'glob'
 import stringifyObject from 'stringify-object'
@@ -64,6 +64,12 @@ export async function xink(xink_config) {
       const mode = env.mode
 
       if (mode == 'production') {
+        try {
+          statSync(join(cwd, '.xink/manifest.js'))
+        } catch (err) {
+          throw new Error('Manifest file not found. You may need to call `<runtime> run dev`, to create it.')
+        }
+
         const routes_glob = new Glob(join(cwd, validated_config.routes_dir, '**/route.{js,ts}'), {})
         const params_glob = new Glob(join(cwd, validated_config.params_dir, '**/*.{js,ts}'), {})
         const middleware_glob = new Glob(join(cwd, validated_config.middleware_dir, '**', 'middleware.{js,ts}'), {})
