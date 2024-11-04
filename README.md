@@ -104,7 +104,8 @@ Setup your package.json or deno.json scripts. If you change your build output di
   "dev": "vite",
   "build": "vite build",
   "preview": "vite preview"
-}
+},
+"nodeModulesDir": "auto"
 ```
 
 ## Use
