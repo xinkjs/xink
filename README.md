@@ -384,7 +384,7 @@ type Store = { [key: string]: Handle };
 type RequestEvent = {
   cookies: Cookies;
   headers: Omit<Headers, 'toJSON' | 'count' | 'getAll'>;
-  locals: { [key: string]: string },
+  locals: { [key: string]: any },
   params: Params;
   request: Request;
   store: Store | null; // HTTP methods and cooresponding handlers; used internally.
