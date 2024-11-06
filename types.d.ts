@@ -18,7 +18,7 @@ export type MaybePromise<T> = T | Promise<T>;
 export type RequestEvent = {
   cookies: Cookies;
   headers: Omit<Headers, 'toJSON' | 'count' | 'getAll'>;
-  locals: { [key: string]: string },
+  locals: { [key: string]: any },
   params: Params;
   request: Request;
   store: Store | null;
