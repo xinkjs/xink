@@ -224,7 +224,7 @@ export default defineConfig(async function () {
       await xink({ 
         runtime: 'bun',
         serve_options: {
-          port:3500
+          port: 3500
         }
       })
     ]
@@ -273,8 +273,9 @@ export const handle: Handle = (event, resolve) => {
 
 /* src/routes/route.ts */
 import { type RequestEvent } from '@xinkjs/xink'
+
 export const GET = (event: RequestEvent) => {
-  console.log(event.locals.xink) // "some value"
+  console.log(event.locals.xink) // some value
 }
 ```
 
