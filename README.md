@@ -28,13 +28,13 @@ xink uses the [xin](https://github.com/xinkjs/xin) URL router, which was forked 
 xin's currently supported route types, in order of match priority:
 - static: `/hello/there/world`
 - specific: `/hello/miss-[name]`
-- matcher: `/hello/[name=string]` (where 'string' references a function, which tests if the value of the `name` parameter matches)
+- matcher: `/hello/[name=word]` (where 'word' references a function, which tests if the value of the `name` parameter matches)
 - dynamic: `/hello/[name]`
 - rest: `/hello/[...rest]` (essentially a wildcard, but must be at the end of a route)
 
 ## Setup
 
-Create a new project, then install Vite v6 and xink as dev dependencies. Also be sure to install your runtime.
+Create a new project, then install Vite v6 and xink as dev dependencies.
 
 ```
 bun add -D vite@beta @xinkjs/xink
@@ -110,11 +110,11 @@ Setup your package.json or deno.json scripts. If you change your build output di
 
 ## Use
 
-In your project root, create your server's entrypoint file, e.g. `index.{js|ts}`, that uses the xink plugin.
+In your project root, create your server's entrypoint file, e.g. `index.{js|ts}`.
 
 We are expecting a default export from this file, so you can't explicitly use `Bun.serve()` or `Deno.serve()`. However, you can declare options for `.serve()` in the xink plugin config.
 
-> Bun does support declaring serve options within a default export, if you'd like to add them below `fetch {}`.
+> Bun does support declaring serve options within a default export, if you'd like to add them below `fetch() {}`.
 
 ```ts
 /* entrypoint file */
