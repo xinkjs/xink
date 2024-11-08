@@ -209,7 +209,7 @@ export const handle: Handle = sequence(first, second)
 
 ## `.serve()` options
 
-For Bun and Deno users, you can declare serve options in xink's plugin configuration. Any other runtimes will ignore these options.
+For Bun and Deno users, you can declare serve options in xink's plugin configuration. Any other runtimes will ignore these options. Be aware that these options are only relevant for `build` and `preview`, not `dev`.
 
 > Bun supports adding these within your entrypoint's default export, if you'd like to declare them there.
 
