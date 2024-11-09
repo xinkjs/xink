@@ -52,7 +52,16 @@ export async function xink(xink_config) {
         "../src/lib/*"
       ]
     }
-  }
+  },
+  "include": [
+		"../vite.config.js",
+		"../vite.config.ts",
+		"../src/**/*.js",
+		"../src/**/*.ts"
+	],
+	"exclude": [
+		"../node_modules/**"
+	]
 }`
   )
 
