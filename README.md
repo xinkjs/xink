@@ -79,6 +79,14 @@ type XinkConfig = {
 }
 ```
 
+### tsconfig
+
+If you're using typescript, add the below to your tsconfig. This will satisfy types using the `$lib` alias in your code.
+
+```ts
+"extends": "./.xink/tsconfig.json",
+```
+
 ### Scripts/Tasks
 
 Setup your package.json or deno.json scripts. If you change your build output directory, be sure to adjust accordingly.
@@ -320,6 +328,13 @@ export const GET = ({ params }) => {
   return new Response(`Hello ${params['*']}!`) // not `params.rest`
 }
 ```
+
+## Import Aliases
+
+- Use `$lib` for importing from `src/lib`, instead of having to deal with things like `../../utils.ts`. This requires extending your tsconfig.json file; see [doc](#tsconfig) for setup.
+  ```js
+  import { thing } from '$lib/utils.ts'
+  ```
 
 ## Helper Functions
 
