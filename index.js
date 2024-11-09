@@ -4,7 +4,7 @@
 import { validateConfig } from './lib/utils/config.js'
 import { getRequest, setResponse } from './lib/utils/vite.js'
 import { createManifest } from './lib/utils/manifest.js'
-import { copyFileSync, statSync } from 'node:fs'
+import { copyFileSync, mkdirSync, statSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { Glob } from 'glob'
 import stringifyObject from 'stringify-object'
@@ -39,6 +39,22 @@ export async function xink(xink_config) {
 
   /** @type {ModuleRunner} */
   let runner
+
+  mkdirSync(join(cwd, '.xink'), { recursive: true })
+  writeFileSync(join(cwd, '.xink/tsconfig.json'),
+    `{
+  "compilerOptions": {
+    "paths": {
+      "$lib": [
+        "../src/lib"
+      ],
+      "$lib/*": [
+        "../src/lib/*"
+      ]
+    }
+  }
+}`
+  )
 
   return {
     name: 'vite-plugin-xink',
@@ -124,7 +140,12 @@ export async function xink(xink_config) {
         define: {
           'XINK_VITE_MODE': JSON.stringify(mode)
         },
-        ssr: { noExternal: [ '@xinkjs/xink' ] }
+        ssr: { noExternal: [ '@xinkjs/xink' ] },
+        resolve: {
+          alias: {
+            '$lib': join(cwd, 'src/lib')
+          }
+        }
       }
     },
     async writeBundle() {
