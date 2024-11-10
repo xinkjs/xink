@@ -81,7 +81,7 @@ type XinkConfig = {
 
 ### tsconfig
 
-If you're using typescript, add the below to your tsconfig. This will satisfy types using the `$lib` alias in your code.
+If you're using typescript, add the below to your tsconfig. This will satisfy types when using the `$lib` alias in your code.
 
 ```ts
 "extends": "./.xink/tsconfig.json",
