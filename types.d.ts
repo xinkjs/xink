@@ -24,6 +24,11 @@ export type RequestEvent = {
   store: Store | null;
   setHeaders: (headers: { [key: string]: any; }) => void;
   url: Omit<URL, 'createObjectURL' | 'revokeObjectURL' | 'canParse'>;
+  valid: {
+    form?: { [key: string]: any };
+    json?: { [key: string]: any };
+    query?: { [key: string]: any };
+  }
 }
 export type ResolveEvent = (event: RequestEvent) => MaybePromise<Response>;
 export type XinkConfig = {
