@@ -33,6 +33,7 @@ export async function xink(xink_config) {
   // }
 
   const validated_config = validateConfig(xink_config)
+  console.log(validated_config)
   const runtime = validated_config.runtime
   const entrypoint = validated_config.entrypoint
   const serve_options = validated_config.serve_options

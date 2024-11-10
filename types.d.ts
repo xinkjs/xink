@@ -30,10 +30,7 @@ export type XinkConfig = {
   runtime: 'bun' | 'cloudflare' | 'deno';
   csrf?: { check?: boolean; origins?: string[]; };
   entrypoint?: string; 
-  middleware_dir?: string;
   out_dir?: string;
-  params_dir?: string;
-  routes_dir?: string;
   serve_options?: { [key: string]: any; };
 }
 
