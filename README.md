@@ -286,6 +286,78 @@ export const GET = (event: RequestEvent) => {
 }
 ```
 
+## Route Validators
+
+Validate incoming route data for forms, json, or query parameters. Any data not defined by your schema will not be passed to the route. xink supports this form of validation for `form`, `json`, and `query` data. Once data is validated, it's made available as an object within `event.valid.[form | json | query]`.
+
+### Define Validators
+
+To define validators, export a `validators` object from your route file.
+
+```js
+/* src/routes/route.js */
+import { z } from 'zod'
+
+export const POST = async (event) => {
+  const received_json = event.valid.json // { hello: 'world', goodbye: 42 } }
+
+  /* Do something and return a response. */
+}
+
+export const validators = {
+  POST: {
+    json: {
+      parse: (z.object({
+        hello: z.string(),
+        goodbye: z.number()
+      })).parse
+    }
+  }
+}
+```
+
+Extra data is not passed to your route. For example, if the json data for the above route looked also had the `thing` property, `thing` would not be available within the `event.valid.json` object.
+
+As you can see above, the first level of object properties define what HTTP handler the validation should apply to. Below that, you can define information for `form`, `json`, and/or `query` validation. Then, below each validation type, you define a `parse` definition.
+
+Below is an example using `valibot`.
+
+```js
+import * as v from 'valibot'
+
+export const POST = async (event) => {
+  const received_json = event.valid.json
+
+  /* Do something and return a response. */
+}
+
+export const validators = {
+  POST: {
+    json: {
+      parse: v.parser({
+        hello: v.string(),
+        goodbye: v.number()
+      })
+    }
+  }
+}
+```
+
+### Handling Validation Errors
+
+Most validation libraries throw errors when there are validation issues. To handle these errors, create an `error.[ts | js]` file in `src`, that exports a `handleError` function.
+
+```ts
+/* src/error.ts */
+import { json } from "@xinkjs/xink"
+import { ZodError } from "zod"
+
+export const handleError = (e: any) => {
+  if (e instanceof ZodError)
+    return json({ data: null, error: e })
+}
+```
+
 ## Parameter Matchers
 
 You can think of these as validators for parameter route segments.
@@ -404,6 +476,11 @@ type RequestEvent = {
   store: Store | null; // HTTP methods and cooresponding handlers; used internally.
   setHeaders: (headers: { [key: string]: any; }) => void;
   url: Omit<URL, 'createObjectURL' | 'revokeObjectURL' | 'canParse'>;
+  valid: {
+    form?: { [key: string]: any };
+    json?: { [key: string]: any };
+    query?: { [key: string]: any };
+  }
 }
 ```
 
