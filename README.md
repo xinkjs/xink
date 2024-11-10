@@ -319,3 +319,24 @@ router.setMiddleware((req) => {
 Returns the middleware function.
 
 - Returns: *() => Promise\<Response\> | Response*
+
+### `router.setErrorHandler(function)`
+
+Sets a global error handling function.
+
+- function *(error: unknown, event?: any) => Promise\<Response | void\> | Response | void* - A global error handling function that runs when an unexpected error is thrown.
+
+```js
+import { Router } from '@xinkjs/xin'
+const router = new Router()
+
+router.setErrorHandler((error, request) => {
+  /* Handle error */
+})
+```
+
+### `router.getErrorHandler()`
+
+Returns the error handler function.
+
+- Returns: *(error: unknown, event?: any) => Promise\<Response | void\> | Response | void*
