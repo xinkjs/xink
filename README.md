@@ -71,10 +71,7 @@ For the xink plugin configuration:
 type XinkConfig = {
   runtime: 'bun' | 'cloudflare' | 'deno';
   entrypoint?: string;
-  middleware_dir?: string; // src/middleware
   out_dir?: string; // build
-  params_dir?: string; // src/params
-  routes_dir?: string; // src/routes
   serve_options?: { [key: string]: any; };
 }
 ```
@@ -91,7 +88,7 @@ If you're using typescript, add the below to your tsconfig. This will satisfy ty
 
 Setup your package.json or deno.json scripts. If you change your build output directory, be sure to adjust accordingly.
 
-> In the future, hope to have a cli installer which sets these automatically.
+> In the future, we hope to have a cli installer which sets these automatically.
 
 #### Bun/Cloudflare
 
@@ -118,7 +115,7 @@ Setup your package.json or deno.json scripts. If you change your build output di
 
 ## Use
 
-In your project root, create your server's entrypoint file, e.g. `index.{js|ts}`.
+In your project root, create your server's entrypoint file, e.g. `index.[js|ts]`.
 
 We are expecting a default export from this file, so you can't explicitly use `Bun.serve()` or `Deno.serve()`. However, you can declare options for `.serve()` in the xink plugin config.
 
@@ -140,7 +137,7 @@ export default {
 
 ## Create Routes
 
-By default, routes should be created in `src/routes`. Each folder under this path represents a route segment.
+Routes are created in `src/routes`. Each folder under this path represents a route segment.
 
 At the end of a route segment, a javascript or typescript `route` file should export one or more functions for each HTTP method it will serve. You can also define a `fallback`, for any unhandled request methods.
 
@@ -166,7 +163,7 @@ export const fallback = ({ request }: RequestEvent) => {
 ```
 
 ## Middleware
-xink uses the same middleware strategy as SvelteKit. You export a single function named `handle`. The default middleware directory is `src/middleware`, so you can place all of your middleware files in this directory and import them into `middleware.[js|ts]`.
+xink uses the same middleware strategy as SvelteKit. You export a single function named `handle`. Place your middleware in `src/middleware`, with the main file being `middleware.[js|ts]`.
 
 ```ts
 /* src/middleware/middleware.ts */
@@ -180,16 +177,18 @@ export const handle: Handle = (event, resolve) => {
   if (event.url.pathname === '/synthetic')
     return new Response('Hit synthetic route.')
 
+  /* You can do something with the request. */
+
   /* Let the router determine a response. */
   const response = resolve(event)
 
-  /* You can do something with the response here, before returning it. */
+  /* You can do something with the response. */
 
   return response
 }
 ```
 
-For multiple middleware, use the `sequence` helper. Each middleware function should take in an `event` and `resolve` function, and return `resolve(event)`. For this example, we're defining each middleware in `middleware.ts`, but these could easily be in another file and imported.
+For multiple middleware, use the `sequence` helper. Each middleware function should take in an `event` and `resolve` function, and return `resolve(event)`. For this example, we're defining each middleware in `middleware.ts`, but the `first` and `second` functions could easily be in another file and imported.
 
 ```ts
 /* src/middleware/middleware.ts */
@@ -272,7 +271,7 @@ export const GET = ({ cookies }) => {
 `event.locals` is available for you to define custom information per server request. This is an object where you can simply set the property and value, and then use it later in the request. This is often used in middleware, which then passes the values to routes.
 
 ```ts
-/* src/middleware.ts */
+/* src/middleware/middleware.ts */
 export const handle: Handle = (event, resolve) => {
   event.locals.xink = "some value"
 
@@ -301,7 +300,7 @@ export const match = (param: string) => {
 } 
 ```
 
-The above would be used in your route segment like so: `/src/routes/[fruit=fruits]/route.ts`, where the right-side name should equal the filename (minus the extension) in `src/params`.
+The above would be used in your route segment like so: `/src/routes/[fruit=fruits]/route.ts`, where the label on the right side of the `=` character should be the same as the filename (minus the extension) in `src/params`.
 
 xin provides the following built-in matchers, but they can be overridden by creating your own file definitions:
 
