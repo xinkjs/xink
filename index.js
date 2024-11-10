@@ -1,4 +1,4 @@
-/** @import { Handler, Matcher, MatcherFn, MatcherType, Middleware, Node, Params, ParametricNode, Route, Router, Store, StoreFactory } from './types.d.ts' */
+/** @import { ErrorHandler, Handler, Matcher, MatcherFn, MatcherType, Middleware, Node, Params, ParametricNode, Route, Router, Store, StoreFactory } from './types.d.ts' */
 
 /**
  * 
@@ -223,8 +223,10 @@ export class Router {
   #matchers
   /** @type {Map<string, Matcher>} */
   #default_matchers
-  /** @type {string | null} */
+  /** @type {Middleware | null} */
   #middleware = null
+  /** @type {ErrorHandler | null} */
+  #error_handler = null
 
   /**
    * @param {Object} RouterArgs
@@ -294,10 +296,28 @@ export class Router {
   /**
    * Returns the middleware function.
    * 
-   * @returns {any | null}
+   * @returns {Middleware | null}
    */
   getMiddleware() {
     return this.#middleware
+  }
+
+  /**
+   * Sets an error handling function, for thrown errors.
+   * 
+   * @param {ErrorHandler} handle
+   */
+  setErrorHandler(handle) {
+    this.#error_handler = handle
+  }
+
+  /**
+   * Returns the error handling function.
+   * 
+   * @returns {ErrorHandler | null}
+   */
+  getErrorHandler() {
+    return this.#error_handler
   }
 
   /**

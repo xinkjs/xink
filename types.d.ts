@@ -1,6 +1,7 @@
+export type ErrorHandler = (error: unknown, event?: any) => MaybePromise<Response | void>;
 export type Handler = (event?: any) => MaybePromise<Response>;
-export type MaybePromise<T> = T | Promise<T>
-export type Middleware = (handle?: any) => MaybePromise<Response> | void;
+export type MaybePromise<T> = T | Promise<T>;
+export type Middleware = (handle?: any) => MaybePromise<Response | void>;
 export type Matcher = (param: string) => boolean | null;
 export type MatcherFn = (param: string) => boolean;
 export type MatcherType = string | null;
