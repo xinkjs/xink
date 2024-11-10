@@ -305,10 +305,10 @@ export class Router {
   /**
    * Sets an error handling function, for thrown errors.
    * 
-   * @param {ErrorHandler} handle
+   * @param {ErrorHandler} handler
    */
-  setErrorHandler(handle) {
-    this.#error_handler = handle
+  setErrorHandler(handler) {
+    this.#error_handler = handler
   }
 
   /**

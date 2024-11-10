@@ -34,6 +34,8 @@ export class Router {
   getMatcher(type: string): Matcher;
   setMiddleware(handle: Middleware): void;
   getMiddleware(): Middleware;
+  setErrorHandler(handler: ErrorHandler): void;
+  getErrorHandler(): ErrorHandler | null;
   register(path: string): Store;
   find(path: string): Route;
   get(path: string, handler: Handler): void;
