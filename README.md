@@ -288,11 +288,11 @@ export const GET = (event: RequestEvent) => {
 
 ## Route Validators
 
-Validate incoming route data for forms, json, or query parameters. Any data not defined by your schema will not be passed to the route. xink supports this form of validation for `form`, `json`, and `query` data. Once data is validated, it's made available as an object within `event.valid.[form | json | query]`.
+Validate incoming route data for `form`s, `json`, or `query` parameters. Validated data is available as an object within `event.valid.[form | json | query]`.
 
-### Define Validators
+### Defining
 
-To define validators, export a `validators` object from your route file.
+To define validators, export a `validators` object from your route file. The first level of object properties define what HTTP handler the validation should apply to. Below that, you can define information for `form`, `json`, and/or `query` validation. Then, below each validation type, you define a `parse` definition.
 
 ```js
 /* src/routes/route.js */
@@ -316,9 +316,7 @@ export const validators = {
 }
 ```
 
-Extra data is not passed to your route. For example, if the json data for the above route looked also had the `thing` property, `thing` would not be available within the `event.valid.json` object.
-
-As you can see above, the first level of object properties define what HTTP handler the validation should apply to. Below that, you can define information for `form`, `json`, and/or `query` validation. Then, below each validation type, you define a `parse` definition.
+Any data which does not match your schema is not passed to `event.valid`. For example, if the json data for the above route also had a `thing: "one"` property, `thing` would not be available within the `event.valid.json` object.
 
 Below is an example using `valibot`.
 
@@ -343,9 +341,11 @@ export const validators = {
 }
 ```
 
-### Handling Validation Errors
+Be sure to look at the section below, to handle errors thrown by your validation library.
 
-Most validation libraries throw errors when there are validation issues. To handle these errors, create an `error.[ts | js]` file in `src`, that exports a `handleError` function.
+## Handling Errors
+
+If you need to handle thrown errors separately, especially for errors from validation libraries, create an `error.[ts | js]` file in `src`, that exports a `handleError` function.
 
 ```ts
 /* src/error.ts */
