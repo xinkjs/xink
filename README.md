@@ -290,8 +290,6 @@ export const GET = (event: RequestEvent) => {
 
 Validate incoming route data for `form`s, `json`, or `query` parameters. Validated data is available as an object within `event.valid.[form | json | query]`.
 
-### Defining
-
 To define validators, export a `validators` object from your route file. The first level of object properties define what HTTP handler the validation should apply to. Below that, you can define information for `form`, `json`, and/or `query` validation. Then, below each validation type, you define a `parse` definition.
 
 ```js
