@@ -2,6 +2,12 @@ import type { Store, Params } from "@xinkjs/xin"
 import type { SerializeOptions, ParseOptions } from "cookie"
 import type { Plugin } from 'vite'
 
+type AtLeastOne<T, P> = { [K in keyof T]: Pick<T, K> }[keyof T]
+interface AllowedValidatorTypes {
+  form: any;
+  json: any;
+  query: any;
+}
 export type Cookie = {
   name: string;
   value: string;
@@ -31,6 +37,19 @@ export type RequestEvent = {
   }
 }
 export type ResolveEvent = (event: RequestEvent) => MaybePromise<Response>;
+/**
+ * TODO require at least one of these and still show options if missing.
+ */
+export interface Validators {
+  GET?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'query'>;
+  POST?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'query'>;
+  PUT?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'query'>;
+  PATCH?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'query'>;
+  DELETE?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'query'>;
+  HEAD?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'query'>;
+  OPTIONS?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'query'>;
+  fallback?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'query'>;
+}
 export type XinkConfig = {
   runtime: 'bun' | 'cloudflare' | 'deno';
   check_origin?: boolean;
