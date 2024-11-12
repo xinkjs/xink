@@ -289,7 +289,7 @@ export const GET = (event: RequestEvent) => {
 
 Validate incoming route data for `form`s, `json`, or `query` parameters. Validated data is available as an object within `event.valid.[form | json | query]`.
 
-To define validators, export a `validators` object from your route file. The first level of object properties define what HTTP handler the validation should apply to. Below that, you can define information for `form`, `json`, and/or `query` validation. Then, below each validation type, you define a `parse` definition.
+To define validators, export a `validators` object from your route file. The first level of object properties define what HTTP handler the validation should apply to; this can include the `fallback` handler. Below that, you can define a parser for `form`, `json`, and/or `query` validation.
 
 ```js
 /* src/routes/route.js */
@@ -303,12 +303,10 @@ export const POST = async (event) => {
 
 export const validators = {
   POST: {
-    json: {
-      parse: (z.object({
-        hello: z.string(),
-        goodbye: z.number()
-      })).parse
-    }
+    json: (z.object({
+      hello: z.string(),
+      goodbye: z.number()
+    })).parse
   }
 }
 ```
@@ -328,12 +326,10 @@ export const POST = async (event) => {
 
 export const validators = {
   POST: {
-    json: {
-      parse: v.parser({
-        hello: v.string(),
-        goodbye: v.number()
-      })
-    }
+    json: v.parser({
+      hello: v.string(),
+      goodbye: v.number()
+    })
   }
 }
 ```
@@ -478,6 +474,17 @@ type RequestEvent = {
     json?: { [key: string]: any };
     query?: { [key: string]: any };
   }
+}
+
+interface Validators {
+  GET?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'query'>;
+  POST?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'query'>;
+  PUT?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'query'>;
+  PATCH?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'query'>;
+  DELETE?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'query'>;
+  HEAD?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'query'>;
+  OPTIONS?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'query'>;
+  fallback?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'query'>;
 }
 ```
 
