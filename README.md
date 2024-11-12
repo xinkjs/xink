@@ -462,7 +462,7 @@ type Cookies = {
 }
 type Handle = (event: RequestEvent, resolve: ResolveEvent) => MaybePromise<Response>;
 type Params = { [key: string]: string };
-type Store = { [key: string]: Handle };
+type Store = { [key: string]: any };
 
 type RequestEvent = {
   cookies: Cookies;
