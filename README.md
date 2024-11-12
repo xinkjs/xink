@@ -14,8 +14,6 @@ It requires Vite v6, which is currently in beta.
 
 - [x] Support {Bun,Deno}.serve
 - [ ] Cloudflare Workers
-- [ ] CORS
-- [ ] CSRF origins
 - [ ] Publish to JSR
 - [ ] OpenAPI integration
 - [ ] Vitest tests
@@ -60,21 +58,22 @@ export default defineConfig(async function () {
 })
 ```
 
+```ts
+type XinkConfig = {
+  runtime: 'bun' | 'cloudflare' | 'deno';
+  check_origin?: boolean; // true
+  entrypoint?: string;
+  out_dir?: string; // build
+  serve_options?: { [key: string]: any; };
+}
+```
+
 For the xink plugin configuration:
 - you must provide a `runtime` value
 - `entrypoint` is optional, but should be the name of the server file in the root of your project. Below are the defaults for each supported runtime; so, you only need to set this if you're using something different. Note that these must only be filenames, not paths - your entrypoint must always be in the root directory of your project.
   - Bun, `index.ts`
   - Cloudflare, `index.ts`
   - Deno, `main.ts`
-
-```ts
-type XinkConfig = {
-  runtime: 'bun' | 'cloudflare' | 'deno';
-  entrypoint?: string;
-  out_dir?: string; // build
-  serve_options?: { [key: string]: any; };
-}
-```
 
 ### tsconfig
 
@@ -286,7 +285,7 @@ export const GET = (event: RequestEvent) => {
 }
 ```
 
-## Route Validators
+## Validation
 
 Validate incoming route data for `form`s, `json`, or `query` parameters. Validated data is available as an object within `event.valid.[form | json | query]`.
 
