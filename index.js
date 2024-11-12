@@ -147,7 +147,8 @@ export async function xink(xink_config) {
 
       return {
         define: {
-          'XINK_VITE_MODE': JSON.stringify(mode)
+          'XINK_VITE_MODE': JSON.stringify(mode),
+          'XINK_CHECK_ORIGIN': validated_config.check_origin
         },
         ssr: { noExternal: [ '@xinkjs/xink' ] },
         resolve: {

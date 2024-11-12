@@ -33,7 +33,7 @@ export type RequestEvent = {
 export type ResolveEvent = (event: RequestEvent) => MaybePromise<Response>;
 export type XinkConfig = {
   runtime: 'bun' | 'cloudflare' | 'deno';
-  csrf?: { check?: boolean; origins?: string[]; };
+  check_origin?: boolean;
   entrypoint?: string; 
   out_dir?: string;
   serve_options?: { [key: string]: any; };

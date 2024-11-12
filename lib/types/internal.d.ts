@@ -1,4 +1,5 @@
 export type DefaultConfig = {
+  check_origin: boolean;
   middleware_dir: string;
   out_dir: string;
   params_dir: string;
