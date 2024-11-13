@@ -7,16 +7,16 @@
   },
   "devDependencies": {
     "@types/bun": "latest",
-    "vitest": "^2.1.3"
+    "vitest": "^2.1.4"
   },
   "dependencies": {
-    "@xinkjs/xin": "0.3.1",
+    "@xinkjs/xin": "^0.3.2",
     "cookie": "^1.0.1",
     "glob": "^11.0.0",
     "magic-string": "^0.30.12",
-    "set-cookie-parser": "^2.7.0",
+    "set-cookie-parser": "^2.7.1",
     "stringify-object": "^5.0.0",
-    "vite": "^6.0.0-beta.8"
+    "vite": "^6.0.0-beta.9"
   },
   "peerDependencies": {
     "vite": "^6.0.0-beta.8"
