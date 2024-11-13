@@ -27,7 +27,7 @@ export type Store = {
 export type StoreFactory = () => Store;
 
 export class Router {
-  constructor(options: { storeFactory?: StoreFactory })
+  constructor(options?: { storeFactory?: StoreFactory })
 
   getTree(): Node;
   setMatcher(type: string, matcher: Matcher): void;
