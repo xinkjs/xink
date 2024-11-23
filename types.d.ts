@@ -6,6 +6,7 @@ type AtLeastOne<T, P> = { [K in keyof T]: Pick<T, K> }[keyof T]
 interface AllowedValidatorTypes {
   form: any;
   json: any;
+  params: any;
   query: any;
 }
 export type Cookie = {
@@ -21,7 +22,7 @@ export type Cookies = {
 }
 export type Handle = (event: RequestEvent, resolve: ResolveEvent) => MaybePromise<Response>;
 export type MaybePromise<T> = T | Promise<T>;
-export type RequestEvent = {
+export type RequestEvent<C = { Validators?: any; }> = {
   cookies: Cookies;
   headers: Omit<Headers, 'toJSON' | 'count' | 'getAll'>;
   locals: { [key: string]: any },
@@ -30,25 +31,19 @@ export type RequestEvent = {
   store: Store | null;
   setHeaders: (headers: { [key: string]: any; }) => void;
   url: Omit<URL, 'createObjectURL' | 'revokeObjectURL' | 'canParse'>;
-  valid: {
-    form?: { [key: string]: any };
-    json?: { [key: string]: any };
-    query?: { [key: string]: any };
-  }
+  valid: C['Validators'];
 }
 export type ResolveEvent = (event: RequestEvent) => MaybePromise<Response>;
-/**
- * TODO require at least one of these and still show options if missing.
- */
+
 export interface Validators {
-  GET?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'query'>;
-  POST?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'query'>;
-  PUT?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'query'>;
-  PATCH?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'query'>;
-  DELETE?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'query'>;
-  HEAD?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'query'>;
-  OPTIONS?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'query'>;
-  fallback?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'query'>;
+  GET?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'params' | 'query'>;
+  POST?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'params' | 'query'>;
+  PUT?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'params' | 'query'>;
+  PATCH?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'params' | 'query'>;
+  DELETE?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'params' | 'query'>;
+  HEAD?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'params' | 'query'>;
+  OPTIONS?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'params' | 'query'>;
+  fallback?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'params' | 'query'>;
 }
 export type XinkConfig = {
   runtime: 'bun' | 'cloudflare' | 'deno';
