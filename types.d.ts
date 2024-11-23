@@ -1,6 +1,7 @@
 import type { Store, Params } from "@xinkjs/xin"
 import type { SerializeOptions, ParseOptions } from "cookie"
 import type { Plugin } from 'vite'
+import type { ApiConfig } from "vitest";
 
 type AtLeastOne<T, P> = { [K in keyof T]: Pick<T, K> }[keyof T]
 interface AllowedValidatorTypes {
@@ -25,7 +26,7 @@ export type MaybePromise<T> = T | Promise<T>;
 export type RequestEvent<C = { Validators?: any; }> = {
   cookies: Cookies;
   headers: Omit<Headers, 'toJSON' | 'count' | 'getAll'>;
-  locals: { [key: string]: any },
+  locals: Api.Locals,
   params: Params;
   request: Request;
   store: Store | null;
