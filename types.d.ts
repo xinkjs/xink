@@ -5,10 +5,10 @@ import type { ApiConfig } from "vitest";
 
 type AtLeastOne<T, P> = { [K in keyof T]: Pick<T, K> }[keyof T]
 interface AllowedValidatorTypes {
-  form: any;
-  json: any;
-  params: any;
-  query: any;
+  form?: any;
+  json?: any;
+  params?: any;
+  query?: any;
 }
 export type Cookie = {
   name: string;
@@ -23,7 +23,7 @@ export type Cookies = {
 }
 export type Handle = (event: RequestEvent, resolve: ResolveEvent) => MaybePromise<Response>;
 export type MaybePromise<T> = T | Promise<T>;
-export type RequestEvent<C = { Validators?: any; }> = {
+export interface RequestEvent<V extends AllowedValidatorTypes = AllowedValidatorTypes> {
   cookies: Cookies;
   headers: Omit<Headers, 'toJSON' | 'count' | 'getAll'>;
   locals: Api.Locals,
@@ -32,7 +32,7 @@ export type RequestEvent<C = { Validators?: any; }> = {
   store: Store | null;
   setHeaders: (headers: { [key: string]: any; }) => void;
   url: Omit<URL, 'createObjectURL' | 'revokeObjectURL' | 'canParse'>;
-  valid: C['Validators'];
+  valid: V
 }
 export type ResolveEvent = (event: RequestEvent) => MaybePromise<Response>;
 
