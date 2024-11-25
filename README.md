@@ -18,6 +18,7 @@ It requires Vite v6, which is currently in beta.
 - [ ] OpenAPI integration
 - [ ] Vitest tests
 - [ ] CLI tool to setup project
+- [ ] docs site
 
 ## Route Types
 
