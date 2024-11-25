@@ -75,6 +75,31 @@ For the xink plugin configuration:
   - Cloudflare, `index.ts`
   - Deno, `main.ts`
 
+### `.serve()` options
+
+For Bun and Deno users, you can declare serve options in xink's plugin configuration. Any other runtimes will ignore these options. Be aware that these options are only relevant for `build` and `preview`, not `dev`.
+
+> Bun supports adding these within your entrypoint's default export, if you'd like to declare them there.
+
+```ts
+/* vite.config.js */
+import { xink } from '@xinkjs/xink'
+import { defineConfig } from 'vite'
+
+export default defineConfig(async function () {
+  return {
+    plugins: [
+      await xink({ 
+        runtime: 'bun',
+        serve_options: {
+          port: 3500
+        }
+      })
+    ]
+  }
+})
+```
+
 ### tsconfig
 
 If you're using typescript, add the below to your tsconfig. This will satisfy types when using the `$lib` alias in your code.
@@ -85,7 +110,7 @@ If you're using typescript, add the below to your tsconfig. This will satisfy ty
 
 ### Scripts/Tasks
 
-Setup your package.json or deno.json scripts. If you change your build output directory, be sure to adjust accordingly.
+Setup your package.json or deno.json scripts.
 
 > In the future, we hope to have a cli installer which sets these automatically.
 
@@ -136,9 +161,9 @@ export default {
 
 ## Create Routes
 
-Routes are created in `src/routes`. Each folder under this path represents a route segment.
+Routes are created in `src/routes`. Each directory under this path represents a route segment.
 
-At the end of a route segment, a javascript or typescript `route` file should export one or more functions for each HTTP method it will serve. You can also define a `fallback`, for any unhandled request methods.
+At the end of a route path, a javascript or typescript `route` file should export one or more functions for each HTTP method it will serve. You can also define a `fallback`, for any unhandled request methods.
 
 xink supports these verbs and function names: 'GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS', 'fallback'
 
@@ -213,31 +238,6 @@ const second: Handle = (event, resolve) => {
 export const handle: Handle = sequence(first, second)
 ```
 
-## `.serve()` options
-
-For Bun and Deno users, you can declare serve options in xink's plugin configuration. Any other runtimes will ignore these options. Be aware that these options are only relevant for `build` and `preview`, not `dev`.
-
-> Bun supports adding these within your entrypoint's default export, if you'd like to declare them there.
-
-```ts
-/* vite.config.js */
-import { xink } from '@xinkjs/xink'
-import { defineConfig } from 'vite'
-
-export default defineConfig(async function () {
-  return {
-    plugins: [
-      await xink({ 
-        runtime: 'bun',
-        serve_options: {
-          port: 3500
-        }
-      })
-    ]
-  }
-})
-```
-
 ## Setting Headers
 
 Use `event.setHeaders()` to set response headers. Be aware that you cannot set cookies using this method, but should instead use [`event.cookies`](#cookie-handling).
@@ -304,7 +304,7 @@ Validate incoming route data for `form`, `json`, `params`, or `query` parameters
 
 To define validators, export a `validators` object from your route file. The first level of object properties define what HTTP handler the validation should apply to; this can include the `fallback` handler. Below that, you can define a function for `form`, `json`, `params`, and/or `query` validation.
 
-Below, we are using a parse function from the Zod validation library, but you could also define a normal function for `json`, with your own validation logic, then return the validated data as an object. In the Zod example above, any data which does not match your schema is not passed to `event.valid`.
+Below, we are using a parse function from the Zod validation library, but you could also define a normal function for `json`, with your own validation logic, then return the validated data as an object. In the Zod example below, any data which does not match your schema is not passed to `event.valid`.
 
 ```js
 /* src/routes/route.js */
@@ -343,7 +343,7 @@ import type { RequestEvent, Validators } from '@xinkjs/xink'
 
 const post_json_schema = v.object({
   hello: v.string(),
-  goodbye: v.boolean()
+  goodbye: v.number()
 })
 type PostTypes = {
   json: v.InferInput<typeof post_json_schema>;
@@ -373,15 +373,15 @@ If you need to handle thrown errors separately, especially for errors from valid
 import { json } from "@xinkjs/xink"
 import { ZodError } from "zod"
 
-export const handleError = (e: any) => {
+export const handleError = (e) => {
   if (e instanceof ZodError)
     return json({ data: null, error: e })
 }
 ```
 
-## Parameter Matchers
+## Router Param Matchers
 
-You can think of these as validators for route parameter segments (`params`). This feature came before validators; you don't need to use both for your params. However, one advantage of a matcher is that it can be defined once and used as much as you'd like.
+You can think of these as validators for route parameter segments (`params`). This feature came before validators; you don't need to use both to validate your params. However, one advantage of a matcher is that it can be defined once and used as much as you'd like.
 
 You can validate route params by creating files in `src/params`. Each file in this directory needs to export a `match` function that takes in a string and returns a boolean. When `true` is returned, the param matches and the router either continues to try and match the rest of the route or returns the route if this is the last segment. Returning `false` indicates the param does not match, and the router keeps searching for a route.
 
@@ -394,6 +394,8 @@ export const match = (param: string) => {
 ```
 
 The above would be used in your route segment like so: `/src/routes/[fruit=fruits]/route.ts`, where the label on the right side of the `=` character should be the same as the filename (minus the extension) in `src/params`.
+
+So, for the fruits example, if a request was made to `/apple`, it would match, but a request to `/banana` would not.
 
 xin provides the following built-in matchers, but they can be overridden by creating your own file definitions:
 
