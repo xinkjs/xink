@@ -7,19 +7,19 @@
   },
   "devDependencies": {
     "@types/bun": "latest",
-    "vitest": "^2.1.4"
+    "vitest": "^2.1.5"
   },
   "dependencies": {
     "@xinkjs/xin": "^0.3.2",
-    "cookie": "^1.0.1",
+    "cookie": "^1.0.2",
     "glob": "^11.0.0",
-    "magic-string": "^0.30.12",
+    "magic-string": "^0.30.13",
     "set-cookie-parser": "^2.7.1",
     "stringify-object": "^5.0.0",
-    "vite": "^6.0.0-beta.9"
+    "vite": "^6.0.0-beta.10"
   },
   "peerDependencies": {
-    "vite": "^6.0.0-beta.9"
+    "vite": "^6.0.0-beta.10"
   },
   "scripts": { "test": "vitest" },
   "exports": {
