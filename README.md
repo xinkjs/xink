@@ -335,24 +335,30 @@ export const POST = async (event) => {
 }
 ```
 
-Below is an example using `valibot`.
+Below is a `valibot` example with types.
 
 ```js
 import * as v from 'valibot'
+import type { RequestEvent, Validators } from '@xinkjs/xink'
 
-export const POST = async (event) => {
+const post_json_schema = v.object({
+  hello: v.string(),
+  goodbye: v.boolean()
+})
+type PostTypes = {
+  json: v.InferInput<typeof post_json_schema>;
+}
+
+export const validators: Validators = {
+  POST: {
+    json: v.parser(post_json_schema)
+  }
+}
+
+export const POST = async (event: RequestEvent<PostTypes>) => {
   const received_json = event.valid.json
 
   /* Do something and return a response. */
-}
-
-export const validators = {
-  POST: {
-    json: v.parser({
-      hello: v.string(),
-      goodbye: v.number()
-    })
-  }
 }
 ```
 
