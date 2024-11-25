@@ -70,7 +70,7 @@ type XinkConfig = {
 
 For the xink plugin configuration:
 - you must provide a `runtime` value
-- `entrypoint` is optional, but should be the name of the server file in the root of your project. Below are the defaults for each supported runtime; so, you only need to set this if you're using something different. Note that these must only be filenames, not paths - your entrypoint must always be in the root directory of your project.
+- `entrypoint` is optional, but should be the name of your entrypoint file. Below are the defaults for each supported runtime; so, you only need to set this if you're using a different filename. Note that these must only be filenames, not paths - your entrypoint must always be in the root directory of your project.
   - Bun, `index.ts`
   - Cloudflare, `index.ts`
   - Deno, `main.ts`
@@ -285,21 +285,30 @@ export const GET = (event: RequestEvent) => {
 }
 ```
 
+To type your locals, create an `api.d.ts` file in your `src` folder.
+```ts
+declare global {
+  namespace Api {
+    interface Locals {
+      xink: string;
+    }
+  }
+}
+
+export {}
+```
+
 ## Validation
 
-Validate incoming route data for `form`s, `json`, or `query` parameters. Validated data is available as an object within `event.valid.[form | json | query]`.
+Validate incoming route data for `form`, `json`, `params`, or `query` parameters. Validated data is available as an object within `event.valid.[form | json | params | query]`.
 
-To define validators, export a `validators` object from your route file. The first level of object properties define what HTTP handler the validation should apply to; this can include the `fallback` handler. Below that, you can define a parser for `form`, `json`, and/or `query` validation.
+To define validators, export a `validators` object from your route file. The first level of object properties define what HTTP handler the validation should apply to; this can include the `fallback` handler. Below that, you can define a function for `form`, `json`, `params`, and/or `query` validation.
+
+Below, we are using a parse function from the Zod validation library, but you could also define a normal function for `json`, with your own validation logic, then return the validated data as an object. In the Zod example above, any data which does not match your schema is not passed to `event.valid`.
 
 ```js
 /* src/routes/route.js */
 import { z } from 'zod'
-
-export const POST = async (event) => {
-  const received_json = event.valid.json // { hello: 'world', goodbye: 42 } }
-
-  /* Do something and return a response. */
-}
 
 export const validators = {
   POST: {
@@ -309,9 +318,22 @@ export const validators = {
     })).parse
   }
 }
-```
 
-Any data which does not match your schema is not passed to `event.valid`. For example, if the json data for the above route also had a `thing: "one"` property, `thing` would not be available within the `event.valid.json` object.
+/**
+ * Assuming the following json is passed in:
+ * {
+ *    hello: 'world',
+ *    goodbye: 42,
+ *    cya: 'later'
+ * }
+ * 
+ */
+export const POST = async (event) => {
+  const received_json = event.valid.json // { hello: 'world', goodbye: 42 } }
+
+  /* Do something and return a response. */
+}
+```
 
 Below is an example using `valibot`.
 
@@ -338,7 +360,7 @@ Be sure to look at the section below, to handle errors thrown by your validation
 
 ## Handling Errors
 
-If you need to handle thrown errors separately, especially for errors from validation libraries, create an `error.[ts | js]` file in `src`, that exports a `handleError` function.
+If you need to handle thrown errors separately, especially for errors from validation libraries, create an `error.[ts|js]` file in `src`, that exports a `handleError` function.
 
 ```ts
 /* src/error.ts */
@@ -353,7 +375,7 @@ export const handleError = (e: any) => {
 
 ## Parameter Matchers
 
-You can think of these as validators for parameter route segments.
+You can think of these as validators for route parameter segments (`params`). This feature came before validators; you don't need to use both for your params. However, one advantage of a matcher is that it can be defined once and used as much as you'd like.
 
 You can validate route params by creating files in `src/params`. Each file in this directory needs to export a `match` function that takes in a string and returns a boolean. When `true` is returned, the param matches and the router either continues to try and match the rest of the route or returns the route if this is the last segment. Returning `false` indicates the param does not match, and the router keeps searching for a route.
 
@@ -450,6 +472,7 @@ export const GET = () => {
 ## Types
 
 ```ts
+type AtLeastOne<T, P> = { [K in keyof T]: Pick<T, K> }[keyof T]
 type Cookies = {
   delete(name: string, options?: SerializeOptions): void;
   get(name: string, options?: ParseOptions): string | undefined;
@@ -460,20 +483,22 @@ type Handle = (event: RequestEvent, resolve: ResolveEvent) => MaybePromise<Respo
 type Params = { [key: string]: string };
 type Store = { [key: string]: any };
 
-type RequestEvent = {
+interface AllowedValidatorTypes {
+  form?: any;
+  json?: any;
+  params?: any;
+  query?: any;
+}
+interface RequestEvent<V extends AllowedValidatorTypes = AllowedValidatorTypes> {
   cookies: Cookies;
   headers: Omit<Headers, 'toJSON' | 'count' | 'getAll'>;
-  locals: { [key: string]: any },
+  locals: Api.Locals,
   params: Params;
   request: Request;
-  store: Store | null; // HTTP methods and cooresponding handlers; used internally.
+  store: Store | null;
   setHeaders: (headers: { [key: string]: any; }) => void;
   url: Omit<URL, 'createObjectURL' | 'revokeObjectURL' | 'canParse'>;
-  valid: {
-    form?: { [key: string]: any };
-    json?: { [key: string]: any };
-    query?: { [key: string]: any };
-  }
+  valid: V
 }
 
 interface Validators {
