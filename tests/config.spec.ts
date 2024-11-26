@@ -24,13 +24,13 @@ test('Returns Vite Plugin, with all config items set', () => {
 })
 
 test('Catches invalid runtime', async () => {
-  expect(testConfig({ runtime: 'hello' })).rejects.toThrowError('Config runtime "hello" is invalid. Only bun, cloudflare, and deno are supported.')
+  await expect(testConfig({ runtime: 'hello' })).rejects.toThrowError('Config runtime "hello" is invalid. Only bun, cloudflare, and deno are supported.')
 })
 
 test('Catches invalid check_origin', async () => {
-  expect(testConfig({ runtime: 'bun', check_origin: 'false' })).rejects.toThrowError('check_origin must be a boolean, but "false" is a string.')
+  await expect(testConfig({ runtime: 'bun', check_origin: 'false' })).rejects.toThrowError('check_origin must be a boolean, but "false" is a string.')
 })
 
 test('Catches invalid entrypoint', async () => {
-  expect(testConfig({ runtime: 'bun', entrypoint: 'server' })).rejects.toThrowError('entrypoint must be a filename that ends with .js or .ts, but found "server".')
+  await expect(testConfig({ runtime: 'bun', entrypoint: 'server' })).rejects.toThrowError('entrypoint must be a filename that ends with .js or .ts, but found "server".')
 })
