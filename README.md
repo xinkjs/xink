@@ -2,8 +2,6 @@
 
 xink is a directory-based API router and a Vite plugin.
 
-It requires Vite v6, which is currently in beta.
-
 ## Road to Alpha
 
 - [x] Bun
@@ -25,9 +23,9 @@ It requires Vite v6, which is currently in beta.
 Create a new project, then install Vite v6 and xink as dev dependencies.
 
 ```
-bun add -D vite@beta @xinkjs/xink
-deno add -D npm:vite@beta npm:@xinkjs/xink
-[p]npm add -D vite@beta @xinkjs/xink
+bun add -D vite@latest @xinkjs/xink
+deno add -D npm:vite@latest npm:@xinkjs/xink
+[p]npm add -D vite@latest @xinkjs/xink
 ```
 
 ### Vite plugin configuration
