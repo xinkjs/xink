@@ -20,17 +20,6 @@ It requires Vite v6, which is currently in beta.
 - [ ] CLI tool to setup project
 - [ ] docs site
 
-## Route Types
-
-xink uses the [xin](https://github.com/xinkjs/xin) URL router, which was forked from @medleyjs/router. However, since xink is designed for directory-based routing, we use brackets to define special route segments for parameters, etc.
-
-xin's currently supported route types, in order of match priority:
-- static: `/hello/there/world`
-- specific: `/hello/miss-[name]`
-- matcher: `/hello/[name=word]` (where 'word' references a function, which tests if the value of the `name` parameter matches)
-- dynamic: `/hello/[name]`
-- rest: `/hello/[...rest]` (essentially a wildcard, but must be at the end of a route)
-
 ## Setup
 
 Create a new project, then install Vite v6 and xink as dev dependencies.
@@ -103,7 +92,7 @@ export default defineConfig(async function () {
 
 ### tsconfig
 
-If you're using typescript, add the below to your tsconfig. This will satisfy types when using the `$lib` alias in your code.
+If you're using typescript, and would like to use xink's `$lib` alias to reference anything under `src/lib`, then add the below to your tsconfig.
 
 ```ts
 "extends": "./.xink/tsconfig.json",
@@ -167,6 +156,17 @@ Routes are created in `src/routes`. Each directory under this path represents a 
 At the end of a route path, a javascript or typescript `route` file should export one or more functions for each HTTP method it will serve. You can also define a `fallback`, for any unhandled request methods.
 
 xink supports these verbs and function names: 'GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS', 'fallback'
+
+### Route Types
+
+xink uses the [xin](https://github.com/xinkjs/xin) URL router, which was forked from @medleyjs/router. However, since xink is designed for directory-based routing, we use brackets to define special route segments for parameters, etc.
+
+xin's currently supported route types, in order of match priority:
+- static: `/hello/there/world`
+- specific: `/hello/miss-[name]`
+- matcher: `/hello/[name=word]` (where 'word' references a function, which tests if the value of the `name` parameter matches)
+- dynamic: `/hello/[name]`
+- rest: `/hello/[...rest]` (essentially a wildcard, but must be at the end of a route)
 
 ```ts
 /* src/routes/blog/[article]/route.ts */
@@ -268,7 +268,7 @@ export const GET = ({ cookies }) => {
 
 ## Locals
 
-`event.locals` is available for you to define custom information per server request. This is an object where you can simply set the property and value, and then use it later in the request. This is often used in middleware, which then passes the values to routes.
+`event.locals` is available for you to define custom information per server request. This is an object where you can simply set the property and value, and then use it later in the request. This is used in middleware, which then passes the values to routes.
 
 ```ts
 /* src/middleware/middleware.ts */
@@ -301,11 +301,13 @@ export {}
 
 ## Validation
 
-Validate incoming route data for `form`, `json`, `params`, or `query` parameters. Validated data is available as an object within `event.valid.[form | json | params | query]`.
+Validate incoming route data for `form`, `json`, `params`, or `query` parameters. Validated data is available as an object within `event.valid.[form|json|params|query]`.
 
 To define validators, export a `validators` object from your route file. The first level of object properties define what HTTP handler the validation should apply to; this can include the `fallback` handler. Below that, you can define a function for `form`, `json`, `params`, and/or `query` validation.
 
-Below, we are using a parse function from the Zod validation library, but you could also define a normal function for `json`, with your own validation logic, then return the validated data as an object. In the Zod example below, any data which does not match your schema is not passed to `event.valid`.
+When using a validation library, you can assign a parse function and xink will call this function for you. Any thrown errors can be handled by `handleError()` (see further below). You could also define a normal function here, with your own validation logic, then return the validated data as an object.
+
+In the Zod example below, any data which does not match your schema is not passed to `event.valid.json`.
 
 ```js
 /* src/routes/route.js */
@@ -327,7 +329,6 @@ export const validators = {
  *    goodbye: 42,
  *    cya: 'later'
  * }
- * 
  */
 export const POST = async (event) => {
   const received_json = event.valid.json // { hello: 'world', goodbye: 42 } }
@@ -336,7 +337,7 @@ export const POST = async (event) => {
 }
 ```
 
-Below is a `valibot` example with types.
+You can also passes types for use with `event.valid`. Below is an example using valibot.
 
 ```js
 import * as v from 'valibot'
@@ -357,7 +358,7 @@ export const validators: Validators = {
 }
 
 export const POST = async (event: RequestEvent<PostTypes>) => {
-  const received_json = event.valid.json
+  const received_json = event.valid.json // Typescript knows `hello` and `goodbye` are available to use here.
 
   /* Do something and return a response. */
 }
@@ -367,7 +368,7 @@ Be sure to look at the section below, to handle errors thrown by your validation
 
 ## Handling Errors
 
-If you need to handle thrown errors separately, especially for errors from validation libraries, create an `error.[ts|js]` file in `src`, that exports a `handleError` function.
+If you need to handle thrown errors separately, especially for errors from validation libraries, create an `error.[ts|js]` file in `src`, that exports a `handleError` function. This can also be used to handle other errors not caught by a try/catch.
 
 ```ts
 /* src/error.ts */
@@ -382,7 +383,7 @@ export const handleError = (e) => {
 
 ## Router Param Matchers
 
-You can think of these as validators for route parameter segments (`params`). This feature came before validators; you don't need to use both to validate your params. However, one advantage of a matcher is that it can be defined once and used as much as you'd like.
+You can think of these as validators for route parameter segments (`params`). This feature came before validators; you don't need to use both to validate your params. However, one advantage of a matcher is that it can be defined once and used for as many routes as you'd like.
 
 You can validate route params by creating files in `src/params`. Each file in this directory needs to export a `match` function that takes in a string and returns a boolean. When `true` is returned, the param matches and the router either continues to try and match the rest of the route or returns the route if this is the last segment. Returning `false` indicates the param does not match, and the router keeps searching for a route.
 
