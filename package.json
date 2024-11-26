@@ -5,23 +5,22 @@
     "type": "git",
     "url": "git+https://github.com/xinkjs/xink.git"
   },
-  "devDependencies": {
-    "@types/bun": "latest",
-    "vitest": "^2.1.5"
-  },
   "dependencies": {
     "@xinkjs/xin": "^0.3.2",
     "cookie": "^1.0.2",
     "glob": "^11.0.0",
     "magic-string": "^0.30.13",
     "set-cookie-parser": "^2.7.1",
-    "stringify-object": "^5.0.0",
-    "vite": "^6.0.0-beta.10"
+    "stringify-object": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "vite": "^6.0.0",
+    "vitest": "^2.1.5"
   },
   "peerDependencies": {
-    "vite": "^6.0.0-beta.10"
+    "vite": "^6.0.0"
   },
-  "scripts": { "test": "vitest" },
   "exports": {
     ".": {
       "import": "./lib/exports/index.js",
@@ -40,7 +39,8 @@
   "homepage": "https://github.com/xinkjs/xink#readme",
   "keywords": ["api", "router", "xink"],
   "license": "MIT",
+  "scripts": { "test": "vitest" },
+  "sideEffects": false,
   "type": "module",
-  "types": "types.d.ts",
-  "sideEffects": false
+  "types": "types.d.ts"
 }
