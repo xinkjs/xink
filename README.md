@@ -364,6 +364,8 @@ export const POST = async (event: RequestEvent<PostTypes>) => {
 
 Be sure to look at the section below, to handle errors thrown by your validation library.
 
+> We clone the request during validation. This allows you to access the original request body within route handlers, if desired.
+
 ## Handling Errors
 
 If you need to handle thrown errors separately, especially for errors from validation libraries, create an `error.[ts|js]` file in `src`, that exports a `handleError` function. This can also be used to handle other errors not caught by a try/catch.
