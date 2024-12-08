@@ -6,12 +6,11 @@ xink is a directory-based API router and a Vite plugin.
 
 - [x] Bun
 - [x] Deno
-- [x] Cloudflare Workers - `request` only; no bindings (`env`) or context (`ctx`)
+- [x] Cloudflare Workers
 
 ## Wishlist
 
 - [x] Support {Bun,Deno}.serve
-- [ ] Cloudflare Workers
 - [ ] Publish to JSR
 - [ ] OpenAPI integration
 - [ ] Vitest tests
@@ -484,6 +483,47 @@ export const GET = (event) => {
 }
 ```
 
+## Cloudflare Workers
+
+To use and type your Bindings(env), create an `api.d.ts` file in your `src` folder or add to the existing file if you're already defining `Api.Locals`.
+```ts
+/* src/api.d.ts */
+declare global {
+  namespace Env {
+    interface Bindings {
+      MY_BUCKET: R2Bucket
+      HELLO: string;
+    }
+  }
+  // namespace Api {
+  //   interface Locals {}
+  // }
+}
+
+export {}
+// or, if you have a need to type your env within your root index.ts file,
+// then you need to export Env so that you can import Env from this file (see below for an example).
+export { Env }
+```
+
+### Using Bindings(env) and Context(ctx)
+
+Doing this also makes `env` and `ctx` available in handlers via `event`.
+```ts
+/* index.ts */
+import { Xink, type Context } from "@xinkjs/xink"
+import type { Env } from "./src/api.d.ts"
+
+const api = new Xink()
+await api.init()
+
+export default {
+  fetch(req: Request, env: Env.Bindings, ctx: Context) {
+    return api.fetch(req, env, ctx)
+  }
+}
+```
+
 ## Additional Features
 
 - CSRF protection: checks content type and origin ([ref](https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html#disallowing-simple-content-types)). If you don't want this, set `check_origin` to `false` in the xink plugin configuration.
@@ -493,6 +533,10 @@ export const GET = (event) => {
 
 ```ts
 type AtLeastOne<T, P> = { [K in keyof T]: Pick<T, K> }[keyof T]
+interface Context {
+  waitUntil(promise: Promise<unknown>): void
+  passThroughOnException(): void
+}
 type Cookies = {
   delete(name: string, options?: SerializeOptions): void;
   get(name: string, options?: ParseOptions): string | undefined;
@@ -511,6 +555,8 @@ interface AllowedValidatorTypes {
 }
 interface RequestEvent<V extends AllowedValidatorTypes = AllowedValidatorTypes> {
   cookies: Cookies;
+  ctx: Context;
+  env: Env.Bindings;
   headers: Omit<Headers, 'toJSON' | 'count' | 'getAll'>;
   html: (data: any, init?: ResponseInit | undefined): Response;
   json: (data: any, init?: ResponseInit | undefined): Response;
