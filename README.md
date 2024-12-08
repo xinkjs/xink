@@ -168,19 +168,19 @@ xin's currently supported route types, in order of match priority:
 
 ```ts
 /* src/routes/blog/[article]/route.ts */
-import { json, text, type RequestEvent } from '@xinkjs/xink'
+import { type RequestEvent } from '@xinkjs/xink'
 
-export const GET = async ({ params }: RequestEvent) => {
+export const GET = async ({ params, text }: RequestEvent) => {
   const article = await getArticle(params.article)
 
   return text(`You asked for ${article.title}`)
 }
 
-export const POST = async ({ request }: RequestEvent) => {
+export const POST = async ({ request, json }: RequestEvent) => {
   return json(await request.json())
 }
 
-export const fallback = ({ request }: RequestEvent) => {
+export const fallback = ({ request, text }: RequestEvent) => {
   return text(`Hello ${request.method}`)
 }
 ```
@@ -432,6 +432,8 @@ export const GET = ({ params }) => {
 
 ## Helper Functions
 
+All helper functions are available as an import and within an `event`.
+
 ### html
 Returns an html response. It sends a `Content-Length` header and a `Content-Type` header of `text/html`.
 ```js
@@ -439,6 +441,8 @@ import { html } from '@xinkjs/xink'
 
 export const GET = (event) => { 
   return html(`<div>You chose ${event.params.fruit}</div>`)
+  // or
+  return event.html(`<div>You chose ${event.params.fruit}</div>`)
 }
 ```
 
@@ -447,8 +451,10 @@ Returns a text response. By default, it sends a `Content-Length` header and a `C
 ```js
 import { text } from '@xinkjs/xink'
 
-export const GET = () => {
+export const GET = (event) => {
   return text(`Hello World!`)
+  // or
+  return event.text(`Hello World!`)
 }
 ```
 
@@ -457,8 +463,10 @@ Returns a json response. By default, it sends a `Content-Length` header and a `C
 ```js
 import { json } from '@xinkjs/xink'
 
-export const GET = () => {
+export const GET = (event) => {
   return json({ hello: 'world' })
+  // or
+  return event.json({ hello: 'world' })
 }
 ```
 
@@ -467,8 +475,10 @@ Returns a redirect response.
 ```js
 import { redirect } from '@xinkjs/xink'
 
-export const GET = () => {
+export const GET = (event) => {
   return redirect(status: number, location: string)
+  // or
+  return event.redirect(status: number, location: string)
 }
 ```
 
@@ -500,11 +510,15 @@ interface AllowedValidatorTypes {
 interface RequestEvent<V extends AllowedValidatorTypes = AllowedValidatorTypes> {
   cookies: Cookies;
   headers: Omit<Headers, 'toJSON' | 'count' | 'getAll'>;
+  html: (data: any, init?: ResponseInit | undefined): Response;
+  json: (data: any, init?: ResponseInit | undefined): Response;
   locals: Api.Locals,
   params: Params;
+  redirect: (status: number, location: string): never;
   request: Request;
   store: Store | null;
   setHeaders: (headers: { [key: string]: any; }) => void;
+  text: (data: string, init?: ResponseInit | undefined): Response;
   url: Omit<URL, 'createObjectURL' | 'revokeObjectURL' | 'canParse'>;
   valid: V
 }
