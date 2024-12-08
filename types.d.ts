@@ -9,6 +9,10 @@ interface AllowedValidatorTypes {
   params?: any;
   query?: any;
 }
+export interface Context {
+  waitUntil(promise: Promise<unknown>): void
+  passThroughOnException(): void
+}
 export type Cookie = {
   name: string;
   value: string;
@@ -24,6 +28,8 @@ export type Handle = (event: RequestEvent, resolve: ResolveEvent) => MaybePromis
 export type MaybePromise<T> = T | Promise<T>;
 export interface RequestEvent<V extends AllowedValidatorTypes = AllowedValidatorTypes> {
   cookies: Cookies;
+  ctx: Context;
+  env: Env.Bindings;
   headers: Omit<Headers, 'toJSON' | 'count' | 'getAll'>;
   html: typeof html;
   json: typeof json;
@@ -65,6 +71,6 @@ export function text(data: string, init?: ResponseInit | undefined): Response;
 export function sequence(...handlers: Handle[]): Handle;
 export class Xink {
   constructor()
-  fetch(request: Request): Promise<Response>;
+  fetch(request: Request, env?: Env.Bindings, ctx?: Context): Promise<Response>;
   init(): Promise<void>;
 }
