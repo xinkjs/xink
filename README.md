@@ -1,23 +1,29 @@
 # @xinkjs/xink
 
-xink is a directory-based API router and a Vite plugin.
+xink is a directory-based filesystem router for APIs, and a Vite plugin. Under the hood, it uses a trie URL router, which is fast and scalable. Supports the bun, deno, and cloudflare workers runtime.
 
-## Road to Alpha
+We're currently in the alpha phase of development and welcome contributions. Please see our contributing guide.
 
-- [x] Bun
-- [x] Deno
-- [x] Cloudflare Workers
+## Why use xink?
+
+- [x] Each API endpoint is well organized based on it's directory path and single route file.
+- [x] Standard handler-function names (e.g. GET, POST) free you from a lot of naming work.
+- [x] Simple data validation with your favorite library.
+- [ ] (coming soon) A CLI tool for creating and setting up routes.
 
 ## Wishlist
 
 - [x] Support {Bun,Deno}.serve
-- [ ] Publish to JSR
-- [ ] OpenAPI integration
-- [ ] Vitest tests
+- [x] Config Vitest tests
+- [ ] API Vitest tests
 - [ ] CLI tool to setup project
 - [ ] docs site
+- [ ] Publish to JSR?
+- [ ] OpenAPI integration?
 
 ## Setup
+
+> Looking forward to our CLI, to make these steps a breeze!
 
 Create a new project, then install Vite v6 and xink as dev dependencies.
 
@@ -29,7 +35,7 @@ deno add -D npm:vite@latest npm:@xinkjs/xink
 
 ### Vite plugin configuration
 
-Create or ensure there is a "vite.config.js" file in your project's root directory.
+Create or ensure there is a "vite.config.js" file in your project's root directory. We show the required options below.
 
 ```ts
 /* vite.config.js */
@@ -99,8 +105,6 @@ If you're using typescript, and would like to use xink's `$lib` alias to referen
 
 Setup your package.json or deno.json scripts.
 
-> In the future, we hope to have a cli installer which sets these automatically.
-
 #### Bun/Cloudflare
 
 ```js
@@ -127,10 +131,6 @@ Setup your package.json or deno.json scripts.
 ## Use
 
 In your project root, create your server's entrypoint file, e.g. `index.[js|ts]`.
-
-We are expecting a default export from this file, so you can't explicitly use `Bun.serve()` or `Deno.serve()`. However, you can declare options for `.serve()` in the xink plugin config.
-
-> Bun does support declaring serve options within a default export, if you'd like to add them below `fetch() {}`.
 
 ```ts
 /* entrypoint file */
@@ -184,8 +184,52 @@ export const fallback = ({ request, text }: RequestEvent) => {
 }
 ```
 
+### Route Param Matchers
+
+You can think of these as validators for route parameter segments (`params`). This feature came before [validators](#validation); you don't need to use both to validate your params. However, one advantage of a matcher is that it can be defined once and used for as many routes as you'd like.
+
+You can validate route params by creating files in `src/params`. Each file in this directory needs to export a `match` function that takes in a string and returns a boolean. When `true` is returned, the param matches and the router either continues to try and match the rest of the route or returns the route if this is the last segment. Returning `false` indicates the param does not match, and the router keeps searching for a route.
+
+```ts
+/* src/params/fruits.ts */
+export const match = (param: string) => {
+  const fruits = new Set(['apple', 'orange', 'grape'])
+  return fruits.has(param)
+} 
+```
+
+The above would be used in your route segment like so: `/src/routes/[fruit=fruits]/route.ts`, where the label on the right side of the `=` character should be the same as the filename (minus the extension) in `src/params`.
+
+So, for the fruits example, if a request was made to `/apple`, it would match, but a request to `/banana` would not.
+
+xin provides the following built-in matchers, but they can be overridden by creating your own file definitions:
+
+```js
+/* word */
+(param) => /^\w+$/.test(param)
+```
+```js
+/* letter */
+(param) => /^[a-z]+$/i.test(param)
+```
+```js
+/* number */
+(param) => /^\d+$/.test(param)
+```
+
+### Rest (Wildcard) Segments
+
+Because of the way the xin URL router works, the rest segment's param is accessed with `'*'`.
+
+```ts
+/* src/routes/hello/[...rest]/route.js */
+export const GET = ({ params }) => {
+  return new Response(`Hello ${params['*']}!`) // not `params.rest`
+}
+```
+
 ## Middleware
-xink uses the same middleware strategy as SvelteKit. You export a single function named `handle`. Place your middleware in `src/middleware`, with the main file being `middleware.[js|ts]`.
+xink uses the same middleware strategy as SvelteKit (ok, we stole it). You export a single function named `handle`. Place your middleware in `src/middleware`, with the main file being `middleware.[js|ts]`.
 
 ```ts
 /* src/middleware/middleware.ts */
@@ -234,66 +278,6 @@ const second: Handle = (event, resolve) => {
 
 /* Middleware is handled in series. */
 export const handle: Handle = sequence(first, second)
-```
-
-## Setting Headers
-
-Use `event.setHeaders()` to set response headers. Be aware that you cannot set cookies using this method, but should instead use [`event.cookies`](#cookie-handling).
-
-```js
-/* src/routes/route.js */
-export const GET = ({ setHeaders }) => {
-  setHeaders({
-    'Powered-By': 'xink'
-  })
-}
-```
-
-## Cookie Handling
-
-xink provides `event.cookies` inside of middleware and your route handlers, with methods `delete`, `get`, `getAll`, and `set`.
-
-```js
-/* src/routes/route.js */
-export const GET = ({ cookies }) => {
-  cookies.set('xink', 'is awesome', { maxAge: 60 * 60 * 24 * 365 })
-  const cookie_value = cookies.get('xink')
-  const all_cookies = cookies.getAll()
-  cookies.delete('xink')
-}
-```
-
-## Locals
-
-`event.locals` is available for you to define custom information per server request. This is an object where you can simply set the property and value, and then use it later in the request. This is used in middleware, which then passes the values to routes.
-
-```ts
-/* src/middleware/middleware.ts */
-export const handle: Handle = (event, resolve) => {
-  event.locals.xink = "some value"
-
-  return resolve(event)
-}
-
-/* src/routes/route.ts */
-import { type RequestEvent } from '@xinkjs/xink'
-
-export const GET = (event: RequestEvent) => {
-  console.log(event.locals.xink) // some value
-}
-```
-
-To type your locals, create an `api.d.ts` file in your `src` folder.
-```ts
-declare global {
-  namespace Api {
-    interface Locals {
-      xink: string;
-    }
-  }
-}
-
-export {}
 ```
 
 ## Validation
@@ -380,48 +364,66 @@ export const handleError = (e) => {
 }
 ```
 
-## Router Param Matchers
+## Setting Headers
 
-You can think of these as validators for route parameter segments (`params`). This feature came before validators; you don't need to use both to validate your params. However, one advantage of a matcher is that it can be defined once and used for as many routes as you'd like.
+`event.setHeaders`
 
-You can validate route params by creating files in `src/params`. Each file in this directory needs to export a `match` function that takes in a string and returns a boolean. When `true` is returned, the param matches and the router either continues to try and match the rest of the route or returns the route if this is the last segment. Returning `false` indicates the param does not match, and the router keeps searching for a route.
-
-```ts
-/* src/params/fruits.ts */
-export const match = (param: string) => {
-  const fruits = new Set(['apple', 'orange', 'grape'])
-  return fruits.has(param)
-} 
-```
-
-The above would be used in your route segment like so: `/src/routes/[fruit=fruits]/route.ts`, where the label on the right side of the `=` character should be the same as the filename (minus the extension) in `src/params`.
-
-So, for the fruits example, if a request was made to `/apple`, it would match, but a request to `/banana` would not.
-
-xin provides the following built-in matchers, but they can be overridden by creating your own file definitions:
+> You cannot set cookies using this method, but rather with [`event.cookies`](#cookie-handling).
 
 ```js
-/* word */
-(param) => /^\w+$/.test(param)
-```
-```js
-/* letter */
-(param) => /^[a-z]+$/i.test(param)
-```
-```js
-/* number */
-(param) => /^\d+$/.test(param)
-```
-
-## Rest (Wildcard) Segments
-
-Because of the way the xin URL router works, the rest segment's param is accessed with `'*'`.
-
-```ts
-/* src/routes/hello/[...rest]/route.js */
-export const GET = ({ params }) => {
-  return new Response(`Hello ${params['*']}!`) // not `params.rest`
+/* src/routes/route.js */
+export const GET = ({ setHeaders }) => {
+  setHeaders({
+    'Powered-By': 'xink'
+  })
 }
+```
+
+## Cookie Handling
+
+`event.cookies`, with methods `delete`, `get`, `getAll`, and `set`.
+
+```js
+/* src/routes/route.js */
+export const GET = ({ cookies }) => {
+  cookies.set('xink', 'is awesome', { maxAge: 60 * 60 * 24 * 365 })
+  const cookie_value = cookies.get('xink')
+  const all_cookies = cookies.getAll()
+  cookies.delete('xink')
+}
+```
+
+## Locals
+
+`event.locals` is available for you to define custom information per request. These are typically defined in middleware and used in route handlers.
+
+```ts
+/* src/middleware/middleware.ts */
+export const handle: Handle = (event, resolve) => {
+  event.locals.xink = "some value"
+
+  return resolve(event)
+}
+
+/* src/routes/route.ts */
+import { type RequestEvent } from '@xinkjs/xink'
+
+export const GET = (event: RequestEvent) => {
+  console.log(event.locals.xink) // some value
+}
+```
+
+To type your locals, create an `api.d.ts` file in your `src` folder.
+```ts
+declare global {
+  namespace Api {
+    interface Locals {
+      xink: string;
+    }
+  }
+}
+
+export {}
 ```
 
 ## Import Aliases
@@ -433,16 +435,12 @@ export const GET = ({ params }) => {
 
 ## Helper Functions
 
-All helper functions are available as an import and within an `event`.
+All helper functions are available within `event` but can also be top-level imported if needed.
 
 ### html
 Returns an html response. It sends a `Content-Length` header and a `Content-Type` header of `text/html`.
 ```js
-import { html } from '@xinkjs/xink'
-
 export const GET = (event) => { 
-  return html(`<div>You chose ${event.params.fruit}</div>`)
-  // or
   return event.html(`<div>You chose ${event.params.fruit}</div>`)
 }
 ```
@@ -450,11 +448,7 @@ export const GET = (event) => {
 ### text
 Returns a text response. By default, it sends a `Content-Length` header and a `Content-Type` header of `text/plain`.
 ```js
-import { text } from '@xinkjs/xink'
-
 export const GET = (event) => {
-  return text(`Hello World!`)
-  // or
   return event.text(`Hello World!`)
 }
 ```
@@ -462,11 +456,7 @@ export const GET = (event) => {
 ### json
 Returns a json response. By default, it sends a `Content-Length` header and a `Content-Type` header of `application/json`.
 ```js
-import { json } from '@xinkjs/xink'
-
 export const GET = (event) => {
-  return json({ hello: 'world' })
-  // or
   return event.json({ hello: 'world' })
 }
 ```
@@ -474,11 +464,7 @@ export const GET = (event) => {
 ### redirect
 Returns a redirect response.
 ```js
-import { redirect } from '@xinkjs/xink'
-
 export const GET = (event) => {
-  return redirect(status: number, location: string)
-  // or
   return event.redirect(status: number, location: string)
 }
 ```
@@ -508,7 +494,7 @@ export { Env }
 
 ### Using Bindings(env) and Context(ctx)
 
-Doing this also makes `env` and `ctx` available in handlers via `event`.
+Doing this also makes `env` and `ctx` available via `event`.
 ```ts
 /* index.ts */
 import { Xink, type Context } from "@xinkjs/xink"
