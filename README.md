@@ -282,13 +282,11 @@ export const handle: Handle = sequence(first, second)
 
 ## Validation
 
-Validate incoming route data for `form`, `json`, `params`, or `query` parameters. Validated data is available as an object within `event.valid.[form|json|params|query]`.
+Validate incoming route data for types `form`, `json`, route `params`, or `query` search params. Validated data is available as an object within `event.valid.[form|json|params|query]`.
 
-To define validators, export a `validators` object from your route file. The first level of object properties define what HTTP handler the validation should apply to; this can include the `fallback` handler. Below that, you can define a function for `form`, `json`, `params`, and/or `query` validation.
+Export a `validators` function within your route file. For each handler, define a function that returns an object of validated data for the data type. Any thrown errors can be handled by `handleError()` (see further below).
 
-When using a validation library, you can assign a parse function and xink will call this function for you. Any thrown errors can be handled by `handleError()` (see further below). You could also define a normal function here, with your own validation logic, then return the validated data as an object.
-
-In the Zod example below, any data which does not match your schema is not passed to `event.valid.json`.
+In the Zod example below, only json data, which matches your schema, will be available in `event.valid.json`; in this case, for POST requests.
 
 ```js
 /* src/routes/route.js */
@@ -312,13 +310,18 @@ export const validators = {
  * }
  */
 export const POST = async (event) => {
-  const received_json = event.valid.json // { hello: 'world', goodbye: 42 } }
+  const received_json = event.valid.json
+  // { hello: 'world', goodbye: 42 } }
 
   /* Do something and return a response. */
 }
 ```
 
-You can also passes types for use with `event.valid`. Below is an example using valibot.
+Instead of using a validation library, you can also define a normal function with your own validation logic, then return the validated data as an object.
+
+> We clone the request during validation. This allows you to access the original request body within route handlers, if desired.
+
+### Using types with validation
 
 ```js
 import * as v from 'valibot'
@@ -339,15 +342,12 @@ export const validators: Validators = {
 }
 
 export const POST = async (event: RequestEvent<PostTypes>) => {
-  const received_json = event.valid.json // Typescript knows `hello` and `goodbye` are available to use here.
+  const valid_json = event.valid.json
+  // IDE autocomplete for "hello" and "goodbye" via valid_json.
 
   /* Do something and return a response. */
 }
 ```
-
-Be sure to look at the section below, to handle errors thrown by your validation library.
-
-> We clone the request during validation. This allows you to access the original request body within route handlers, if desired.
 
 ## Handling Errors
 
