@@ -344,7 +344,7 @@ const VALIDATORS = {
 export const HOOKS = () => {
   return {
     VALIDATORS,
-    someHookFn: () => {}
+    someHookFn: () => null
   }
 }
 
