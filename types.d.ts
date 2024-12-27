@@ -53,7 +53,7 @@ export interface Validators {
   DELETE?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'params' | 'query'>;
   HEAD?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'params' | 'query'>;
   OPTIONS?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'params' | 'query'>;
-  fallback?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'params' | 'query'>;
+  default?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'params' | 'query'>;
 }
 export type XinkConfig = {
   runtime: 'bun' | 'cloudflare' | 'deno';
