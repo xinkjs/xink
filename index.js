@@ -111,7 +111,10 @@ export async function xink(xink_config) {
           input.push(file)
           break // there should only be one middleware file
         }
-
+        for (const file of new Glob(join(cwd, 'src/error.{js,ts}'), {})) {
+          input.push(file)
+          break // there should only be one error handling file
+        }
         for (const file of entrypoint_glob) {
           input.push(file)
           break // there should only be one entrypoint file
