@@ -287,6 +287,7 @@ You can define hooks for each endpoint. These are called after global middleware
 The `HOOKS` export must be a function, which returns an object of hooks. This is a library preference that ensures all route exports are functions.
 
 - access to `event`; if you change it, then you must return it.
+- if not returning `event`, you must return `null`.
 - no access to the response.
 - can by sync or async functions.
 - are not guaranteed to run in any particular order.
@@ -306,6 +307,8 @@ export const HOOKS = () => {
     },
     log: () => {
       logger().info('Hello from Pino!')
+
+      return null
     },
     poki: async (event: RequestEvent) => {
       const res = await fetch('https://pokeapi.co/api/v2/pokemon/pikachu')
