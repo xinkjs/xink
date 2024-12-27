@@ -28,9 +28,9 @@ We're currently in the alpha phase of development and welcome contributions. Ple
 Create a new project, then install Vite v6 and xink as dev dependencies.
 
 ```
-bun add -D vite@latest @xinkjs/xink
-deno add -D npm:vite@latest npm:@xinkjs/xink
-[p]npm add -D vite@latest @xinkjs/xink
+bun add -D vite @xinkjs/xink
+deno add -D npm:vite npm:@xinkjs/xink
+[p]npm add -D vite @xinkjs/xink
 ```
 
 ### Vite plugin configuration
@@ -150,9 +150,9 @@ export default {
 
 Routes are created in `src/routes`. Each directory under this path represents a route segment.
 
-At the end of a route path, a javascript or typescript `route` file should export one or more functions for each HTTP method it will serve. You can also define a `fallback`, for any unhandled request methods.
+At the end of a route path, a javascript or typescript `route` file should export one or more functions for each HTTP method it will serve. You can also define a default export, for any unhandled request methods.
 
-xink supports these verbs and function names: 'GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS', 'fallback'
+xink supports these route exports: 'GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS', 'default'
 
 ### Route Types
 
@@ -179,7 +179,7 @@ export const POST = async ({ request, json }: RequestEvent) => {
   return json(await request.json())
 }
 
-export const fallback = ({ request, text }: RequestEvent) => {
+export default ({ request, text }: RequestEvent) => {
   return text(`Hello ${request.method}`)
 }
 ```
@@ -229,7 +229,7 @@ export const GET = ({ params }) => {
 ```
 
 ## Middleware
-xink uses the same middleware strategy as SvelteKit (ok, we stole it). You export a single function named `handle`. Place your middleware in `src/middleware`, with the main file being `middleware.[js|ts]`.
+xink uses the same middleware strategy as SvelteKit (ok, we stole it). You export a single function named `handle`. Place your middleware in `src/middleware`, with the main file being `middleware.[js|ts]`. This gives you access to both the event (includes the Request) and the Response.
 
 ```ts
 /* src/middleware/middleware.ts */
@@ -280,11 +280,51 @@ const second: Handle = (event, resolve) => {
 export const handle: Handle = sequence(first, second)
 ```
 
+## Route Hooks
+
+You can define hooks for each endpoint. These are called after global middleware but before the route handler. Validation also happens before these are called, so you have access to validated data (see next section).
+
+The `HOOKS` export must be a function, which returns an object of hooks. This is a library preference that ensures all route exports are functions.
+
+- access to `event`; if you change it, then you must return it.
+- if not returning `event`, you must return `null`.
+- no access to the response.
+- can by sync or async functions.
+- are not guaranteed to run in any particular order.
+
+```ts
+/* src/routes/route.ts */
+import logger from 'pino'
+
+export const GET = () => { return new Response('Hello') }
+
+export const HOOKS = () => {
+  return {
+    state: (event: RequestEvent) => {
+      event.locals.state = { some: 'state' }
+
+      return event
+    },
+    log: () => {
+      logger().info('Hello from Pino!')
+
+      return null
+    },
+    poki: async (event: RequestEvent) => {
+      const res = await fetch('https://pokeapi.co/api/v2/pokemon/pikachu')
+      event.locals.poki = await res.json()
+
+      return event
+    }
+  }
+}
+```
+
 ## Validation
 
 Validate incoming route data for types `form`, `json`, route `params`, or `query` search params. Validated data is available as an object within `event.valid.[form|json|params|query]`.
 
-Export a `validators` function within your route file. For each handler, define a function that returns an object of validated data for the data type. Any thrown errors can be handled by `handleError()` (see further below).
+Your validators are part of hooks. For each handler, define a function that returns an object of validated data for the data type. Any thrown errors can be handled by `handleError()` (see further below).
 
 In the Zod example below, only json data, which matches your schema, will be available in `event.valid.json`; in this case, for POST requests.
 
@@ -292,12 +332,19 @@ In the Zod example below, only json data, which matches your schema, will be ava
 /* src/routes/route.js */
 import { z } from 'zod'
 
-export const validators = {
+const VALIDATORS = {
   POST: {
     json: (z.object({
       hello: z.string(),
       goodbye: z.number()
     })).parse
+  }
+}
+
+export const HOOKS = () => {
+  return {
+    VALIDATORS,
+    someHookFn: () => null
   }
 }
 
@@ -335,10 +382,14 @@ type PostTypes = {
   json: v.InferInput<typeof post_json_schema>;
 }
 
-export const validators: Validators = {
+const VALIDATORS: Validators = {
   POST: {
     json: v.parser(post_json_schema)
   }
+}
+
+export const HOOKS = () => {
+  return { VALIDATORS }
 }
 
 export const POST = async (event: RequestEvent<PostTypes>) => {
@@ -565,7 +616,7 @@ interface Validators {
   DELETE?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'query'>;
   HEAD?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'query'>;
   OPTIONS?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'query'>;
-  fallback?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'query'>;
+  default?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'query'>;
 }
 ```
 
