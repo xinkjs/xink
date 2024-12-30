@@ -22,7 +22,7 @@ export const createXink = (project_path: string, runtime: string, language: stri
 }
 ` :
     `{
-    "name": ${project_path.split('/').at(-1)},
+    "name": "${project_path.split('/').at(-1)}",
     "version": "0.0.0",
     "type": "module",
     "scripts": {
