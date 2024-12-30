@@ -9,103 +9,22 @@ We're currently in the alpha phase of development and welcome contributions. Ple
 - [x] Each API endpoint is well organized based on it's directory path and single route file.
 - [x] Standard handler-function names (e.g. GET, POST) free you from a lot of naming work.
 - [x] Simple data validation with your favorite library.
-- [ ] (coming soon) A CLI tool for creating and setting up routes.
+- [x] Easy setup with our `xk` CLI tool.
 
 ## Wishlist
 
 - [x] Support {Bun,Deno}.serve
 - [x] Config Vitest tests
 - [ ] API Vitest tests
-- [ ] CLI tool to setup project
+- [x] CLI tool to setup project
 - [ ] docs site
 - [ ] Publish to JSR?
 - [ ] OpenAPI integration?
 
 ## Setup
 
-> Looking forward to our CLI, to make these steps a breeze!
-
-Create a new project, then install Vite v6 and xink as dev dependencies.
-
-```
-bun add -D vite @xinkjs/xink
-deno add -D npm:vite npm:@xinkjs/xink
-[p]npm add -D vite @xinkjs/xink
-```
-
-### Vite plugin configuration
-
-Create or ensure there is a "vite.config.js" file in your project's root directory. We show the required options below.
-
-```ts
-/* vite.config.js */
-import { xink } from '@xinkjs/xink'
-import { defineConfig } from 'vite'
-
-export default defineConfig(async function () {
-  return {
-    plugins: [
-      await xink({ runtime: 'bun' })
-    ]
-  }
-})
-```
-
-```ts
-type XinkConfig = {
-  runtime: 'bun' | 'cloudflare' | 'deno';
-  check_origin?: boolean; // true
-  entrypoint?: string; // (derived from runtime)
-  out_dir?: string; // build
-  serve_options?: { [key: string]: any; };
-}
-```
-
-### Scripts/Tasks
-
-Setup your package.json or deno.json scripts.
-
-#### Bun/Cloudflare
-
-```js
-/* package.json */
-"scripts": {
-  "dev": "vite",
-  "build": "vite build",
-  "preview": "vite preview"
-}
-```
-
-#### Deno
-
-```js
-/* deno.json */
-"tasks": {
-  "dev": "vite",
-  "build": "vite build",
-  "preview": "vite preview"
-},
-"nodeModulesDir": "auto"
-```
-
-## Use
-
-In your project root, create your server's entrypoint file; whose name should be based on the following:
-
-- Bun and Cloudflare: `index.ts`
-- Deno: `main.ts`
-
-```ts
-import { Xink } from '@xinkjs/xink'
-
-const api = new Xink()
-await api.init()
-
-export default {
-  fetch(req: Request) {
-    return api.fetch(req)
-  }
-}
+```bash
+npx xk create my-api
 ```
 
 ## Create Routes
@@ -464,7 +383,7 @@ export {}
 
 ## Import Aliases
 
-Use `$lib` for importing from `src/lib`, instead of having to deal with things like `../../utils.ts`. This requires extending your tsconfig.json file.
+Use `$lib` for importing from `src/lib`, instead of having to deal with things like `../../utils.ts`. This requires extending your tsconfig.json file. If you used the `xk` CLI tool to create your project, this should already be done for you.
 
 ```ts
 "extends": "./.xink/tsconfig.json",
@@ -558,6 +477,14 @@ export default {
 ## Types
 
 ```ts
+type XinkConfig = {
+  runtime: 'bun' | 'cloudflare' | 'deno';
+  check_origin?: boolean; // true
+  entrypoint?: string; // (derived from runtime)
+  out_dir?: string; // build
+  serve_options?: { [key: string]: any; };
+}
+
 type AtLeastOne<T, P> = { [K in keyof T]: Pick<T, K> }[keyof T]
 interface Context {
   waitUntil(promise: Promise<unknown>): void
@@ -611,6 +538,8 @@ interface Validators {
 
 ## Attributions
 xink stands on the shoulders of giants. A special shoutout and tip of the hat goes to [SvelteKit](https://github.com/sveltejs/kit), as I used some of their code for various things; as it was not feasible to fork their code directly, and there's no reason to re-invent the wheel. Therefore, I've added a copyright for them in the license and marked relevant code with a short attribution.
+
+Thanks to [Deigo Rodríguez Baquero](https://github.com/DiegoRBaquero) for donating the `xk` npm package.
 
 ## Origins
 Pronounced "zinc", the name is based on the Georgian word [khinkali](https://en.wikipedia.org/wiki/Khinkali); which is a type of dumpling in the country of Georgia. The transcription is /ˈxink'ali/. To be clear: khinkali's beginning proununciation is dissimilar from "zinc".
