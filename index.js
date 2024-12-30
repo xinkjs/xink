@@ -15,23 +15,8 @@ import MagicString from 'magic-string'
  * @returns {Promise<import('vite').Plugin>}
  */
 export async function xink(xink_config) {
-  //let config_file_exists = false
-  ///** @type {XinkConfig} */
-  //let xink_config = {}
   const cwd = process.cwd()
   const route_file_regex = /route.[j,t]s/
-  //const config_path = join(cwd, 'xink.config.js')
-  //try {
-  //  console.log('trying to load xink config')
-  //  statSync(config_path).isFile()
-  //  config_file_exists = true
-  //} catch (error) {}
-
-  // if (config_file_exists) {
-  //   console.log('loading config')
-  //   xink_config = await import(`${url.pathToFileURL(config_path)}`)
-  // }
-
   const validated_config = validateConfig(xink_config)
   const runtime = validated_config.runtime
   const entrypoint = validated_config.entrypoint
@@ -40,9 +25,18 @@ export async function xink(xink_config) {
   /** @type {ModuleRunner} */
   let runner
 
-  mkdirSync(join(cwd, '.xink'), { recursive: true })
-  writeFileSync(join(cwd, '.xink/tsconfig.json'),
-    `{
+  let tsconfig_file_exists = false
+  const tsconfig_path = join(cwd, '.xink/tsconfig.json')
+
+  try {
+    statSync(tsconfig_path).isFile()
+    tsconfig_file_exists = true
+  } catch (error) {}
+
+  if (!tsconfig_file_exists) {
+    mkdirSync(join(cwd, '.xink'), { recursive: true })
+    writeFileSync(join(cwd, '.xink/tsconfig.json'),
+      `{
   "compilerOptions": {
     "paths": {
       "$lib": [
@@ -51,19 +45,26 @@ export async function xink(xink_config) {
       "$lib/*": [
         "../src/lib/*"
       ]
-    }
+    },
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    "moduleResolution": "bundler",
+    "module": "esnext",
+    "noEmit": true,
+    "target": "esnext"
   },
   "include": [
-		"../vite.config.js",
-		"../vite.config.ts",
-		"../src/**/*.js",
-		"../src/**/*.ts"
-	],
-	"exclude": [
-		"../node_modules/**"
-	]
+    "../vite.config.js",
+    "../vite.config.ts",
+    "../src/**/*.js",
+    "../src/**/*.ts"
+  ],
+  "exclude": [
+    "../node_modules/**"
+  ]
 }`
-  )
+    )
+  }
 
   return {
     name: 'vite-plugin-xink',
