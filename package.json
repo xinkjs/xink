@@ -1,0 +1,19 @@
+{
+  "name": "xk",
+  "version": "0.1.0",
+  "description": "A CLI for xink projects",
+  "license": "MIT",
+  "bin": "./dist/bin.js",
+  "type": "module",
+  "files": ["dist"],
+  "scripts": {
+    "build": "bun build --entrypoints ./bin.ts --outdir ./dist --target node"
+  },
+  "devDependencies": {
+    "@clack/prompts": "^0.9.0",
+    "commander": "^12.1.0",
+    "typescript": "^5.0.0",
+    "valibot": "^1.0.0-beta.9"
+  },
+  "keywords": ["create", "new", "xink", "project"]
+}
