@@ -55,50 +55,10 @@ export default defineConfig(async function () {
 type XinkConfig = {
   runtime: 'bun' | 'cloudflare' | 'deno';
   check_origin?: boolean; // true
-  entrypoint?: string;
+  entrypoint?: string; // (derived from runtime)
   out_dir?: string; // build
   serve_options?: { [key: string]: any; };
 }
-```
-
-For the xink plugin configuration:
-- you must provide a `runtime` value
-- `entrypoint` is optional, but should be the name of your entrypoint file. Below are the defaults for each supported runtime; so, you only need to set this if you're using a different filename. Note that these must only be filenames, not paths - your entrypoint must always be in the root directory of your project.
-  - Bun, `index.ts`
-  - Cloudflare, `index.ts`
-  - Deno, `main.ts`
-
-### `.serve()` options
-
-For Bun and Deno users, you can declare serve options in xink's plugin configuration. Any other runtimes will ignore these options. Be aware that these options are only relevant for `build` and `preview`, not `dev`.
-
-> Bun supports adding these within your entrypoint's default export, if you'd like to declare them there.
-
-```ts
-/* vite.config.js */
-import { xink } from '@xinkjs/xink'
-import { defineConfig } from 'vite'
-
-export default defineConfig(async function () {
-  return {
-    plugins: [
-      await xink({ 
-        runtime: 'bun',
-        serve_options: {
-          port: 3500
-        }
-      })
-    ]
-  }
-})
-```
-
-### tsconfig
-
-If you're using typescript, and would like to use xink's `$lib` alias to reference anything under `src/lib`, then add the below to your tsconfig.
-
-```ts
-"extends": "./.xink/tsconfig.json",
 ```
 
 ### Scripts/Tasks
@@ -113,7 +73,7 @@ Setup your package.json or deno.json scripts.
   "dev": "vite",
   "build": "vite build",
   "preview": "vite preview"
-},
+}
 ```
 
 #### Deno
@@ -130,10 +90,12 @@ Setup your package.json or deno.json scripts.
 
 ## Use
 
-In your project root, create your server's entrypoint file, e.g. `index.[js|ts]`.
+In your project root, create your server's entrypoint file; whose name should be based on the following:
+
+- Bun and Cloudflare: `index.ts`
+- Deno: `main.ts`
 
 ```ts
-/* entrypoint file */
 import { Xink } from '@xinkjs/xink'
 
 const api = new Xink()
@@ -156,9 +118,7 @@ xink supports these route exports: 'GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEA
 
 ### Route Types
 
-xink uses the [xin](https://github.com/xinkjs/xin) URL router, which was forked from @medleyjs/router. However, since xink is designed for directory-based routing, we use brackets to define special route segments for parameters, etc.
-
-xin's currently supported route types, in order of match priority:
+Currently supported route types, in order of match priority:
 - static: `/hello/there/world`
 - specific: `/hello/miss-[name]`
 - matcher: `/hello/[name=word]` (where 'word' references a function, which tests if the value of the `name` parameter matches)
@@ -181,6 +141,17 @@ export const POST = async ({ request, json }: RequestEvent) => {
 
 export default ({ request, text }: RequestEvent) => {
   return text(`Hello ${request.method}`)
+}
+```
+
+### Rest (Wildcard) Segments
+
+Because of the way the xin URL router works, the rest segment's param is accessed with `'*'`.
+
+```ts
+/* src/routes/hello/[...rest]/route.js */
+export const GET = ({ params }) => {
+  return new Response(`Hello ${params['*']}!`) // not `params.rest`
 }
 ```
 
@@ -215,17 +186,6 @@ xin provides the following built-in matchers, but they can be overridden by crea
 ```js
 /* number */
 (param) => /^\d+$/.test(param)
-```
-
-### Rest (Wildcard) Segments
-
-Because of the way the xin URL router works, the rest segment's param is accessed with `'*'`.
-
-```ts
-/* src/routes/hello/[...rest]/route.js */
-export const GET = ({ params }) => {
-  return new Response(`Hello ${params['*']}!`) // not `params.rest`
-}
 ```
 
 ## Middleware
@@ -415,6 +375,31 @@ export const handleError = (e) => {
 }
 ```
 
+## `.serve()` options
+
+For Bun and Deno users, you can declare serve options in xink's plugin configuration. Any other runtimes will ignore these options. Be aware that these options are only relevant for `build` and `preview`, not `dev`.
+
+> Bun supports adding these within your entrypoint's default export, if you'd like to declare them there.
+
+```ts
+/* vite.config.js */
+import { xink } from '@xinkjs/xink'
+import { defineConfig } from 'vite'
+
+export default defineConfig(async function () {
+  return {
+    plugins: [
+      await xink({ 
+        runtime: 'bun',
+        serve_options: {
+          port: 3500
+        }
+      })
+    ]
+  }
+})
+```
+
 ## Setting Headers
 
 `event.setHeaders`
@@ -479,10 +464,14 @@ export {}
 
 ## Import Aliases
 
-- Use `$lib` for importing from `src/lib`, instead of having to deal with things like `../../utils.ts`. This requires extending your tsconfig.json file; see [doc](#tsconfig) for setup.
-  ```js
-  import { thing } from '$lib/utils.ts'
-  ```
+Use `$lib` for importing from `src/lib`, instead of having to deal with things like `../../utils.ts`. This requires extending your tsconfig.json file.
+
+```ts
+"extends": "./.xink/tsconfig.json",
+```
+```js
+import { thing } from '$lib/utils.ts'
+```
 
 ## Helper Functions
 
