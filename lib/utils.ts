@@ -142,7 +142,7 @@ export const GET = ({ text }: RequestEvent) => {
     ` : `${language === 'checkjs' ? 
         `/**
  * 
- * @param {RequestEvent} event 
+ * @param {import('@xinkjs/xink').RequestEvent} event 
  * @returns {Response}
  */
 `
