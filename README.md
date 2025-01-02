@@ -6,10 +6,11 @@ We're currently in the alpha phase of development and welcome contributions. Ple
 
 ## Why use xink?
 
-- [x] Each API endpoint is well organized based on it's directory path and single route file.
-- [x] Standard handler-function names (e.g. GET, POST) free you from a lot of naming work.
-- [x] Simple data validation with your favorite library.
-- [x] Easy setup with our `xk` CLI tool.
+- Each endpoint is well organized based on it's directory path and single route file.
+- Standard handler names (e.g. GET, POST) free you from a lot of naming work.
+- Simple data validation with your favorite library.
+- Easy setup with our `xk` CLI tool.
+- Native handling of 404 and 405 (Method Not Allowed) responses.
 
 ## Wishlist
 
@@ -79,6 +80,8 @@ export const GET = ({ params }) => {
 You can think of these as validators for route parameter segments (`params`). This feature came before [validators](#validation); you don't need to use both to validate your params. However, one advantage of a matcher is that it can be defined once and used for as many routes as you'd like.
 
 You can validate route params by creating files in `src/params`. Each file in this directory needs to export a `match` function that takes in a string and returns a boolean. When `true` is returned, the param matches and the router either continues to try and match the rest of the route or returns the route if this is the last segment. Returning `false` indicates the param does not match, and the router keeps searching for a route.
+
+This feature does not populate `event.valid`, like validators does.
 
 ```ts
 /* src/params/fruits.ts */
@@ -159,28 +162,36 @@ const second: Handle = (event, resolve) => {
 export const handle: Handle = sequence(first, second)
 ```
 
-## Route Hooks
+## Hooks
 
-You can define hooks for each endpoint. These are called after global middleware but before the route handler. Validation also happens before these are called, so you have access to validated data (see next section).
+You can define hooks for each route, which are run for any valid method for the route. They are called after global middleware but before the route handler. Validation also happens before they are called, so you have access to validated data (see next section).
 
 The `HOOKS` export must be a function, which returns an object of hooks. This is a library preference that ensures all route exports are functions.
 
 - access to `event`; if you change it, then you must return it.
 - if not returning `event`, you must return `null`.
 - no access to the response.
-- can by sync or async functions.
+- functions can be sync or async.
 - are not guaranteed to run in any particular order.
 
 ```ts
 /* src/routes/route.ts */
 import logger from 'pino'
 
-export const GET = () => { return new Response('Hello') }
+export const GET = (event) => { 
+  console.log(event.locals.state.some) // thing
+  return new Response('Hello GET') 
+}
+
+export const POST = (event) => { 
+  console.log(event.locals.state.some) // thing
+  return new Response('Hello POST') 
+}
 
 export const HOOKS = () => {
   return {
     state: (event: RequestEvent) => {
-      event.locals.state = { some: 'state' }
+      event.locals.state = { some: 'thing' }
 
       return event
     },
@@ -203,7 +214,7 @@ export const HOOKS = () => {
 
 Validate incoming route data for types `form`, `json`, route `params`, or `query` search params. Validated data is available as an object within `event.valid.[form|json|params|query]`.
 
-Your validators are part of hooks. For each handler, define a function that returns an object of validated data for the data type. Any thrown errors can be handled by `handleError()` (see further below).
+Your validators are defined in `HOOKS`. For each handler, define a function that returns an object of validated data for the data type. Any thrown errors can be handled by `handleError()` (see further below).
 
 In the Zod example below, only json data, which matches your schema, will be available in `event.valid.json`; in this case, for POST requests.
 
@@ -247,7 +258,7 @@ Instead of using a validation library, you can also define a normal function wit
 
 > We clone the request during validation. This allows you to access the original request body within route handlers, if desired.
 
-### Using types with validation
+### Validation with types
 
 ```js
 import * as v from 'valibot'
@@ -273,7 +284,7 @@ export const HOOKS = () => {
 
 export const POST = async (event: RequestEvent<PostTypes>) => {
   const valid_json = event.valid.json
-  // IDE autocomplete for "hello" and "goodbye" via valid_json.
+  // IDE autocomplete/types for "hello" and "goodbye", within valid_json.
 
   /* Do something and return a response. */
 }
@@ -294,29 +305,40 @@ export const handleError = (e) => {
 }
 ```
 
-## `.serve()` options
+## Helper Functions
 
-For Bun and Deno users, you can declare serve options in xink's plugin configuration. Any other runtimes will ignore these options. Be aware that these options are only relevant for `build` and `preview`, not `dev`.
+All helper functions are available within `event` but can also be top-level imported if needed.
 
-> Bun supports adding these within your entrypoint's default export, if you'd like to declare them there.
+### html
+Returns an html response. It sends a `Content-Length` header and a `Content-Type` header of `text/html`.
+```js
+export const GET = (event) => { 
+  return event.html(`<div>You chose ${event.params.fruit}</div>`)
+}
+```
 
-```ts
-/* vite.config.js */
-import { xink } from '@xinkjs/xink'
-import { defineConfig } from 'vite'
+### text
+Returns a text response. By default, it sends a `Content-Length` header and a `Content-Type` header of `text/plain`.
+```js
+export const GET = (event) => {
+  return event.text(`Hello World!`)
+}
+```
 
-export default defineConfig(async function () {
-  return {
-    plugins: [
-      await xink({ 
-        runtime: 'bun',
-        serve_options: {
-          port: 3500
-        }
-      })
-    ]
-  }
-})
+### json
+Returns a json response. By default, it sends a `Content-Length` header and a `Content-Type` header of `application/json`.
+```js
+export const GET = (event) => {
+  return event.json({ hello: 'world' })
+}
+```
+
+### redirect
+Returns a redirect response.
+```js
+export const GET = (event) => {
+  return event.redirect(status: number, location: string)
+}
 ```
 
 ## Setting Headers
@@ -381,6 +403,43 @@ declare global {
 export {}
 ```
 
+## 404 and 405 handling
+
+If a requested route does not exit, a 404 is returned.
+
+If a requested route exists but there is no matching or default method, a 405 is returned with an `Allow` header indicating the available methods.
+
+## etag handling
+
+If a request header of `if-none-match` exists and matches the response `etag` header, a 304 is returned with the following headers (if they exist on the response):
+
+`cache-control`, `content-location`, `date`, `expires`, `set-cookie`, `vary`
+
+## `.serve()` options
+
+For Bun and Deno users, you can declare serve options in xink's plugin configuration. Any other runtimes will ignore these options. Be aware that these options are only relevant for `build` and `preview`, not `dev`.
+
+> Bun supports adding these within your entrypoint's default export, if you'd like to declare them there.
+
+```ts
+/* vite.config.js */
+import { xink } from '@xinkjs/xink'
+import { defineConfig } from 'vite'
+
+export default defineConfig(async function () {
+  return {
+    plugins: [
+      await xink({ 
+        runtime: 'bun',
+        serve_options: {
+          port: 3500
+        }
+      })
+    ]
+  }
+})
+```
+
 ## Import Aliases
 
 Use `$lib` for importing from `src/lib`, instead of having to deal with things like `../../utils.ts`. This requires extending your tsconfig.json file. If you used the `xk` CLI tool to create your project, this should already be done for you.
@@ -390,42 +449,6 @@ Use `$lib` for importing from `src/lib`, instead of having to deal with things l
 ```
 ```js
 import { thing } from '$lib/utils.ts'
-```
-
-## Helper Functions
-
-All helper functions are available within `event` but can also be top-level imported if needed.
-
-### html
-Returns an html response. It sends a `Content-Length` header and a `Content-Type` header of `text/html`.
-```js
-export const GET = (event) => { 
-  return event.html(`<div>You chose ${event.params.fruit}</div>`)
-}
-```
-
-### text
-Returns a text response. By default, it sends a `Content-Length` header and a `Content-Type` header of `text/plain`.
-```js
-export const GET = (event) => {
-  return event.text(`Hello World!`)
-}
-```
-
-### json
-Returns a json response. By default, it sends a `Content-Length` header and a `Content-Type` header of `application/json`.
-```js
-export const GET = (event) => {
-  return event.json({ hello: 'world' })
-}
-```
-
-### redirect
-Returns a redirect response.
-```js
-export const GET = (event) => {
-  return event.redirect(status: number, location: string)
-}
 ```
 
 ## Cloudflare Workers
@@ -472,7 +495,6 @@ export default {
 ## Additional Features
 
 - CSRF protection: checks content type and origin ([ref](https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html#disallowing-simple-content-types)). If you don't want this, set `check_origin` to `false` in the xink plugin configuration.
-- etag helper: returns 304 with no body, instead of 200 with body, if request etag equals response etag.
 
 ## Types
 
