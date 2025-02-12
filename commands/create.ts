@@ -97,7 +97,7 @@ export const create = new Command('create')
                 }
             }
         )
-        console.log('dir', directory)
+
         project_path = path.resolve(directory)
 
         createXink(project_path, runtime, language)
