@@ -22,7 +22,7 @@ export const createXink = (project_path: string, runtime: string, language: stri
 }
 ` :
     `{
-    "name": "${project_path.split('/').at(-1)}",
+    "name": "~TODO~",
     "version": "0.0.0",
     "type": "module",
     "scripts": {
@@ -130,7 +130,7 @@ export default defineConfig(async function () {
     )
 
     /* Create package file. */
-    writeFileSync(join(project_path, package_file), package_contents)
+    writeFileSync(join(project_path, package_file), package_contents.replace(/~TODO~/g, project_path.split("/").at(-1) || "package-name"))
 
     /* Create routes directory and example route. */
     const route_contents = language === 'typescript' ?
