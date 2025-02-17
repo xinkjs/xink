@@ -32,9 +32,23 @@ npx xk create my-api
 
 Routes are created in `src/routes`. Each directory under this path represents a route segment.
 
-At the end of a route path, a javascript or typescript `route` file should export one or more functions for each HTTP method it will serve. You can also define a default export, for any unhandled request methods.
+At the end of a route path, a javascript or typescript `route` file should export one or more functions for each HTTP method it will serve. You can also define a default export, for any unhandled request methods. A route will not be registered unless this file exists.
 
-xink supports these route exports: 'GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS', 'default'
+xink supports these route handler exports: 'GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS', 'default'
+
+```ts
+/* route endpoint example, src/routes/route.ts */
+import type { RequestEvent } from '@xinkjs/xink'
+
+export const GET = (event: RequestEvent) => {
+  return event.text('Welcome to xink!')
+}
+
+/* handle all other http methods */
+export default (event: RequestEvent) => {
+  return event.json({ message: `Hello ${event.method}!` })
+}
+```
 
 ### Route Types
 
@@ -49,18 +63,10 @@ Currently supported route types, in order of match priority:
 /* src/routes/blog/[article]/route.ts */
 import { type RequestEvent } from '@xinkjs/xink'
 
-export const GET = async ({ params, text }: RequestEvent) => {
+export const GET = async ({ params, html }: RequestEvent) => {
   const article = await getArticle(params.article)
 
-  return text(`You asked for ${article.title}`)
-}
-
-export const POST = async ({ request, json }: RequestEvent) => {
-  return json(await request.json())
-}
-
-export default ({ request, text }: RequestEvent) => {
-  return text(`Hello ${request.method}`)
+  return html(article)
 }
 ```
 
@@ -178,16 +184,6 @@ The `HOOKS` export must be a function, which returns an object of hooks. This is
 /* src/routes/route.ts */
 import logger from 'pino'
 
-export const GET = (event) => { 
-  console.log(event.locals.state.some) // thing
-  return new Response('Hello GET') 
-}
-
-export const POST = (event) => { 
-  console.log(event.locals.state.some) // thing
-  return new Response('Hello POST') 
-}
-
 export const HOOKS = () => {
   return {
     state: (event: RequestEvent) => {
@@ -207,6 +203,16 @@ export const HOOKS = () => {
       return event
     }
   }
+}
+
+export const GET = (event) => { 
+  console.log(event.locals.state.some) // thing
+  return new Response('Hello GET') 
+}
+
+export const POST = (event) => { 
+  console.log(event.locals.state.some) // thing
+  return new Response('Hello POST') 
 }
 ```
 
@@ -415,7 +421,37 @@ If a request header of `if-none-match` exists and matches the response `etag` he
 
 `cache-control`, `content-location`, `date`, `expires`, `set-cookie`, `vary`
 
-## `.serve()` options
+## Configuration
+
+You can set these in the plugin's configuration.
+
+```ts
+type XinkConfig = {
+  runtime: 'bun' | 'cloudflare' | 'deno';
+  check_origin?: boolean;
+  entrypoint?: string; 
+  out_dir?: string;
+  serve_options?: { [key: string]: any; }; // for Bun and Deno users (see next section)
+}
+```
+```ts
+/* vite.config.js */
+import { xink } from '@xinkjs/xink'
+import { defineConfig } from 'vite'
+
+export default defineConfig(async function () {
+  return {
+    plugins: [
+      await xink({ 
+        runtime: 'bun',
+        entrypoint: 'server.js'
+      })
+    ]
+  }
+})
+```
+
+### `.serve()` options
 
 For Bun and Deno users, you can declare serve options in xink's plugin configuration. Any other runtimes will ignore these options. Be aware that these options are only relevant for `build` and `preview`, not `dev`.
 
@@ -439,6 +475,18 @@ export default defineConfig(async function () {
   }
 })
 ```
+
+## Build
+
+To build your app, run the relevant command per runtime:
+
+- `bun run build`
+- `deno task build`
+- `npm run build`
+
+## Deploy
+
+For Cloudflare, you can deploy your api with `npm run deploy`.
 
 ## Import Aliases
 
