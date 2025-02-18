@@ -75,6 +75,8 @@ export class Xink {
   init(): Promise<void>;
 }
 
+export function isSchemaError(error: unknown): boolean;
+
 /* STANDARD SCHEMA */
 /** The Standard Schema interface. */
 export interface StandardSchemaV1<Input = unknown, Output = Input> {
