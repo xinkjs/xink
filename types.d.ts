@@ -75,7 +75,11 @@ export class Xink {
   init(): Promise<void>;
 }
 
-export function isSchemaError(error: unknown): boolean;
+export class StandardSchemaError extends Error {
+  constructor(message?: string, options?: ErrorOptions) {
+    super(message, options)
+  }
+};
 
 /* STANDARD SCHEMA */
 /** The Standard Schema interface. */
