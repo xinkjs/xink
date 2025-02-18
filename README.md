@@ -300,6 +300,7 @@ export const POST = async (event: RequestEvent<PostTypes>) => {
 
 If you need to handle thrown errors separately, especially for errors from validation libraries, create an `error.[ts|js]` file in `src`, that exports a `handleError` function. This can also be used to handle other errors not caught by a try/catch.
 
+### Validator Errors
 ```ts
 /* src/error.ts */
 import { json } from "@xinkjs/xink"
@@ -308,6 +309,24 @@ import { ZodError } from "zod"
 export const handleError = (e) => {
   if (e instanceof ZodError)
     return json({ data: null, error: e })
+}
+```
+
+### Standard Schema Errors
+```ts
+import { json, isSchemaError } from "@xinkjs/xink"
+
+export const handleError = (e: any) => {
+  if (isSchemaError(e))
+    return json({ 
+      data: null, 
+      error: JSON.parse(e.message) 
+    })
+
+  return json({ 
+    data: null, 
+    error: e.message 
+  })
 }
 ```
 
