@@ -8,15 +8,15 @@
   "dependencies": {
     "@xinkjs/xin": "^0.3.2",
     "cookie": "^1.0.2",
-    "glob": "^11.0.0",
-    "magic-string": "^0.30.14",
+    "glob": "^11.0.1",
+    "magic-string": "^0.30.17",
     "set-cookie-parser": "^2.7.1",
     "stringify-object": "^5.0.0"
   },
   "devDependencies": {
     "@types/bun": "latest",
-    "vite": "^6.0.3",
-    "vitest": "^2.1.8"
+    "vite": "^6.1.0",
+    "vitest": "^2.1.9"
   },
   "peerDependencies": {
     "vite": "^6.0.0"
