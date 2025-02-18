@@ -222,6 +222,8 @@ Validate incoming route data for types `form`, `json`, route `params`, or `query
 
 Your validators are defined in `HOOKS`. For each handler, define a function that returns an object of validated data for the data type. Any thrown errors can be handled by `handleError()` (see further below).
 
+### Using Validators
+
 In the Zod example below, only json data, which matches your schema, will be available in `event.valid.json`; in this case, for POST requests.
 
 ```js
@@ -264,7 +266,7 @@ Instead of using a validation library, you can also define a normal function wit
 
 > We clone the request during validation. This allows you to access the original request body within route handlers, if desired.
 
-### Validation with types
+### With Types
 
 ```js
 import * as v from 'valibot'
@@ -296,11 +298,53 @@ export const POST = async (event: RequestEvent<PostTypes>) => {
 }
 ```
 
+### Using Standard Schema
+
+> Please see https://standardschema.dev for background.
+
+You can only use SCHEMAS when using a validation library that is Standard Schema compliant. It works almost exactly the same as VALIDATORS except you just pass your schemas, and also name the hook differently. You can use types with this as well.
+
+```js
+/* src/routes/route.js */
+import * as v from 'valibot'
+
+const SCHEMAS = {
+  POST: {
+    json: v.object({
+      hello: v.string(),
+      goodbye: v.number()
+    })
+  }
+}
+
+export const HOOKS = () => {
+  return {
+    SCHEMAS,
+    someHookFn: () => null
+  }
+}
+
+/**
+ * Assuming the following json is passed in:
+ * {
+ *    hello: 'world',
+ *    goodbye: 42,
+ *    cya: 'later'
+ * }
+ */
+export const POST = async (event) => {
+  const received_json = event.valid.json
+  // { hello: 'world', goodbye: 42 } }
+
+  /* Do something and return a response. */
+}
+```
+
 ## Handling Errors
 
 If you need to handle thrown errors separately, especially for errors from validation libraries, create an `error.[ts|js]` file in `src`, that exports a `handleError` function. This can also be used to handle other errors not caught by a try/catch.
 
-### Validator Errors
+### VALIDATORS Errors
 ```ts
 /* src/error.ts */
 import { json } from "@xinkjs/xink"
@@ -312,17 +356,18 @@ export const handleError = (e) => {
 }
 ```
 
-### Standard Schema Errors
+### SCHEMAS Errors
 ```ts
-import { json, isSchemaError } from "@xinkjs/xink"
+import { json, StandardSchemaError } from "@xinkjs/xink"
 
 export const handleError = (e: any) => {
-  if (isSchemaError(e))
+  if (e instanceof StandardSchemaError)
     return json({ 
       data: null, 
-      error: JSON.parse(e.message) 
+      error: JSON.parse(e.message) // use JSON.parse to return as an array
     })
 
+  /* Handle other errors. */
   return json({ 
     data: null, 
     error: e.message 
