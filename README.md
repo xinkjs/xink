@@ -1,6 +1,6 @@
 # @xinkjs/xink
 
-xink is a directory-based filesystem router for APIs, and a Vite plugin. Under the hood, it uses a trie URL router, which is fast and scalable. Supports the bun, deno, and cloudflare workers runtime.
+xink is a directory-based filesystem router for APIs, and a Vite plugin. Under the hood, it uses a trie URL router, which is fast and scalable. Supports the bun and deno runtime.
 
 We're currently in the alpha phase of development and welcome contributions. Please see our contributing guide.
 
@@ -168,40 +168,36 @@ const second: Handle = (event, resolve) => {
 export const handle: Handle = sequence(first, second)
 ```
 
-## Hooks
+## Developer Hooks
 
 You can define hooks for each route, which are run for any valid method for the route. They are called after global middleware but before the route handler. Validation also happens before they are called, so you have access to validated data (see next section).
 
-The `HOOKS` export must be a function, which returns an object of hooks. This is a library preference that ensures all route exports are functions.
-
-- access to `event`; if you change it, then you must return it.
-- if not returning `event`, you must return `null`.
-- no access to the response.
-- functions can be sync or async.
-- are not guaranteed to run in any particular order.
+- Have access to `Request`.
+- Do not have access to `Response`.
+- Must return either `null` or `event`. If `event` is changed, it needs to be returned in order to access to it in handlers.
+- Functions can be sync or async.
+- Are not guaranteed to run in any particular order.
 
 ```ts
 /* src/routes/route.ts */
 import logger from 'pino'
 
-export const HOOKS = () => {
-  return {
-    state: (event: RequestEvent) => {
-      event.locals.state = { some: 'thing' }
+export const HOOKS = {
+  state: (event: RequestEvent) => {
+    event.locals.state = { some: 'thing' }
 
-      return event
-    },
-    log: () => {
-      logger().info('Hello from Pino!')
+    return event
+  },
+  log: () => {
+    logger().info('Hello from Pino!')
 
-      return null
-    },
-    poki: async (event: RequestEvent) => {
-      const res = await fetch('https://pokeapi.co/api/v2/pokemon/pikachu')
-      event.locals.poki = await res.json()
+    return null
+  },
+  poki: async (event: RequestEvent) => {
+    const res = await fetch('https://pokeapi.co/api/v2/pokemon/pikachu')
+    event.locals.poki = await res.json()
 
-      return event
-    }
+    return event
   }
 }
 
@@ -218,11 +214,13 @@ export const POST = (event) => {
 
 ## Validation
 
-Validate incoming route data for types `form`, `json`, route `params`, or `query` search params. Validated data is available as an object within `event.valid.[form|json|params|query]`.
+Validate incoming route data for types `form`, `json`, route `params`, or `query` search params. Validated data is available as an object within `event.valid`.
 
-Your validators are defined in `HOOKS`. For each handler, define a function that returns an object of validated data for the data type. Any thrown errors can be handled by `handleError()` (see further below).
+Any thrown errors can be handled by `handleError()` (see further below).
 
 ### Using Validators
+
+`VALIDATORS` is a built-in `HOOKS` object. For each route handler and data type, you can define a function that returns an object of validated data. 
 
 In the Zod example below, only json data, which matches your schema, will be available in `event.valid.json`; in this case, for POST requests.
 
@@ -239,11 +237,9 @@ const VALIDATORS = {
   }
 }
 
-export const HOOKS = () => {
-  return {
-    VALIDATORS,
-    someHookFn: () => null
-  }
+export const HOOKS = {
+  VALIDATORS,
+  someHook: () => null
 }
 
 /**
@@ -255,7 +251,7 @@ export const HOOKS = () => {
  * }
  */
 export const POST = async (event) => {
-  const received_json = event.valid.json
+  console.log(event.valid.json)
   // { hello: 'world', goodbye: 42 } }
 
   /* Do something and return a response. */
@@ -286,13 +282,13 @@ const VALIDATORS: Validators = {
   }
 }
 
-export const HOOKS = () => {
-  return { VALIDATORS }
+export const HOOKS = {
+  VALIDATORS
 }
 
 export const POST = async (event: RequestEvent<PostTypes>) => {
+  // IDE autocomplete/types for "hello" and "goodbye" for event.valid.json.
   const valid_json = event.valid.json
-  // IDE autocomplete/types for "hello" and "goodbye", within valid_json.
 
   /* Do something and return a response. */
 }
@@ -300,9 +296,9 @@ export const POST = async (event: RequestEvent<PostTypes>) => {
 
 ### Using Standard Schema
 
-> Please see https://standardschema.dev for background.
+`SCHEMAS` is a built-in `HOOKS` object. For each route handler and data type, you can define a schema for validated data. You can only use SCHEMAS when using a validation library that is Standard Schema compliant. You can use types with this as well.
 
-You can only use SCHEMAS when using a validation library that is Standard Schema compliant. It works almost exactly the same as VALIDATORS except you just pass your schemas, and also name the hook differently. You can use types with this as well.
+> Please see https://standardschema.dev for background.
 
 ```js
 /* src/routes/route.js */
@@ -317,11 +313,9 @@ const SCHEMAS = {
   }
 }
 
-export const HOOKS = () => {
-  return {
-    SCHEMAS,
-    someHookFn: () => null
-  }
+export const HOOKS = {
+  SCHEMAS,
+  someHook: () => null
 }
 
 /**
@@ -333,7 +327,7 @@ export const HOOKS = () => {
  * }
  */
 export const POST = async (event) => {
-  const received_json = event.valid.json
+  console.log(event.valid.json)
   // { hello: 'world', goodbye: 42 } }
 
   /* Do something and return a response. */
@@ -659,14 +653,14 @@ interface RequestEvent<V extends AllowedValidatorTypes = AllowedValidatorTypes> 
 }
 
 interface Validators {
-  GET?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'query'>;
-  POST?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'query'>;
-  PUT?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'query'>;
-  PATCH?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'query'>;
-  DELETE?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'query'>;
-  HEAD?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'query'>;
-  OPTIONS?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'query'>;
-  default?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'query'>;
+  GET?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'params' | 'query'>;
+  POST?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'params' | 'query'>;
+  PUT?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'params' | 'query'>;
+  PATCH?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'params' | 'query'>;
+  DELETE?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'params' | 'query'>;
+  HEAD?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'params' | 'query'>;
+  OPTIONS?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'params' | 'query'>;
+  default?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'params' | 'query'>;
 }
 ```
 
