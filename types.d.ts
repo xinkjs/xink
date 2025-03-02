@@ -1,4 +1,4 @@
-import type { Store, Params } from "@xinkjs/xin"
+import type { Store, Params, Router } from "@xinkjs/xin"
 import type { SerializeOptions, ParseOptions } from "cookie"
 import type { Plugin } from 'vite'
 
@@ -24,8 +24,10 @@ export type Cookies = {
   getAll(options?: ParseOptions): Array<{ name: string, value: string }>;
   set(name: string, value: string, options?: SerializeOptions): void;
 }
+export type ErrorHandler = (error: unknown, event?: RequestEvent) => MaybePromise<Response | void>;
 export type Handle = (event: RequestEvent, resolve: ResolveEvent) => MaybePromise<Response>;
 export type MaybePromise<T> = T | Promise<T>;
+export type Middleware = (event: RequestEvent, resolve: ResolveEvent) => MaybePromise<Response>;
 export interface RequestEvent<V extends AllowedValidatorTypes = AllowedValidatorTypes> {
   cookies: Cookies;
   ctx: Context;
@@ -69,10 +71,20 @@ export function json(data: any, init?: ResponseInit | undefined): Response;
 export function redirect(status: number, location: string): never;
 export function text(data: string, init?: ResponseInit | undefined): Response;
 export function sequence(...handlers: Handle[]): Handle;
-export class Xink {
+export class Xink extends Router {
   constructor()
   fetch(request: Request, env?: Env.Bindings, ctx?: Context): Promise<Response>;
   init(): Promise<void>;
+  openapi(metadata: { 
+    path: string; 
+    data?: {
+      "openapi": string;
+      "info": {
+        "title": string;
+        "version": string;
+      }
+    }
+  }): void;
 }
 
 export class StandardSchemaError extends Error {
