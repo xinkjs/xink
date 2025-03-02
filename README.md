@@ -42,7 +42,6 @@ If you'd like to set a basepath for your entire API, you can do so in your proje
 ```ts
 /* e.g. index.ts */
 import { Xink } from "@xinkjs/xink"
-import type { Env } from "./src/api.d.ts"
 
 const api = new Xink()
 
