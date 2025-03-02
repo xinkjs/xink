@@ -74,7 +74,7 @@ export function sequence(...handlers: Handle[]): Handle;
 export class Xink extends Router {
   constructor()
   fetch(request: Request, env?: Env.Bindings, ctx?: Context): Promise<Response>;
-  init(): Promise<void>;
+  init(basepath?: string): Promise<void>;
   openapi(metadata: { 
     path: string; 
     data?: {
