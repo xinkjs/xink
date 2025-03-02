@@ -197,11 +197,11 @@ export const handle: Handle = sequence(first, second)
 
 ## Developer Hooks
 
-You can define hooks for each route, which are run for any valid method for the route. They are called after global middleware but before the route handler. Validation also happens before they are called, so you have access to validated data (see next section).
+You can define hooks for each route, with the `HOOKS` export. They are run for any configured method for a route, including the `default` export. They are called after global middleware but before the route handler. Validation also happens before they are called, so you have access to validated data (see next section).
 
 - Have access to `Request`.
 - Do not have access to `Response`.
-- Must return either `null` or `event`. If `event` is changed, it needs to be returned in order to access to it in handlers.
+- Must return either `null` or `event`. If `event` is changed, it needs to be returned in order to access it in handlers.
 - Functions can be sync or async.
 - Are not guaranteed to run in any particular order.
 
@@ -578,7 +578,7 @@ export default {
 
 ## 404 and 405 handling
 
-If a requested route does not exit, a 404 is returned.
+If a requested route does not exist, a 404 is returned.
 
 If a requested route exists but there is no matching or default method, a 405 is returned with an `Allow` header indicating the available methods.
 
