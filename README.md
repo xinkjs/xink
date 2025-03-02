@@ -2,7 +2,7 @@
 
 xink is a directory-based filesystem router for APIs, acting as a Vite plugin. Under the hood, it uses a trie URL router, which is fast and scalable.
 
-Supports the bun and deno runtimes, but be aware that we currently rely on access to the filesystem during runtime initialization. We have some documentation for Cloudflare Workers here, but it's not supported yet.
+It supports the bun and deno runtimes; but be aware that we currently rely on access to the filesystem during runtime initialization, so we don't currently support edge environments. We have some documentation for Cloudflare Workers here, but it's also not supported yet.
 
 We're currently in the alpha phase of development and welcome contributions. Please see our contributing guide.
 
@@ -11,7 +11,8 @@ We're currently in the alpha phase of development and welcome contributions. Ple
 - Each endpoint is well organized based on it's directory path and single route file.
 - Standard handler names (e.g. GET, POST) free you from a lot of naming work.
 - Simple data validation with your favorite library.
-- Easy setup with our `xk` CLI tool.
+- Easy OpenAPI integration.
+- No-fuss setup with our `xk` CLI tool.
 - Native handling of 404 and 405 (Method Not Allowed) responses.
 
 ## Wishlist
@@ -21,7 +22,7 @@ We're currently in the alpha phase of development and welcome contributions. Ple
 - [x] Config Vitest tests
 - [ ] API Vitest tests
 - [x] CLI tool to setup project
-- [ ] docs site
+- [ ] Official docs site
 - [ ] Publish to JSR?
 - [x] OpenAPI integration?
 
@@ -33,9 +34,10 @@ npx xk create my-api
 
 ### Basepath
 
-If you'd like to set a basepath for your entire API, you can do so in your project's entrypoint file.
+If you'd like to set a basepath for your entire API, you can do so in your project's entrypoint file. This must be a string that begins with a forward slash (`/`).
 
 ```ts
+/* e.g. index.ts */
 import { Xink } from "@xinkjs/xink"
 import type { Env } from "./src/api.d.ts"
 
@@ -45,8 +47,8 @@ api.path('/api')
 await api.init()
 
 export default {
-  fetch(req: Request, env: Env.Bindings) {
-    return api.fetch(req, env)
+  fetch(req: Request) {
+    return api.fetch(req)
   }
 }
 ```
@@ -55,9 +57,9 @@ export default {
 
 Routes are created in `src/routes`. Each directory under this path represents a route segment.
 
-At the end of a route path, a javascript or typescript `route` file should export one or more functions for each HTTP method it will serve. You can also define a default export, for any unhandled request methods. A route will not be registered unless this file exists.
+At the end of a route path, a javascript or typescript `route` file should export one or more functions. These functions are named based on the HTTP method they serve. You can also define a default export, for any unhandled request methods. A route will not be registered unless this file exists.
 
-xink supports these route handler exports: 'GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS', 'default'
+xink supports these route handler exports: `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, `HEAD`, `OPTIONS`, `default`
 
 ```ts
 /* route endpoint example, src/routes/route.ts */
@@ -77,7 +79,7 @@ export default (event: RequestEvent) => {
 
 Currently supported route types, in order of match priority:
 - static: `/hello/there/world`
-- specific: `/hello/miss-[name]`
+- specific: `/hello/miss-[name]` (combo of static and dynamic segment)
 - matcher: `/hello/[name=word]` (where 'word' references a function, which tests if the value of the `name` parameter matches)
 - dynamic: `/hello/[name]`
 - rest: `/hello/[...rest]` (essentially a wildcard, but must be at the end of a route)
@@ -237,7 +239,7 @@ export const POST = (event) => {
 
 ## Validation
 
-Validate incoming route data for types `form`, `json`, route `params`, or `query` search params. Validated data is available as an object within `event.valid`.
+Validate incoming route data for types `form`, `json`, route `params`, or `query` search params. Validated data is available as an object within `event.valid`. You can validate using either validator functions or schemas.
 
 Any thrown errors can be handled by `handleError()` (see further below).
 
@@ -245,7 +247,7 @@ Any thrown errors can be handled by `handleError()` (see further below).
 
 `VALIDATORS` is a built-in `HOOKS` object. For each route handler and data type, you can define a function that returns an object of validated data. 
 
-In the Zod example below, only json data, which matches your schema, will be available in `event.valid.json`; in this case, for POST requests.
+In the Zod example below, only json data which matches your schema, will be available in `event.valid.json`; in this case, for POST requests.
 
 ```js
 /* src/routes/route.js */
@@ -256,13 +258,13 @@ const VALIDATORS = {
     json: (z.object({
       hello: z.string(),
       goodbye: z.number()
-    })).parse
+    })).parse // notice we pass a parse function, not just the schema.
   }
 }
 
 export const HOOKS = {
   VALIDATORS,
-  someHook: () => null
+  someOtherHook: () => null
 }
 
 /**
@@ -285,7 +287,7 @@ Instead of using a validation library, you can also define a normal function wit
 
 > We clone the request during validation. This allows you to access the original request body within route handlers, if desired.
 
-### With Types
+#### Validators With Types
 
 ```js
 import * as v from 'valibot'
@@ -319,9 +321,7 @@ export const POST = async (event: RequestEvent<PostTypes>) => {
 
 ### Using Standard Schema
 
-`SCHEMAS` is a built-in `HOOKS` object. For each route handler and data type, you can define a schema for validated data. You can only use SCHEMAS when using a validation library that is Standard Schema compliant. You can use types with this as well.
-
-> Please see https://standardschema.dev for background.
+`SCHEMAS` is a built-in `HOOKS` object. For each route handler and data type, you can define a schema to validate data. You can only use SCHEMAS when using a validation library that is [Standard Schema](https://standardschema.dev) compliant. You can use types with this as well.
 
 ```js
 /* src/routes/route.js */
@@ -338,7 +338,7 @@ const SCHEMAS = {
 
 export const HOOKS = {
   SCHEMAS,
-  someHook: () => null
+  someOtherHook: () => null
 }
 
 /**
@@ -361,7 +361,7 @@ export const POST = async (event) => {
 
 If you need to handle thrown errors separately, especially for errors from validation libraries, create an `error.[ts|js]` file in `src`, that exports a `handleError` function. This can also be used to handle other errors not caught by a try/catch.
 
-### VALIDATORS Errors
+### for VALIDATORS Errors
 ```ts
 /* src/error.ts */
 import { json } from "@xinkjs/xink"
@@ -373,7 +373,7 @@ export const handleError = (e) => {
 }
 ```
 
-### SCHEMAS Errors
+### for SCHEMAS Errors
 ```ts
 import { json, StandardSchemaError } from "@xinkjs/xink"
 
@@ -422,7 +422,7 @@ export const GET = (event) => {
 
 ### redirect
 Returns a redirect response.
-```js
+```ts
 export const GET = (event) => {
   return event.redirect(status: number, location: string)
 }
@@ -432,7 +432,7 @@ export const GET = (event) => {
 
 `event.setHeaders`
 
-> You cannot set cookies using this method, but rather with [`event.cookies`](#cookie-handling).
+> You cannot set cookies using this method; instead, use [`event.cookies`](#cookie-handling).
 
 ```js
 /* src/routes/route.js */
@@ -549,7 +549,7 @@ export const OPENAPI = {
 Then, within your project's entrypoint file, define your desired path to the OpenAPI docs, and any optional metadata. When the router is started, you can visit the reference docs in a browser - e.g. http://localhost:3000/reference
 
 ```ts
-/* project root index.ts or other entrypoint variation */
+/* e.g. index.ts */
 import { Xink } from "@xinkjs/xink"
 
 const api = new Xink()
@@ -559,7 +559,7 @@ api.openapi({
   data: { 
     "openapi": "3.1.0",
     "info": {
-      "title": "Xi API",
+      "title": "Xink API",
       "version": "0.0.0"
     }
   }
