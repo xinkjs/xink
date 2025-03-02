@@ -1,4 +1,4 @@
-/** @import { ErrorHandler, Handler, Matcher, MatcherFn, MatcherType, Middleware, Node, Params, ParametricNode, Route, Router, Store, StoreFactory } from './types.d.ts' */
+/** @import { Handler, Matcher, MatcherFn, MatcherType, Node, Params, ParametricNode, Route, Router, Store, StoreFactory } from './types.js' */
 
 /**
  * 
@@ -223,10 +223,6 @@ export class Router {
   #matchers
   /** @type {Map<string, Matcher>} */
   #default_matchers
-  /** @type {Middleware | null} */
-  #middleware = null
-  /** @type {ErrorHandler | null} */
-  #error_handler = null
 
   /**
    * @param {Object} RouterArgs
@@ -280,44 +276,6 @@ export class Router {
     const matcher = this.#matchers.get(type) ?? this.#default_matchers.get(type) ?? null
 
     return matcher
-  }
-
-  /**
-   * Sets the middleware function.
-   * 
-   * This must be a singular function, but in theory it could run multiple functions itself.
-   * 
-   * @param {Middleware} handle 
-   */
-  setMiddleware(handle) {
-    this.#middleware = handle
-  }
-
-  /**
-   * Returns the middleware function.
-   * 
-   * @returns {Middleware | null}
-   */
-  getMiddleware() {
-    return this.#middleware
-  }
-
-  /**
-   * Sets an error handling function, for thrown errors.
-   * 
-   * @param {ErrorHandler} handler
-   */
-  setErrorHandler(handler) {
-    this.#error_handler = handler
-  }
-
-  /**
-   * Returns the error handling function.
-   * 
-   * @returns {ErrorHandler | null}
-   */
-  getErrorHandler() {
-    return this.#error_handler
   }
 
   /**

@@ -1,7 +1,5 @@
-export type ErrorHandler = (error: unknown, event?: any) => MaybePromise<Response | void>;
 export type Handler = (event?: any) => MaybePromise<Response>;
 export type MaybePromise<T> = T | Promise<T>;
-export type Middleware = () => MaybePromise<Response | void>;
 export type Matcher = (param: string) => boolean | null;
 export type MatcherFn = (param: string) => boolean;
 export type MatcherType = string | null;
@@ -32,10 +30,6 @@ export class Router {
   getTree(): Node;
   setMatcher(type: string, matcher: Matcher): void;
   getMatcher(type: string): Matcher;
-  setMiddleware(handle: Middleware): void;
-  getMiddleware(): Middleware;
-  setErrorHandler(handler: ErrorHandler): void;
-  getErrorHandler(): ErrorHandler | null;
   register(path: string): Store;
   find(path: string): Route;
   get(path: string, handler: Handler): void;
