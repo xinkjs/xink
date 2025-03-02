@@ -1,6 +1,8 @@
 # @xinkjs/xink
 
-xink is a directory-based filesystem router for APIs, and a Vite plugin. Under the hood, it uses a trie URL router, which is fast and scalable. Supports the bun and deno runtime.
+xink is a directory-based filesystem router for APIs, acting as a Vite plugin. Under the hood, it uses a trie URL router, which is fast and scalable.
+
+Supports the bun and deno runtimes, but be aware that we currently rely on access to the filesystem during runtime initialization. We have some documentation for Cloudflare Workers here, but it's not supported yet.
 
 We're currently in the alpha phase of development and welcome contributions. Please see our contributing guide.
 
@@ -14,18 +16,39 @@ We're currently in the alpha phase of development and welcome contributions. Ple
 
 ## Wishlist
 
+- [ ] Adapters for other runtimes and environments (help wanted)
 - [x] Support {Bun,Deno}.serve
 - [x] Config Vitest tests
 - [ ] API Vitest tests
 - [x] CLI tool to setup project
 - [ ] docs site
 - [ ] Publish to JSR?
-- [ ] OpenAPI integration?
+- [x] OpenAPI integration?
 
 ## Setup
 
 ```bash
 npx xk create my-api
+```
+
+### Basepath
+
+If you'd like to set a basepath for your entire API, you can do so in your project's entrypoint file.
+
+```ts
+import { Xink } from "@xinkjs/xink"
+import type { Env } from "./src/api.d.ts"
+
+const api = new Xink()
+
+api.path('/api')
+await api.init()
+
+export default {
+  fetch(req: Request, env: Env.Bindings) {
+    return api.fetch(req, env)
+  }
+}
 ```
 
 ## Create Routes
@@ -465,6 +488,90 @@ declare global {
 }
 
 export {}
+```
+
+## OpenAPI
+
+xink makes it easy for you to create OpenAPI reference docs, powered by [Scalar](https://scalar.com/) to render them in a browser.
+
+### Endpoint configuration
+
+First, define your `OPENAPI` export within each route file.
+
+```js
+/* src/routes/route.ts */
+import * as v from 'valibot'
+import { toJsonSchema } from "@valibot/to-json-schema"
+
+const post_json_schema = v.object({
+  hello: v.string(),
+  goodbye: v.string()
+})
+
+const post_res_schema = v.object({
+  data: v.nullable(v.object({
+    message: v.string()
+  })),
+  error: v.nullable(v.unknown())
+})
+
+/* Define route endpoints. */
+...
+
+/* Define OpenAPI definitions. */
+export const OPENAPI = {
+  post: {
+    summary: "Post root route",
+    requestBody: {
+      required: true,
+      content: {
+        "application/json": {
+          schema: toJsonSchema(post_json_schema)
+        }
+      }
+    },
+    responses: {
+      200: {
+        description: "OK",
+        content: {
+          "application/json": {
+            schema: toJsonSchema(post_res_schema)
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+### API configuration
+
+Then, within your project's entrypoint file, define your desired path to the OpenAPI docs, and any optional metadata. When the router is started, you can visit the reference docs in a browser - e.g. http://localhost:3000/reference
+
+```ts
+/* project root index.ts or other entrypoint variation */
+import { Xink } from "@xinkjs/xink"
+
+const api = new Xink()
+
+api.openapi({ 
+  path: "/reference", 
+  data: { 
+    "openapi": "3.1.0",
+    "info": {
+      "title": "Xi API",
+      "version": "0.0.0"
+    }
+  }
+})
+
+await api.init()
+
+export default {
+  fetch(req: Request) {
+    return api.fetch(req)
+  }
+}
 ```
 
 ## 404 and 405 handling
