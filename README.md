@@ -8,12 +8,15 @@ We're currently in the alpha phase of development and welcome contributions. Ple
 
 ## Why use xink?
 
-- Each endpoint is well organized based on it's directory path and single route file.
-- Standard handler names (e.g. GET, POST) free you from a lot of naming work.
+- Your directory structure defines your API paths<sup>*</sup>.
+- An endpoint's handlers are well organized in single route file.
+- HTTP-based handler names (e.g. GET, POST) free you from a lot of naming work.
 - Simple data validation with your favorite library.
 - Easy OpenAPI integration.
 - No-fuss setup with our `xk` CLI tool.
 - Native handling of 404 and 405 (Method Not Allowed) responses.
+
+<small><sup>*</sup> - requires a route file at the end of each path.</small>
 
 ## Wishlist
 
