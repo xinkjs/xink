@@ -85,6 +85,7 @@ export class Xink extends Router {
       }
     }
   }): void;
+  path(path: string): void;
 }
 
 export class StandardSchemaError extends Error {
