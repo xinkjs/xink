@@ -6,7 +6,7 @@
     "url": "git+https://github.com/xinkjs/xink.git"
   },
   "dependencies": {
-    "@xinkjs/xin": "^0.3.2",
+    "@xinkjs/xin": "^0.4.0",
     "cookie": "^1.0.2",
     "glob": "^11.0.1",
     "magic-string": "^0.30.17",
@@ -15,7 +15,7 @@
   },
   "devDependencies": {
     "@types/bun": "latest",
-    "vite": "^6.1.0",
+    "vite": "^6.2.0",
     "vitest": "^2.1.9"
   },
   "peerDependencies": {
