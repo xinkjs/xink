@@ -1,0 +1,40 @@
+{
+  "name": "@xinkjs/xin",
+  "version": "0.4.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xinkjs/xin.git"
+  },
+  "exports": {
+    ".": {
+      "import": "./index.js",
+      "types": "./types.d.ts"
+    }
+  },
+  "bugs": "https://github.com/xinkjs/xin/issues",
+  "contributors": [
+    {
+      "name": "Nathan Woltman",
+      "email": "nwoltman@outlook.com"
+    },
+    {
+      "name": "Jason Creviston",
+      "email": "the@j4w8n.com",
+      "url": "https://github.com/j4w8n"
+    }
+  ],
+  "description": "An enhanced javascript URL router",
+  "files": [
+    "index.js",
+    "types.d.ts"
+  ],
+  "homepage": "https://github.com/xinkjs/xin#readme",
+  "keywords": [
+    "url",
+    "router",
+    "xin"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "types": "types.d.ts"
+}
