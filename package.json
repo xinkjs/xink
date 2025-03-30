@@ -5,18 +5,16 @@
     "type": "git",
     "url": "git+https://github.com/xinkjs/xink.git"
   },
-  "dependencies": {
-    "@xinkjs/xin": "^0.4.0",
-    "cookie": "^1.0.2",
+  "devDependencies": {
+    "@types/bun": "latest",
+    "vite": "^6.2.3",
+    "vitest": "^2.1.9",
     "glob": "^11.0.1",
     "magic-string": "^0.30.17",
     "set-cookie-parser": "^2.7.1",
-    "stringify-object": "^5.0.0"
-  },
-  "devDependencies": {
-    "@types/bun": "latest",
-    "vite": "^6.2.2",
-    "vitest": "^2.1.9"
+    "stringify-object": "^5.0.0",
+    "@xinkjs/xin": "^0.4.0",
+    "cookie": "^1.0.2"
   },
   "peerDependencies": {
     "vite": "^6.0.0"
