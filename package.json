@@ -1,0 +1,14 @@
+{
+  "name": "xinkjs",
+  "version": "0.0.0",
+  "description": "monorepo for @xinkjs",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "workspaces": ["packages/*"]
+}
