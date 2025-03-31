@@ -59,6 +59,7 @@ export interface Validators {
   default?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'params' | 'query'>;
 }
 export interface XinkAdaptContext {
+  entrypoint: string;
   out_dir: string;
   api_chunk_filename: string;
   log: (msg: string) => void;
