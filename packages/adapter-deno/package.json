@@ -1,0 +1,22 @@
+{
+  "name": "@xinkjs/adapter-deno",
+  "version": "0.1.0",
+  "main": "index.js",
+  "module": "index.js",
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@xinkjs/xink": "workspace:*"
+  },
+  "peerDependencies": {
+    "@xinkjs/xink": "workspace:*"
+  },
+  "description": "Deno adapter for xink",
+  "files": [
+    "index.js",
+    "index.d.ts"
+  ],
+  "keywords": ["xink", "deno", "adapter", "vite"],
+  "license": "MIT",
+  "type": "module",
+  "types": "index.d.ts"
+}
