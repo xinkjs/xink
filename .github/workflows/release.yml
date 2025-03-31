@@ -1,0 +1,60 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+        # Fetch all history to allow correct version calculation
+        with:
+          fetch-depth: 0
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Install Dependencies
+        run: bun install --frozen-lockfile
+
+      # This action handles:
+      # - Running 'changeset version'
+      # - Creating/updating CHANGELOG.md files
+      # - Committing changes (package.json versions, changelogs)
+      # - Creating Git tags for new versions
+      # - Running 'changeset publish'
+      - name: Create Release Pull Request or Publish to npm
+        id: changesets
+        uses: changesets/action@v1
+        with:
+          publish: bun run release
+          # If you want the action to commit the version changes
+          commit: "chore: update versions and changelogs for release"
+          title: "Upcoming Release Changes" # Title for the PR if versioning only
+        env:
+          # Required for publishing packages to npm
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          # Provided by GitHub Actions, required for commits/tags/GitHub releases
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Optional: Create GitHub Releases for the tags created by changesets/action
+      - name: Create GitHub Releases
+        if: steps.changesets.outputs.published == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Extract published package info from the action output
+          published_packages=$(echo '${{ steps.changesets.outputs.publishedPackages }}' | jq -r '.[] | "\(.name)@\(.version)"')
+          # Create a release for each tag (adjust logic if needed)
+          for tag in $(git tag --points-at HEAD); do
+            gh release create "$tag" --notes "Published packages:\n${published_packages}"
+          done
