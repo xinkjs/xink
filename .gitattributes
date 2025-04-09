@@ -15,6 +15,7 @@
 
 # Ensure lockfile uses LF (CRITICAL for consistency)
 bun.lock text eol=lf
+bun.lockb text eol=lf
 
 # Handle specific binary files if needed
 # *.png binary
