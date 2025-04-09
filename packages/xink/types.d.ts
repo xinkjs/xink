@@ -2,6 +2,7 @@ import type { Store, Params, Router } from "@xinkjs/xin"
 import type { SerializeOptions, ParseOptions } from "cookie"
 import type { Plugin } from 'vite'
 import type { Config } from "./lib/types/internal"
+import type { Env } from "bun"
 
 type AtLeastOne<T, P> = { [K in keyof T]: Pick<T, K> }[keyof T]
 interface AllowedValidatorTypes {
@@ -30,9 +31,8 @@ export type Handle = (event: RequestEvent, resolve: ResolveEvent) => MaybePromis
 export type MaybePromise<T> = T | Promise<T>;
 export type Middleware = (event: RequestEvent, resolve: ResolveEvent) => MaybePromise<Response>;
 export interface RequestEvent<V extends AllowedValidatorTypes = AllowedValidatorTypes> {
+  context: { env: Env.Bindings, ctx: Context } | null,
   cookies: Cookies;
-  ctx: Context;
-  env: Env.Bindings;
   headers: Omit<Headers, 'toJSON' | 'count' | 'getAll'>;
   html: typeof html;
   json: typeof json;

@@ -47,11 +47,10 @@ export class Xink extends Router {
   /**
    *
    * @param {Request} request
-   * @param {Env.Bindings} [env]
-   * @param {Context} [ctx]
+   * @param { { env: Env.Bindings, ctx: Context } } [context]
    * @returns {Promise<Response>}
    */
-  fetch = async (request, env, ctx) => {
+  fetch = async (request, context = null) => {
     if (!this.#is_initialized) await this.#init()
     if (!this.#router) {
       console.error('[Xink] Router not available, returning 500.')
@@ -99,9 +98,8 @@ export class Xink extends Router {
      * @type {RequestEvent}
      */
     const event = {
+      context,
       cookies,
-      ctx,
-      env,
       headers: request.headers,
       html,
       json,
