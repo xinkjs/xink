@@ -7,14 +7,18 @@
   "devDependencies": {
     "@changesets/changelog-github": "^0.5.1",
     "@changesets/cli": "^2.28.1",
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "husky": "^9.1.7"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
   },
   "scripts": {
     "release": "bun run build && changeset publish",
-    "build": "bun run --filter \"./packages/*\" build"
+    "build": "bun run --filter \"./packages/*\" build",
+    "prepare": "husky"
   },
-  "workspaces": ["packages/*"]
+  "workspaces": [
+    "packages/*"
+  ]
 }

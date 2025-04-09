@@ -1,0 +1,19 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "Running pre-commit checks..."
+
+# Check if lockfile is consistent
+if bun install --frozen-lockfile; then
+  echo "Lockfile is consistent."
+else
+  echo "Error: Lockfile is inconsistent or out of date." >&2
+  echo "Run 'bun install' and stage 'bun.lockb'." >&2
+  exit 1 # Abort commit
+fi
+
+# You can add other checks here (linting, testing) if desired
+# Example: bun run lint
+
+echo "Pre-commit checks passed."
+exit 0 # Proceed with commit
