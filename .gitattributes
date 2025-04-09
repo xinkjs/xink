@@ -14,7 +14,7 @@
 *.sh text eol=lf
 
 # Ensure lockfile uses LF (CRITICAL for consistency)
-bun.lockb text eol=lf
+bun.lock text eol=lf
 
 # Handle specific binary files if needed
 # *.png binary
