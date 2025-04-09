@@ -1,22 +1,29 @@
 import { mkdirSync, writeFileSync } from "node:fs"
 import { join } from "node:path"
 
-const runtime_map: Record<string, string> = {
+const entrypoint_map: Record<string, string> = {
     bun: 'index',
     deno: 'index',
     cloudflare: 'main'
 }
 
+const runtime_map: Record<string, string> = {
+    bun: 'bun run build/server.js',
+    deno: 'deno run --allow-net --allow-sys --allow-read=build build/server.js',
+    cloudflare: 'npx wrangler dev'
+}
+
 export const createXink = (project_path: string, runtime: string, language: string) => {
     const type = language === 'typescript' ? 'ts' : 'js'
-    const entrypoint = `${runtime_map[runtime]}.${type}`
+    const entrypoint = `${entrypoint_map[runtime]}.${type}`
     const package_file = runtime === 'deno' ? 'deno.json' : 'package.json'
     const package_contents = runtime === 'deno' ?
         `{
     "tasks": {
         "dev": "vite",
         "build": "vite build",
-        "preview": "vite preview"
+        "preview": "vite preview",
+        "start": "${runtime_map[runtime]}"
     },
     "nodeModulesDir": "auto"
 }
@@ -95,20 +102,8 @@ export const createXink = (project_path: string, runtime: string, language: stri
         `import { Xink } from '@xinkjs/xink'
 
 const api = new Xink()
-await api.init()
 
-export default {${language === 'checkjs' ? 
-    `
-    /**
-     * 
-     * @param {Request} req 
-     * @returns {Response}
-     */`
-: ''}
-    fetch(req${language === 'typescript' ? ': Request' : ''}) {
-        return api.fetch(req)
-    }
-}
+export default api
 `
     )
 
@@ -116,12 +111,13 @@ export default {${language === 'checkjs' ?
     writeFileSync(join(project_path, 'vite.config.js'),
         `import { xink } from '@xinkjs/xink'
 import { defineConfig } from 'vite'
+import adapter from 'adapter-${runtime}'
 
 export default defineConfig(async function () {
     return {
         plugins: [
             await xink({ 
-                runtime: '${runtime}',
+                adapter,
             })
         ]
     }
