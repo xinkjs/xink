@@ -1,6 +1,6 @@
 {
   "name": "@xinkjs/adapter-cloudflare",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Cloudflare Workers adapter for xink",
   "main": "index.js",
   "types": "index.d.ts",
@@ -15,7 +15,16 @@
     "@types/bun": "latest",
     "@xinkjs/xink": "workspace:*"
   },
-  "files": ["index.js", "index.d.ts"],
-  "keywords": ["xink", "cloudflare", "workers", "adapter", "vite"],
+  "files": [
+    "index.js",
+    "index.d.ts"
+  ],
+  "keywords": [
+    "xink",
+    "cloudflare",
+    "workers",
+    "adapter",
+    "vite"
+  ],
   "license": "MIT"
 }
