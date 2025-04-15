@@ -7,7 +7,6 @@ import { statSync } from 'node:fs'
 import { join, relative } from 'node:path'
 import { Glob } from 'glob'
 
-// Define virtual module IDs
 const virtualManifestId = 'virtual:xink-manifest'
 const resolvedVirtualManifestId = '\0' + virtualManifestId
 
@@ -89,43 +88,38 @@ export async function xink(xink_config = {}) {
     },
 
     generateBundle(options, bundle) {
-      if (!vite_config.build.ssr) return; // Only care about SSR builds
+      if (!vite_config.build.ssr) return // Only care about SSR builds
 
       for (const file_name in bundle) {
         const chunk = bundle[file_name]
-        // Check if it's a chunk and its facadeModuleId matches the entrypoint input
+
         if (chunk.type === 'chunk' && chunk.facadeModuleId === entrypoint_path) {
-          api_chunk_filename = chunk.fileName; // Store the output filename
-          console.log(`[Xink Plugin] Found api chunk: ${api_chunk_filename} for ${entrypoint}`)
+          api_chunk_filename = chunk.fileName
           break
         }
       }
       if (!api_chunk_filename) {
-          console.error(`[Xink Plugin] Could not find output chunk for: ${entrypoint_path}`)
-          // Optionally throw an error to fail the build
+        console.error(`[Xink Plugin] Could not find output chunk for: ${entrypoint_path}`)
       }
     },
 
     async closeBundle() {
-      // Check if it was an SSR build and we found the chunk and have an adapter
       if (vite_config.build.ssr && api_chunk_filename && stored_adapter) {
-        console.log(`[Xink Plugin] Running adapter: ${stored_adapter.name}`);
+        console.log(`[Xink Plugin] Running adapter: ${stored_adapter.name}`)
         const context = {
           entrypoint,
           out_dir: vite_config.build.outDir,
           api_chunk_filename,
-          log: (msg) => console.log(`[${stored_adapter.name}] ${msg}`),
-          // Add other context if needed
+          log: (msg) => console.log(`[${stored_adapter.name}] ${msg}`)
         };
         try {
           await stored_adapter.adapt(context);
         } catch (error) {
-          console.error(`[Xink Plugin] Adapter ${stored_adapter.name} failed:`, error);
-          // Optionally re-throw to indicate build failure
-          throw error;
+          console.error(`[Xink Plugin] Adapter ${stored_adapter.name} failed:`, error)
+          throw error
         }
       } else if (vite_config.build.ssr && !stored_adapter) {
-          console.warn('[Xink Plugin] SSR build finished, but no adapter was configured.');
+          console.warn('[Xink Plugin] SSR build finished, but no adapter was configured.')
       }
     },
 
@@ -232,7 +226,7 @@ export async function xink(xink_config = {}) {
         )
       } catch (error) {
         console.error('[Xink] Error generating initial manifest:', error)
-        // Optional: Close server or prevent startup?
+        throw error
       }
 
       // Keep existing middleware for handling requests
@@ -257,7 +251,6 @@ export async function xink(xink_config = {}) {
     },
 
     async configurePreviewServer(server) {
-      // It implicitly uses the built code which includes the virtual module
       server.middlewares.use(async (req, res) => {
         /** @type {{ default: { fetch: (request: Request) => Promise<Response> }}} */
         const api = await import(
