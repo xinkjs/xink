@@ -77,6 +77,14 @@ export type XinkConfig = {
   out_dir?: string;
 }
 
+export interface PlatformContext {
+  env?: Record<string, any>;
+  ctx?: {
+    waitUntil?: (promise: Promise<any>) => void;
+    passThroughOnException?: () => void;
+  };
+}
+
 export function xink(xink_config?: XinkConfig): Promise<Plugin>;
 export function html(data: any, init?: ResponseInit | undefined): Response;
 export function json(data: any, init?: ResponseInit | undefined): Response;
@@ -85,7 +93,7 @@ export function text(data: string, init?: ResponseInit | undefined): Response;
 export function sequence(...handlers: Handle[]): Handle;
 export class Xink extends Router {
   constructor()
-  fetch(request: Request, env?: Env.Bindings, ctx?: Context): Promise<Response>;
+  fetch(request: Request, context?: PlatformContext): Promise<Response>;
   init(basepath?: string): Promise<void>;
   openapi(metadata: { 
     path: string; 
