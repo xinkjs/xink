@@ -1,6 +1,6 @@
 {
   "name": "@xinkjs/xink",
-  "version": "0.13.0",
+  "version": "0.14.0",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/xinkjs/xink.git"
@@ -33,9 +33,15 @@
     "types.d.ts"
   ],
   "homepage": "https://github.com/xinkjs/xink#readme",
-  "keywords": ["api", "router", "xink"],
+  "keywords": [
+    "api",
+    "router",
+    "xink"
+  ],
   "license": "MIT",
-  "scripts": { "test": "vitest" },
+  "scripts": {
+    "test": "vitest"
+  },
   "sideEffects": false,
   "type": "module",
   "types": "types.d.ts"
