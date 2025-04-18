@@ -23,7 +23,7 @@
     "cookie": "^1.0.2",
     "glob": "^11.0.1",
     "set-cookie-parser": "^2.7.1",
-    "@xinkjs/xin": "workspace:^"
+    "@xinkjs/xin": "workspace:*"
   },
   "peerDependencies": {
     "vite": "^6.0.0"

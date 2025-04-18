@@ -13,7 +13,7 @@
     "@types/bun": "latest"
   },
   "peerDependencies": {
-    "@xinkjs/xink": "workspace:^"
+    "@xinkjs/xink": "workspace:*"
   },
   "files": [
     "index.js",
