@@ -19,9 +19,9 @@ let entrypoint_path
 
 /**
  * @param {Config} [xink_config]
- * @returns {Promise<import('vite').Plugin>}
+ * @returns {import('vite').Plugin}
  */
-export async function xink(xink_config = {}) {
+export function xink(xink_config = {}) {
   const cwd = process.cwd()
 
   const validated_config = validateConfig(xink_config)

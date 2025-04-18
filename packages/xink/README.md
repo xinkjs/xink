@@ -1,8 +1,6 @@
 # @xinkjs/xink
 
-xink is a directory-based filesystem router for APIs, acting as a Vite plugin. Under the hood, it uses a trie URL router, which is fast and scalable.
-
-It supports the bun and deno runtimes; but be aware that we currently rely on access to the filesystem during runtime initialization, so we don't currently support edge environments. We have some documentation for Cloudflare Workers here, but it's also not supported yet.
+xink is a directory-based filesystem router for APIs, acting as a Vite plugin. Under the hood, it uses a trie URL router, which is fast and scalable. It supports the bun, cloudflare, and deno runtimes.
 
 We're currently in the alpha phase of development and welcome contributions. Please see our contributing guide.
 
@@ -20,7 +18,7 @@ We're currently in the alpha phase of development and welcome contributions. Ple
 
 ## Wishlist
 
-- [ ] Adapters for other runtimes and environments (help wanted)
+- [x] Adapters for other runtimes and environments (help wanted)
 - [x] Support {Bun,Deno}.serve
 - [x] Config Vitest tests
 - [ ] API Vitest tests
@@ -46,7 +44,6 @@ import { Xink } from "@xinkjs/xink"
 const api = new Xink()
 
 api.path('/api')
-await api.init()
 
 export default {
   fetch(req: Request) {
@@ -195,7 +192,7 @@ const second: Handle = (event, resolve) => {
 export const handle: Handle = sequence(first, second)
 ```
 
-## Developer Hooks
+## Hooks
 
 You can define hooks for each route, with the `HOOKS` export. They are run for any configured method for a route, including the `default` export. They are called after global middleware but before the route handler. Validation also happens before they are called, so you have access to validated data (see next section).
 
@@ -230,11 +227,13 @@ export const HOOKS = {
 
 export const GET = (event) => { 
   console.log(event.locals.state.some) // thing
+  console.log(event.locals.poki) // <some json>
   return new Response('Hello GET') 
 }
 
 export const POST = (event) => { 
   console.log(event.locals.state.some) // thing
+  console.log(event.locals.poki) // <some json>
   return new Response('Hello POST') 
 }
 ```
@@ -567,8 +566,6 @@ api.openapi({
   }
 })
 
-await api.init()
-
 export default {
   fetch(req: Request) {
     return api.fetch(req)
@@ -590,11 +587,11 @@ If a request header of `if-none-match` exists and matches the response `etag` he
 
 ## Configuration
 
-You can set these in the plugin's configuration.
+You can set these in the plugin's configuration. Note that you must pass an adapter.
 
 ```ts
 type XinkConfig = {
-  runtime: 'bun' | 'cloudflare' | 'deno';
+  adapter: (options?: any) => XinkAdapter;
   check_origin?: boolean;
   entrypoint?: string; 
   out_dir?: string;
@@ -605,13 +602,13 @@ type XinkConfig = {
 /* vite.config.js */
 import { xink } from '@xinkjs/xink'
 import { defineConfig } from 'vite'
+import adapter from '@xinkjs/adapter-bun'
 
 export default defineConfig(async function () {
   return {
     plugins: [
-      await xink({ 
-        runtime: 'bun',
-        entrypoint: 'server.js'
+      xink({ 
+        adapter
       })
     ]
   }
@@ -620,7 +617,7 @@ export default defineConfig(async function () {
 
 ### `.serve()` options
 
-For Bun and Deno users, you can declare serve options in xink's plugin configuration. Any other runtimes will ignore these options. Be aware that these options are only relevant for `build` and `preview`, not `dev`.
+For Bun and Deno users, you can declare serve options in xink's plugin configuration. Any other runtimes will ignore these options. Be aware that these options are only relevant for `build`, `preview` and `start`.
 
 > Bun supports adding these within your entrypoint's default export, if you'd like to declare them there.
 
@@ -628,12 +625,13 @@ For Bun and Deno users, you can declare serve options in xink's plugin configura
 /* vite.config.js */
 import { xink } from '@xinkjs/xink'
 import { defineConfig } from 'vite'
+import adapter from '@xinkjs/adapter-bun'
 
 export default defineConfig(async function () {
   return {
     plugins: [
-      await xink({ 
-        runtime: 'bun',
+      xink({ 
+        adapter,
         serve_options: {
           port: 3500
         }
@@ -645,15 +643,29 @@ export default defineConfig(async function () {
 
 ## Build
 
-To build your app, run the relevant command per runtime:
+To build the api, run the relevant command per runtime:
 
 - `bun run build`
 - `deno task build`
 - `npm run build`
 
+## Preview
+
+To preview the api with vite:
+
+- `bun run preview`
+- `deno task preview`
+- `npm run preview`
+
+To preview the api in your runtime's environment:
+
+- `bun run start`
+- `deno task start`
+- `wrangler dev`
+
 ## Deploy
 
-For Cloudflare, you can deploy your api with `npm run deploy`.
+For Cloudflare, you can deploy your api with `wrangler deploy`.
 
 ## Import Aliases
 
@@ -698,11 +710,10 @@ import { Xink, type Context } from "@xinkjs/xink"
 import type { Env } from "./src/api.d.ts"
 
 const api = new Xink()
-await api.init()
 
 export default {
   fetch(req: Request, env: Env.Bindings, ctx: Context) {
-    return api.fetch(req, env, ctx)
+    return api.fetch(req, { env, ctx })
   }
 }
 ```
@@ -715,9 +726,9 @@ export default {
 
 ```ts
 type XinkConfig = {
-  runtime: 'bun' | 'cloudflare' | 'deno';
+  adapter: (options?: any) => XinkAdapter; // null
   check_origin?: boolean; // true
-  entrypoint?: string; // (derived from runtime)
+  entrypoint?: string; // index.ts
   out_dir?: string; // build
   serve_options?: { [key: string]: any; };
 }
