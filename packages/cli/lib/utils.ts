@@ -1,5 +1,6 @@
 import { mkdirSync, writeFileSync } from "node:fs"
 import { join } from "node:path"
+import { getPackageContents } from "./package.ts"
 
 const entrypoint_map: Record<string, string> = {
     bun: 'index',
@@ -7,38 +8,11 @@ const entrypoint_map: Record<string, string> = {
     cloudflare: 'main'
 }
 
-const runtime_map: Record<string, string> = {
-    bun: 'bun run build/server.js',
-    deno: 'deno run --allow-net --allow-sys --allow-read=build build/server.js',
-    cloudflare: 'npx wrangler dev'
-}
-
 export const createXink = (project_path: string, runtime: string, language: string) => {
     const type = language === 'typescript' ? 'ts' : 'js'
     const entrypoint = `${entrypoint_map[runtime]}.${type}`
     const package_file = runtime === 'deno' ? 'deno.json' : 'package.json'
-    const package_contents = runtime === 'deno' ?
-        `{
-    "tasks": {
-        "dev": "vite",
-        "build": "vite build",
-        "preview": "vite preview",
-        "start": "${runtime_map[runtime]}"
-    },
-    "nodeModulesDir": "auto"
-}
-` :
-    `{
-    "name": "~TODO~",
-    "version": "0.0.0",
-    "type": "module",
-    "scripts": {
-        "dev": "vite",
-        "build": "vite build",
-        "preview": "vite preview"
-    }
-}
-`
+    const package_contents = getPackageContents(runtime)
 
     /* Create project path. */
     mkdirSync(project_path, { recursive: true })
