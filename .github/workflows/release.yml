@@ -20,6 +20,7 @@ jobs:
         # Fetch all history to allow correct version calculation
         with:
           fetch-depth: 0
+          fetch-tags: true
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v1
@@ -28,6 +29,108 @@ jobs:
 
       - name: Install Dependencies
         run: bun install --frozen-lockfile
+      
+      - name: Check for changesets
+        id: changesets_check
+        run: |
+          # Check if any markdown files exist in .changeset directory
+          if ls .changeset/*.md > /dev/null 2>&1; then
+            echo "Changesets found."
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "No changesets found. Skipping versioning and publishing based on changesets."
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      # --- Step 2: Version Packages (if changesets exist) ---
+      - name: Run changeset version (Verbose)
+        if: steps.changesets_check.outputs.exists == 'true'
+        run: bunx changeset version --verbose
+
+      # --- Step 3: DEBUG - Check package.json files ---
+      # IMPORTANT: Examine the output of this step in the Action logs!
+      - name: Show package.json after versioning (Debug)
+        if: steps.changesets_check.outputs.exists == 'true'
+        run: |
+          echo "--- packages/xink/package.json ---"
+          cat packages/xink/package.json || echo "File not found"
+          echo "--- packages/adapter-bun/package.json ---"
+          cat packages/adapter-bun/package.json || echo "File not found"
+          echo "--- packages/adapter-cloudflare/package.json ---"
+          cat packages/adapter-cloudflare/package.json || echo "File not found"
+          echo "--- packages/adapter-deno/package.json ---"
+          cat packages/adapter-deno/package.json || echo "File not found"
+          # Add any other packages whose dependencies you need to check
+
+      # --- Step 4: Commit and Push Versioning Changes (if changesets existed) ---
+      - name: Commit and Push Versioning Changes
+        if: steps.changesets_check.outputs.exists == 'true'
+        env:
+          # GITHUB_TOKEN is needed for authentication to push
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Configuring git user..."
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          echo "Staging changes..."
+          # Add all changes (version bumps, changelogs, deleted changesets)
+          git add .
+
+          # Check if there are staged changes before committing
+          if ! git diff --staged --quiet; then
+            echo "Committing version changes..."
+            # Use [skip ci] in commit message to prevent workflow loops
+            git commit -m "chore: update versions and changelogs for release [skip ci]"
+
+            echo "Pushing commit to main..."
+            # Push commit directly to main branch
+            git push origin main
+
+            echo "Pushing tags..."
+            # Push tags created by 'changeset version'
+            # Use --force if tags might already exist from failed runs (use with caution)
+            git push origin --tags
+          else
+            echo "No versioning changes detected to commit."
+          fi
+
+      # --- Step 5: Publish Packages (if changesets existed) ---
+      # This step now runs AFTER the version commit is pushed to main
+      - name: Publish packages
+        if: steps.changesets_check.outputs.exists == 'true'
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          # GITHUB_TOKEN not strictly needed here unless build/publish interacts with GitHub API
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: bun run release # Runs build and filtered bun publish
+
+      # --- Step 6: Create GitHub Releases (if changesets existed) ---
+      - name: Create GitHub Releases
+        if: steps.changesets_check.outputs.exists == 'true' # Run if versioning happened
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Creating releases for tags pointing to HEAD..."
+          # Get tags associated with the commit pushed in the previous step
+          # Note: There might be a slight delay, consider fetching again if needed
+          # git fetch origin --tags # Optional fetch if tags aren't immediately visible
+          tags_at_head=$(git tag --points-at HEAD)
+
+          if [ -z "$tags_at_head" ]; then
+            echo "No tags found at HEAD to create releases for. This might happen if the commit step failed or tags weren't pushed."
+            # Optionally fail the step: exit 1
+            exit 0 # Or exit cleanly
+          fi
+
+          echo "Tags found at HEAD: $tags_at_head"
+          # Create a release for each tag found using GitHub CLI
+          for tag in $tags_at_head; do
+            echo "Creating GitHub release for tag $tag"
+            # You might want to extract changelog notes here if possible,
+            # otherwise just create a basic release note.
+            gh release create "$tag" --notes "Automatic release for $tag" || echo "Failed to create release for $tag (maybe it already exists?)"
+          done
 
       # This action handles:
       # - Running 'changeset version'
@@ -35,29 +138,29 @@ jobs:
       # - Committing changes (package.json versions, changelogs)
       # - Creating Git tags for new versions
       # - Running 'changeset publish'
-      - name: Create Release Pull Request or Publish to npm
-        id: changesets
-        uses: changesets/action@v1
-        with:
-          publish: bun run release
-          # If you want the action to commit the version changes
-          commit: "chore: update versions and changelogs for release"
-          title: "Upcoming Release Changes" # Title for the PR if versioning only
-        env:
-          # Required for publishing packages to npm
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          # Provided by GitHub Actions, required for commits/tags/GitHub releases
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #- name: Create Release Pull Request or Publish to npm
+      #  id: changesets
+      #  uses: changesets/action@v1
+      #  with:
+      #    publish: bun run release
+      #    # If you want the action to commit the version changes
+      #    commit: "chore: update versions and changelogs for release"
+      #    title: "Upcoming Release Changes" # Title for the PR if versioning only
+      #  env:
+      #    # Required for publishing packages to npm
+      #    NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      #    # Provided by GitHub Actions, required for commits/tags/GitHub releases
+      #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # Optional: Create GitHub Releases for the tags created by changesets/action
-      - name: Create GitHub Releases
-        if: steps.changesets.outputs.published == 'true'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          # Extract published package info from the action output
-          published_packages=$(echo '${{ steps.changesets.outputs.publishedPackages }}' | jq -r '.[] | "\(.name)@\(.version)"')
-          # Create a release for each tag (adjust logic if needed)
-          for tag in $(git tag --points-at HEAD); do
-            gh release create "$tag" --notes "Published packages:\n${published_packages}"
-          done
+      #- name: Create GitHub Releases
+      #  if: steps.changesets.outputs.published == 'true'
+      #  env:
+      #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #  run: |
+      #    # Extract published package info from the action output
+      #    published_packages=$(echo '${{ steps.changesets.outputs.publishedPackages }}' | jq -r '.[] | "\(.name)@\(.version)"')
+      #    # Create a release for each tag (adjust logic if needed)
+      #    for tag in $(git tag --points-at HEAD); do
+      #      gh release create "$tag" --notes "Published packages:\n${published_packages}"
+      #    done
