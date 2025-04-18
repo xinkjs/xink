@@ -1,15 +1,18 @@
 # adapter-bun
 
-To install dependencies:
+```js
+/* vite.config.js */
+import { xink } from '@xinkjs/xink'
+import { defineConfig } from 'vite'
+import adapter from '@xinkjs/adapter-bun'
 
-```bash
-bun install
+export default defineConfig(async function () {
+  return {
+    plugins: [
+      xink({ 
+        adapter
+      })
+    ]
+  }
+})
 ```
-
-To run:
-
-```bash
-bun run index.js
-```
-
-This project was created using `bun init` in bun v1.1.27. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.

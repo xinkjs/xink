@@ -1,8 +1,7 @@
-import type { Store, Params, Router } from "@xinkjs/xin"
-import type { SerializeOptions, ParseOptions } from "cookie"
+import type { Store, Params, Router } from '@xinkjs/xin'
+import type { SerializeOptions, ParseOptions } from 'cookie'
 import type { Plugin } from 'vite'
-import type { Config } from "./lib/types/internal"
-import type { Env } from "bun"
+import type { Config } from './lib/types/internal'
 
 type AtLeastOne<T, P> = { [K in keyof T]: Pick<T, K> }[keyof T]
 interface AllowedValidatorTypes {

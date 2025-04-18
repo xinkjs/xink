@@ -1,7 +1,5 @@
 import type { XinkAdapter, XinkAdaptContext } from '@xinkjs/xink'
 
-// Define options based on Deno.ServeOptions, excluding the handler
-// See: https://deno.land/api@v1.42.1?s=Deno.ServeOptions
 export interface XinkDenoServeOptions {
   /** The port to listen on. @default 8000 */
   port?: number;
