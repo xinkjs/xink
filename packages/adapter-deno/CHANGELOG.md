@@ -1,5 +1,14 @@
 # @xinkjs/adapter-deno
 
+## 0.2.2
+
+### Patch Changes
+
+- [#17](https://github.com/xinkjs/xink/pull/17) [`abffb8c`](https://github.com/xinkjs/xink/commit/abffb8c0491a4a211e93fffffba6ba60c5b06719) Thanks [@j4w8n](https://github.com/j4w8n)! - Use asterisks for workspaces
+
+- Updated dependencies [[`abffb8c`](https://github.com/xinkjs/xink/commit/abffb8c0491a4a211e93fffffba6ba60c5b06719)]:
+  - @xinkjs/xink@0.14.2
+
 ## 0.2.1
 
 ### Patch Changes
