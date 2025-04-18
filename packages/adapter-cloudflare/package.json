@@ -10,7 +10,7 @@
     "publish": "bun publish --access public"
   },
   "peerDependencies": {
-    "@xinkjs/xink": "workspace:^"
+    "@xinkjs/xink": "workspace:*"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20240403.0",
