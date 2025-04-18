@@ -71,10 +71,11 @@ export interface XinkAdapter {
   adapt: (context: XinkAdaptContext) => Promise<void> | void;
 }
 export type XinkConfig = {
-  adapter?: (options?: any) => XinkAdapter;
+  adapter: (options?: any) => XinkAdapter;
   check_origin?: boolean;
   entrypoint?: string; 
   out_dir?: string;
+  serve_options?: { [key: string]: any; };
 }
 
 export interface PlatformContext {
