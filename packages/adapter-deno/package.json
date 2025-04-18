@@ -10,8 +10,7 @@
     "publish": "bun publish --access public"
   },
   "devDependencies": {
-    "@types/bun": "latest",
-    "@xinkjs/xink": "workspace:^"
+    "@types/bun": "latest"
   },
   "peerDependencies": {
     "@xinkjs/xink": "workspace:^"

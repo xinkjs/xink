@@ -15,8 +15,7 @@
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20240403.0",
     "@types/node": "^18.0.0",
-    "@types/bun": "latest",
-    "@xinkjs/xink": "workspace:^"
+    "@types/bun": "latest"
   },
   "files": [
     "index.js",
