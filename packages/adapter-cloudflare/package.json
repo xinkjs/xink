@@ -3,17 +3,20 @@
   "version": "0.2.0",
   "description": "Cloudflare Workers adapter for xink",
   "main": "index.js",
+  "module": "index.js",
   "types": "index.d.ts",
   "type": "module",
-  "scripts": {},
+  "scripts": {
+    "publish": "bun publish --access public"
+  },
   "peerDependencies": {
-    "@xinkjs/xink": "workspace:*"
+    "@xinkjs/xink": "workspace:^"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20240403.0",
     "@types/node": "^18.0.0",
     "@types/bun": "latest",
-    "@xinkjs/xink": "workspace:*"
+    "@xinkjs/xink": "workspace:^"
   },
   "files": [
     "index.js",
@@ -26,5 +29,13 @@
     "adapter",
     "vite"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xinkjs/xink/packages/adapter-cloudflare.git"
+  },
+  "bugs": {
+    "url": "https://github.com/xinkjs/xink/issues"
+  },
+  "homepage": "https://github.com/xinkjs/xink/packages/adapter-cloudflare#readme",
   "license": "MIT"
 }

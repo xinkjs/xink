@@ -9,7 +9,8 @@
     "dist"
   ],
   "scripts": {
-    "build": "bun build --entrypoints ./bin.ts --outdir ./dist --target node"
+    "build": "bun build --entrypoints ./bin.ts --outdir ./dist --target node",
+    "publish": "bun publish --access public"
   },
   "devDependencies": {
     "@clack/prompts": "^0.9.0",
@@ -25,10 +26,10 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/xinkjs/cli.git"
+    "url": "git+https://github.com/xinkjs/xink/packages/cli.git"
   },
   "bugs": {
-    "url": "https://github.com/xinkjs/cli/issues"
+    "url": "https://github.com/xinkjs/xink/issues"
   },
-  "homepage": "https://github.com/xinkjs/cli#readme"
+  "homepage": "https://github.com/xinkjs/xink/packages/cli#readme"
 }
