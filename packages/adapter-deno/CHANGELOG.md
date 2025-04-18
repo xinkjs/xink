@@ -1,5 +1,14 @@
 # @xinkjs/adapter-deno
 
+## 0.2.3
+
+### Patch Changes
+
+- [#19](https://github.com/xinkjs/xink/pull/19) [`88a9228`](https://github.com/xinkjs/xink/commit/88a922875de1061ffd6645d61f9bcc38b806e5da) Thanks [@j4w8n](https://github.com/j4w8n)! - Cleanup
+
+- Updated dependencies [[`88a9228`](https://github.com/xinkjs/xink/commit/88a922875de1061ffd6645d61f9bcc38b806e5da)]:
+  - @xinkjs/xink@0.14.3
+
 ## 0.2.2
 
 ### Patch Changes
