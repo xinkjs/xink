@@ -1,13 +1,22 @@
 {
   "name": "@xinkjs/xink",
   "version": "0.14.0",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/xinkjs/xink.git"
+  "description": "A directory-based javascript API router",
+  "type": "module",
+  "types": "types.d.ts",
+  "exports": {
+    ".": {
+      "import": "./lib/exports/index.js",
+      "types": "./types.d.ts"
+    }
+  },
+  "scripts": {
+    "test": "vitest",
+    "publish": "bun publish --access public"
   },
   "devDependencies": {
     "@types/bun": "latest",
-    "@xinkjs/xin": "workspace:*",
+    "@xinkjs/xin": "workspace:^",
     "cookie": "^1.0.2",
     "glob": "^11.0.1",
     "set-cookie-parser": "^2.7.1",
@@ -17,32 +26,24 @@
   "peerDependencies": {
     "vite": "^6.0.0"
   },
-  "exports": {
-    ".": {
-      "import": "./lib/exports/index.js",
-      "types": "./types.d.ts"
-    }
-  },
-  "bugs": {
-    "url": "https://github.com/xinkjs/xink/issues"
-  },
-  "description": "A directory-based javascript API router",
   "files": [
     "lib",
     "index.js",
     "types.d.ts"
   ],
-  "homepage": "https://github.com/xinkjs/xink#readme",
   "keywords": [
     "api",
     "router",
     "xink"
   ],
-  "license": "MIT",
-  "scripts": {
-    "test": "vitest"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xinkjs/xink/packages/xink.git"
   },
-  "sideEffects": false,
-  "type": "module",
-  "types": "types.d.ts"
+  "bugs": {
+    "url": "https://github.com/xinkjs/xink/issues"
+  },
+  "homepage": "https://github.com/xinkjs/xink/packages/xink#readme",
+  "license": "MIT",
+  "sideEffects": false
 }

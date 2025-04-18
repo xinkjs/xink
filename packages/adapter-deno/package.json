@@ -1,16 +1,21 @@
 {
   "name": "@xinkjs/adapter-deno",
   "version": "0.2.0",
+  "description": "Deno adapter for xink",
   "main": "index.js",
   "module": "index.js",
+  "types": "index.d.ts",
+  "type": "module",
+  "scripts": {
+    "publish": "bun publish --access public"
+  },
   "devDependencies": {
     "@types/bun": "latest",
-    "@xinkjs/xink": "workspace:*"
+    "@xinkjs/xink": "workspace:^"
   },
   "peerDependencies": {
-    "@xinkjs/xink": "workspace:*"
+    "@xinkjs/xink": "workspace:^"
   },
-  "description": "Deno adapter for xink",
   "files": [
     "index.js",
     "index.d.ts"
@@ -21,7 +26,13 @@
     "adapter",
     "vite"
   ],
-  "license": "MIT",
-  "type": "module",
-  "types": "index.d.ts"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xinkjs/xink/packages/adapter-deno.git"
+  },
+  "bugs": {
+    "url": "https://github.com/xinkjs/xink/issues"
+  },
+  "homepage": "https://github.com/xinkjs/xink/packages/adapter-deno#readme",
+  "license": "MIT"
 }
