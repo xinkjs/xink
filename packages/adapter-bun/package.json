@@ -1,6 +1,6 @@
 {
   "name": "@xinkjs/adapter-bun",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Bun adapter for xink",
   "main": "index.js",
   "module": "index.js",

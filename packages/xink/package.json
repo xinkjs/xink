@@ -1,6 +1,6 @@
 {
   "name": "@xinkjs/xink",
-  "version": "0.14.0",
+  "version": "0.14.1",
   "description": "A directory-based javascript API router",
   "type": "module",
   "types": "types.d.ts",
