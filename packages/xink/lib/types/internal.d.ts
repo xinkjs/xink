@@ -1,4 +1,4 @@
-import type { XinkAdapter } from "../../types";
+import type { XinkAdapter } from '../../types'
 
 export type Config = {
   adapter: XinkAdapter;

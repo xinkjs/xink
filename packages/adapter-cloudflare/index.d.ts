@@ -8,7 +8,6 @@ export interface PlatformContext {
 
 export interface XinkCloudflareAdapterOptions {
   workerEntry?: string;
-  // Add options for wrangler.toml generation later if desired
 }
 
 /**
