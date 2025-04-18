@@ -90,7 +90,7 @@ import adapter from 'adapter-${runtime}'
 export default defineConfig(async function () {
     return {
         plugins: [
-            await xink({ 
+            xink({ 
                 adapter,
             })
         ]
