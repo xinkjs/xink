@@ -14,7 +14,7 @@
     "typescript": "^5.0.0"
   },
   "scripts": {
-    "release": "bun run build && changeset publish",
+    "release": "bun run build && bun run --filter \"./packages/*\" publish",
     "build": "bun run --filter \"./packages/*\" build",
     "prepare": "husky"
   },
