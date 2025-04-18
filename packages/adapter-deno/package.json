@@ -1,6 +1,6 @@
 {
   "name": "@xinkjs/adapter-deno",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "main": "index.js",
   "module": "index.js",
   "devDependencies": {
@@ -15,7 +15,12 @@
     "index.js",
     "index.d.ts"
   ],
-  "keywords": ["xink", "deno", "adapter", "vite"],
+  "keywords": [
+    "xink",
+    "deno",
+    "adapter",
+    "vite"
+  ],
   "license": "MIT",
   "type": "module",
   "types": "index.d.ts"
