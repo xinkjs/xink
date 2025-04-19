@@ -35,7 +35,7 @@ jobs:
 
       - name: Run changeset version (using bunx)
         if: steps.changesets_check.outputs.exists == 'true'
-        run: bunx changeset version --verbose # Run via bunx
+        run: bun run changeset version --verbose # Run via bunx
   
       - name: Show package.json after versioning (Debug)
         if: steps.changesets_check.outputs.exists == 'true'
