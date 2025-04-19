@@ -1,5 +1,13 @@
 # @xinkjs/adapter-cloudflare
 
+## 0.2.4
+
+### Patch Changes
+
+- 924eebb: Update readmes
+- Updated dependencies [924eebb]
+  - @xinkjs/xink@0.14.4
+
 ## 0.2.3
 
 ### Patch Changes

@@ -1,6 +1,6 @@
 {
   "name": "@xinkjs/adapter-cloudflare",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Cloudflare Workers adapter for xink",
   "main": "index.js",
   "module": "index.js",
