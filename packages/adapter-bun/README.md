@@ -9,7 +9,9 @@ import adapter from '@xinkjs/adapter-bun'
 export default defineConfig(async function () {
   return {
     plugins: [
-      xink({ adapter })
+      xink({ 
+        adapter 
+      })
     ]
   }
 })
