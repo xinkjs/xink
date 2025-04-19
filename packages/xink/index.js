@@ -3,7 +3,7 @@
 import { validateConfig } from './lib/utils/config.js'
 import { getRequest, setResponse } from './lib/utils/vite.js'
 import { createManifestVirtualModule } from './lib/utils/manifest.js'
-import { statSync } from 'node:fs'
+import { statSync, mkdirSync, writeFileSync } from 'node:fs'
 import { join, relative } from 'node:path'
 import { Glob } from 'glob'
 
