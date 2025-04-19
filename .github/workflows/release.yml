@@ -21,6 +21,11 @@ jobs:
         with:
           fetch-depth: 0
           fetch-tags: true
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: 1.2.10
     
       - name: Check for changesets
         id: changesets_check
@@ -81,11 +86,6 @@ jobs:
           else
             echo "No versioning changes detected to commit."
           fi
-
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v1
-        with:
-          bun-version: 1.2.10
 
       - name: Install Dependencies
         run: bun install --frozen-lockfile
