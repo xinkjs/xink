@@ -1,5 +1,13 @@
 # @xinkjs/adapter-deno
 
+## 0.2.3
+
+### Patch Changes
+
+- ed1c2fb: Resolve release issues
+- Updated dependencies [ed1c2fb]
+  - @xinkjs/xink@0.14.3
+
 ## 0.2.2
 
 ### Patch Changes
