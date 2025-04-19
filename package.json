@@ -17,7 +17,7 @@
     "release": "bun run build && bun run --filter \"./packages/*\" publish",
     "build": "bun run --filter \"./packages/*\" build",
     "prepare": "husky",
-    "changeset": "changeset"
+    "changeset": "./node_modules/.bin/changeset"
   },
   "workspaces": [
     "packages/*"
