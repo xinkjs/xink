@@ -14,10 +14,9 @@
     "typescript": "^5.0.0"
   },
   "scripts": {
-    "release": "bun run build && bun run --filter \"./packages/*\" publish",
+    "release": "bun run build && changeset publish",
     "build": "bun run --filter \"./packages/*\" build",
-    "prepare": "husky",
-    "changeset": "./node_modules/.bin/changeset"
+    "prepare": "husky"
   },
   "workspaces": [
     "packages/*"

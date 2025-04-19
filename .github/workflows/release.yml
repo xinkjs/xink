@@ -13,108 +13,63 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      pull-requests: write # Keep for potential future use or other actions
+      pull-requests: write
+      # statuses: read # Keep if using github changelog, remove if git changelog works
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          fetch-tags: true
+          fetch-tags: true # Good to keep for release notes step
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v1
         with:
-          bun-version: 1.2.10
+          bun-version: 1.2.10 # Pinned version
 
-      # --- MOVED INSTALL STEP HERE ---
       - name: Install Dependencies
         run: bun install --frozen-lockfile
 
-      # --- Step 1: Check for Changesets ---
-      - name: Check for changesets
-        id: changesets_check
-        run: |
-          if ls .changeset/*.md > /dev/null 2>&1; then
-            echo "Changesets found."
-            echo "exists=true" >> $GITHUB_OUTPUT
-          else
-            echo "No changesets found. Skipping release process."
-            echo "exists=false" >> $GITHUB_OUTPUT
-          fi
-
-      # --- Step 2: Version Packages (if changesets exist) ---
-      - name: Run changeset version
-        if: steps.changesets_check.outputs.exists == 'true'
-        # Use the script defined in package.json which points to ./node_modules/.bin/changeset
-        run: bun run changeset version --verbose
-
-      # --- Step 3: DEBUG - Check package.json files ---
-      - name: Show package.json after versioning (Debug)
-        if: steps.changesets_check.outputs.exists == 'true'
-        run: |
-          echo "--- packages/xink/package.json ---"
-          cat packages/xink/package.json || echo "File not found"
-          echo "--- packages/adapter-bun/package.json ---"
-          cat packages/adapter-bun/package.json || echo "File not found"
-          echo "--- packages/adapter-cloudflare/package.json ---"
-          cat packages/adapter-cloudflare/package.json || echo "File not found"
-          echo "--- packages/adapter-deno/package.json ---"
-          cat packages/adapter-deno/package.json || echo "File not found"
-          # Add any other packages whose dependencies you need to check
-
-      # --- Step 4: Commit and Push Versioning Changes (if changesets existed) ---
-      - name: Commit and Push Versioning Changes
-        if: steps.changesets_check.outputs.exists == 'true'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          echo "Configuring git user..."
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-          echo "Staging changes..."
-          git add .
-
-          if ! git diff --staged --quiet; then
-            echo "Committing version changes..."
-            git commit -m "chore: update versions and changelogs for release [skip ci]"
-            echo "Pushing commit to main..."
-            git push origin main
-            echo "Pushing tags..."
-            git push origin --tags
-          else
-            echo "No versioning changes detected to commit."
-          fi
-
-      # --- Step 5: Publish Packages (if changesets existed) ---
-      - name: Publish packages
-        if: steps.changesets_check.outputs.exists == 'true'
+      # --- Use the standard action again ---
+      - name: Create Release Pull Request or Publish to npm
+        id: changesets
+        uses: changesets/action@v1
+        with:
+          # *** CHANGE THIS LINE ***
+          # Tell the action to run 'changeset publish' after the release PR is merged
+          # Use 'bun run' to execute the script defined in package.json
+          publish: bun run release
+          commit: "chore: update versions and changelogs for release"
+          title: "Upcoming Release Changes"
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # May be needed by build/publish steps
-        run: bun run release # Runs build and filtered bun publish
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # --- REMOVED REDUNDANT changesets/action@v1 STEP ---
-
-      # --- Step 6: Create GitHub Releases (if changesets existed) ---
+      # --- Optional: Create GitHub Releases ---
       - name: Create GitHub Releases
-        if: steps.changesets_check.outputs.exists == 'true' # Run if versioning happened
+        if: steps.changesets.outputs.published == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "Creating releases for tags pointing to HEAD..."
-          # Give tags a moment to propagate after push
-          sleep 5
-          git fetch origin --tags
-          tags_at_head=$(git tag --points-at HEAD)
+          echo "Creating releases for published packages..."
+          published_packages_json='${{ steps.changesets.outputs.publishedPackages }}'
+          echo "Published packages JSON: $published_packages_json"
 
-          if [ -z "$tags_at_head" ]; then
-            echo "No tags found at HEAD to create releases for."
-            exit 0 # Exit cleanly
+          # Ensure jq is available (might need 'sudo apt-get update && sudo apt-get install -y jq')
+          if ! command -v jq &> /dev/null; then
+              echo "jq could not be found, installing..."
+              sudo apt-get update && sudo apt-get install -y jq
           fi
 
-          echo "Tags found at HEAD: $tags_at_head"
-          for tag in $tags_at_head; do
+          tags=$(echo "$published_packages_json" | jq -r '.[] | "\(.name)@\(.version)"')
+
+          if [ -z "$tags" ]; then
+            echo "No published packages found in output."
+            exit 0
+          fi
+
+          echo "Tags to create releases for: $tags"
+          for tag in $tags; do
             echo "Creating GitHub release for tag $tag"
             gh release create "$tag" --notes "Automatic release for $tag" || echo "Failed to create release for $tag (maybe it already exists?)"
           done
