@@ -16,7 +16,8 @@
   "scripts": {
     "release": "bun run build && bun run --filter \"./packages/*\" publish",
     "build": "bun run --filter \"./packages/*\" build",
-    "prepare": "husky"
+    "prepare": "husky",
+    "changeset": "changeset"
   },
   "workspaces": [
     "packages/*"
