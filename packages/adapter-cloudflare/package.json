@@ -6,9 +6,6 @@
   "module": "index.js",
   "types": "index.d.ts",
   "type": "module",
-  "scripts": {
-    "publish": "bun publish --access public"
-  },
   "peerDependencies": {
     "@xinkjs/xink": "workspace:*"
   },

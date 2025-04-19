@@ -10,9 +10,6 @@
       "types": "./types.d.ts"
     }
   },
-  "scripts": {
-    "publish": "bun publish --access public"
-  },
   "contributors": [
     {
       "name": "Nathan Woltman",

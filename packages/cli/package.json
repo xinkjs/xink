@@ -9,8 +9,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "bun build --entrypoints ./bin.ts --outdir ./dist --target node",
-    "publish": "bun publish --access public"
+    "build": "bun build --entrypoints ./bin.ts --outdir ./dist --target node"
   },
   "devDependencies": {
     "@clack/prompts": "^0.9.0",
