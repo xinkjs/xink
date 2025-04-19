@@ -9,7 +9,9 @@ import adapter from '@xinkjs/adapter-deno'
 export default defineConfig(async function () {
   return {
     plugins: [
-      xink({ adapter })
+      xink({ 
+        adapter 
+      })
     ]
   }
 })
