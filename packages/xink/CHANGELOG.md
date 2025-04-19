@@ -1,5 +1,11 @@
 # @xinkjs/xink
 
+## 0.14.5
+
+### Patch Changes
+
+- f4b8abf: Import missing functions
+
 ## 0.14.4
 
 ### Patch Changes
