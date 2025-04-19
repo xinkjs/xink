@@ -21,6 +21,80 @@ jobs:
         with:
           fetch-depth: 0
           fetch-tags: true
+    
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: latest
+
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check for changesets
+        id: changesets_check
+        run: |
+          if ls .changeset/*.md > /dev/null 2>&1; then
+            echo "Changesets found."
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "No changesets found. Skipping versioning and publishing based on changesets."
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run changeset version (using pnpm)
+        if: steps.changesets_check.outputs.exists == 'true'
+        run: pnpm changeset version --verbose # Run via pnpm
+  
+      - name: Show package.json after versioning (Debug)
+        if: steps.changesets_check.outputs.exists == 'true'
+        run: |
+          echo "--- packages/xink/package.json ---"
+          cat packages/xink/package.json || echo "File not found"
+          echo "--- packages/adapter-bun/package.json ---"
+          cat packages/adapter-bun/package.json || echo "File not found"
+          echo "--- packages/adapter-cloudflare/package.json ---"
+          cat packages/adapter-cloudflare/package.json || echo "File not found"
+          echo "--- packages/adapter-deno/package.json ---"
+          cat packages/adapter-deno/package.json || echo "File not found"
+          # Add any other packages whose dependencies you need to check
+
+      - name: Commit and Push Versioning Changes
+        if: steps.changesets_check.outputs.exists == 'true'
+        env:
+          # GITHUB_TOKEN is needed for authentication to push
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Configuring git user..."
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          echo "Staging changes..."
+          # Add all changes (version bumps, changelogs, deleted changesets)
+          git add .
+
+          # Check if there are staged changes before committing
+          if ! git diff --staged --quiet; then
+            echo "Committing version changes..."
+            # Use [skip ci] in commit message to prevent workflow loops
+            git commit -m "chore: update versions and changelogs for release [skip ci]"
+
+            echo "Pushing commit to main..."
+            # Push commit directly to main branch
+            git push origin main
+
+            echo "Pushing tags..."
+            # Push tags created by 'changeset version'
+            # Use --force if tags might already exist from failed runs (use with caution)
+            git push origin --tags
+          else
+            echo "No versioning changes detected to commit."
+          fi
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v1
