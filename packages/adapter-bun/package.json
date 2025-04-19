@@ -1,6 +1,6 @@
 {
   "name": "@xinkjs/adapter-bun",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Bun adapter for xink",
   "main": "index.js",
   "module": "index.js",
@@ -10,7 +10,7 @@
     "@types/bun": "latest"
   },
   "peerDependencies": {
-    "@xinkjs/xink": "workspace:*"
+    "@xinkjs/xink": "^0.14.4"
   },
   "files": [
     "index.js",
