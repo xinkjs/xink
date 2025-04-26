@@ -2,7 +2,7 @@
 
 xink is a directory-based filesystem router for APIs, acting as a Vite plugin. Under the hood, it uses a trie URL router, which is fast and scalable. It supports the bun, cloudflare, and deno runtimes.
 
-We're currently in the alpha phase of development and welcome contributions. Please see our contributing guide.
+We're currently in the beta phase of development and welcome contributions. Please see our contributing guide.
 
 ## Why use xink?
 
@@ -45,11 +45,7 @@ const api = new Xink()
 
 api.path('/api')
 
-export default {
-  fetch(req: Request) {
-    return api.fetch(req)
-  }
-}
+export default api
 ```
 
 ## Create Routes
@@ -390,6 +386,49 @@ export const handleError = (e: any) => {
     data: null, 
     error: e.message 
   })
+}
+```
+
+## JSX and fallback handling
+
+Basic JSX is supported, as well as directly returning text, numbers, and json.
+
+### JSX
+
+Ensure the following is in your `tsconfig.json` file:
+```json
+"extends": "./.xink/tsconfig.json",
+"compilerOptions": {
+  "jsx": "react-jsx",
+  "jsxImportSource": "@xinkjs/xink"
+}
+```
+
+Returns a text/html response.
+```js
+export const GET = () => {
+  return (
+    <h1>Hello from JSX!</h1>
+  )
+}
+```
+
+### Text and Numbers
+Returns a text/plain response. Numbers are converted to strings.
+```js
+export const GET = () => 'Ok'
+```
+```js
+export const GET = () => 42
+```
+
+### JSON
+Returns an application/json response.
+```js
+export const GET = () => {
+  return {
+    "message": "hello"
+  }
 }
 ```
 
