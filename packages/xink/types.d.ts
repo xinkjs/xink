@@ -185,3 +185,74 @@ export declare namespace StandardSchemaV1 {
       Schema['~standard']['types']
   >['output'];
 }
+
+class XinkVNode {
+  type;
+  tag;
+  props;
+  key;
+
+  constructor(tag, props, key)
+}
+
+// Make the JSX namespace available globally for TSX files
+declare global {
+  namespace JSX {
+      /**
+       * Represents a JSX element structure.
+       * Corresponds to the return type of the jsx/jsxs functions.
+       */
+      type Element = XinkVNode;
+
+      /**
+       * Defines the allowed properties for intrinsic HTML elements.
+       * Using Record<string, any> is the bare minimum.
+       * A full implementation would list all standard HTML tags and their specific attributes.
+       * See libraries like [at]types/react for comprehensive examples.
+       */
+      interface IntrinsicElements {
+          // Allow any standard HTML tag with any properties
+          [elem_mame: string]: Record<string, any>;
+
+          // Example of specific typing (better DX):
+          // div: { id?: string; class?: string; children?: any; style?: Record<string, string>; onClick?: Function };
+          // a: { href?: string; target?: string; children?: any; };
+          // img: { src?: string; alt?: string; width?: number; height?: number; };
+      }
+
+      // You might need to define ElementAttributesProperty and ElementChildrenAttribute
+      // if your runtime handles props differently, but defaults often work.
+      // interface ElementAttributesProperty { props: {}; }
+      // interface ElementChildrenAttribute { children: {}; }
+  }
+}
+
+// Define the type for props, including children
+type JsxProps = Record<string, any> & { children?: any };
+
+export const Fragment: unique symbol;
+
+export function jsx(
+  tag: string | symbol | Function,
+  props: JsxProps,
+  key?: string | number | undefined
+): XinkVNode;
+
+export function jsxDEV(
+  tag: string | symbol | Function,
+  props: JsxProps,
+  key?: string | number | undefined,
+  isStaticChildren?: boolean,
+  sourceDebugInfo?: {
+    fileName?: string;
+    lineNumber?: number;
+    columnNumber?: number;
+  },
+  thisArg?: any
+): XinkVNode;
+
+export function jsxs(
+  tag: string | symbol | Function,
+  props: JsxProps,
+  key?: string | number | undefined
+): XinkVNode;

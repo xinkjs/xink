@@ -8,6 +8,14 @@
     ".": {
       "import": "./lib/exports/index.js",
       "types": "./types.d.ts"
+    },
+    "./jsx-runtime": {
+      "import": "./lib/runtime/jsx.js",
+      "types": "./types.d.ts"
+    },
+    "./jsx-dev-runtime": {
+      "import": "./lib/runtime/jsx.js",
+      "types": "./types.d.ts"
     }
   },
   "scripts": {

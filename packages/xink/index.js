@@ -66,7 +66,8 @@ export function xink(xink_config = {}) {
     "../vite.config.js",
     "../vite.config.ts",
     "../src/**/*.js",
-    "../src/**/*.ts"
+    "../src/**/*.ts",
+    "../src/**/*.tsx"
   ],
   "exclude": [
     "../node_modules/**"
@@ -150,7 +151,7 @@ export function xink(xink_config = {}) {
 
       if (isBuild) {
         const routes_glob = new Glob(
-          join(cwd, routes_dir, '**/route.{js,ts}'),
+          join(cwd, routes_dir, '**/route.{js,ts,tsx}'),
           {},
         )
         const params_glob = new Glob(
