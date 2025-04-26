@@ -1,5 +1,11 @@
 # @xinkjs/xink
 
+## 0.15.0
+
+### Minor Changes
+
+- 8b184a5: Support for basic JSX
+
 ## 0.14.5
 
 ### Patch Changes
