@@ -4,7 +4,8 @@
 import { parse, serialize } from 'cookie'
 import { isContentType } from './utils.js'
 import { DISALLOWED_METHODS } from '../constants.js'
-import { StandardSchemaError } from './helpers.js'
+import { StandardSchemaError, json, text, html } from './helpers.js'
+import { isVNode, renderToString } from "./jsx.js"
 
 /* ATTR: SvelteKit */
 /**
@@ -243,6 +244,24 @@ export const redirectResponse = (status, location) => {
 	return response
 }
 
+const processHandler = (result) => {
+  if (isVNode(result)) {
+    // Handle JSX VNode result
+    return html(renderToString(result))
+  } else if (result instanceof Response) {
+    return result
+  } else if (typeof result === 'object' && result !== null) {
+    // Handle plain objects -> JSON response
+    return json(result)
+  } else if (result !== undefined && result !== null) {
+    // Handle strings, numbers, etc. -> Text response
+    return text(String(result))
+  } else {
+    // Handle null/undefined result -> 204 No Content
+    return new Response(null, { status: 204 })
+  }
+}
+
 /**
  * 
  * @type {ResolveEvent}
@@ -346,19 +365,16 @@ export const resolve = async (event) => {
 
   const hooks = event.store.HOOKS ?? null
 
-  if (typeof hooks !== 'object')
-    return await handler(event)
-
-  if (hooks?.VALIDATORS?.[event.request.method]) {
-    const validators = Object.entries(hooks.VALIDATORS[event.request.method])
-    await validation(validators)
-  } else if (hooks?.SCHEMAS?.[event.request.method]) {
-    using_schema = true
-    const schemas = Object.entries(hooks.SCHEMAS[event.request.method])
-    await validation(schemas)
-  }
-
   if (hooks) {
+    if (hooks.VALIDATORS?.[event.request.method]) {
+      const validators = Object.entries(hooks.VALIDATORS[event.request.method])
+      await validation(validators)
+    } else if (hooks?.SCHEMAS?.[event.request.method]) {
+      using_schema = true
+      const schemas = Object.entries(hooks.SCHEMAS[event.request.method])
+      await validation(schemas)
+    }
+
     const route_hooks = Object.entries(hooks).filter((h) => (h[0] !== 'VALIDATORS' || h[0] !== 'SCHEMAS'))
 
     for (let h = 0; h < route_hooks.length; h++) {
@@ -369,5 +385,5 @@ export const resolve = async (event) => {
     }
   }
 
-  return await handler(event)
+  return processHandler(await handler(event))
 }

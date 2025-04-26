@@ -6,7 +6,7 @@ const bun = `{
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "start": "bun run build/_worker.js"
+    "start": "bun run build/server.js"
   }
 }
 `
@@ -27,7 +27,7 @@ const deno = `{
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "start": "deno run --allow-net --allow-sys --allow-read=build build/_worker.js"
+    "start": "deno run --allow-net --allow-sys --allow-read=build build/server.js"
   },
   "nodeModulesDir": "auto"
 }

@@ -71,7 +71,7 @@ export const createManifestVirtualModule = async (config) => {
   for (let p of readFiles(routes_dir, { filename: 'route' })) {
     const relativePath = p.substring(routes_dir.length)
     const parts = relativePath.split('/')
-    const dirs = parts.filter(t => !((/^route\.(?:js|ts)$/).test(t) || t === ''))
+    const dirs = parts.filter(t => !((/^route\.(?:js|ts|tsx)$/).test(t) || t === ''))
     let urlPath = dirs.length === 0 ? '/' : `/${dirs.join('/')}`
 
     // --- Convert path segments (same logic as original) ---
