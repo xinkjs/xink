@@ -1,5 +1,12 @@
 # @xinkjs/adapter-bun
 
+## 0.2.5
+
+### Patch Changes
+
+- Updated dependencies [8b184a5]
+  - @xinkjs/xink@0.15.0
+
 ## 0.2.4
 
 ### Patch Changes

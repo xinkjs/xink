@@ -1,6 +1,6 @@
 {
   "name": "xk",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "A CLI for xink projects",
   "license": "MIT",
   "bin": "./dist/bin.js",
