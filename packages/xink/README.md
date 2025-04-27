@@ -1,6 +1,6 @@
 # @xinkjs/xink
 
-xink is a directory-based filesystem router for APIs, acting as a Vite plugin. Under the hood, it uses a trie URL router, which is fast and scalable. It supports the bun, cloudflare, and deno runtimes.
+xink is a directory-based filesystem router for APIs - and a Vite plugin. Under the hood, it uses a trie URL router, which is fast and scalable. It supports the bun, cloudflare, and deno runtimes.
 
 We're currently in the beta phase of development and welcome contributions. Please see our contributing guide.
 
@@ -11,6 +11,7 @@ We're currently in the beta phase of development and welcome contributions. Plea
 - HTTP-based handler names (e.g. GET, POST) free you from a lot of naming work.
 - Simple data validation with your favorite library.
 - Easy OpenAPI integration.
+- Supports JSX.
 - No-fuss setup with our `xk` CLI tool.
 - Native handling of 404 and 405 (Method Not Allowed) responses.
 
@@ -60,14 +61,13 @@ xink supports these route handler exports: `GET`, `POST`, `PUT`, `PATCH`, `DELET
 /* route endpoint example, src/routes/route.ts */
 import type { RequestEvent } from '@xinkjs/xink'
 
-export const GET = (event: RequestEvent) => {
+export const GET = () => {
   return event.text('Welcome to xink!')
 }
 
 /* handle all other http methods */
 export default (event: RequestEvent) => {
-  return event.json({ message: `Hello ${event.method}!` })
-}
+  return { message: `Hello ${event.method}!` }
 ```
 
 ### Route Types
@@ -97,7 +97,7 @@ Because of the way the xin URL router works, the rest segment's param is accesse
 ```ts
 /* src/routes/hello/[...rest]/route.js */
 export const GET = ({ params }) => {
-  return new Response(`Hello ${params['*']}!`) // not `params.rest`
+  return `Hello ${params['*']}!` // not `params.rest`
 }
 ```
 
@@ -112,8 +112,7 @@ This feature does not populate `event.valid`, like validators does.
 ```ts
 /* src/params/fruits.ts */
 export const match = (param: string) => {
-  const fruits = new Set(['apple', 'orange', 'grape'])
-  return fruits.has(param)
+  return new Set(['apple', 'orange', 'grape']).has(param)
 } 
 ```
 
@@ -194,7 +193,7 @@ You can define hooks for each route, with the `HOOKS` export. They are run for a
 
 - Have access to `Request`.
 - Do not have access to `Response`.
-- Must return either `null` or `event`. If `event` is changed, it needs to be returned in order to access it in handlers.
+- Must return either `null` or `event`. If `event` is changed, it needs to be returned in order to access the updated version in handlers.
 - Functions can be sync or async.
 - Are not guaranteed to run in any particular order.
 
@@ -224,13 +223,13 @@ export const HOOKS = {
 export const GET = (event) => { 
   console.log(event.locals.state.some) // thing
   console.log(event.locals.poki) // <some json>
-  return new Response('Hello GET') 
+  return 'Hello GET'
 }
 
 export const POST = (event) => { 
   console.log(event.locals.state.some) // thing
   console.log(event.locals.poki) // <some json>
-  return new Response('Hello POST') 
+  return 'Hello POST'
 }
 ```
 
@@ -406,9 +405,10 @@ Ensure the following is in your `tsconfig.json` file:
 
 Returns a text/html response.
 ```js
+/* src/routes/route.tsx */
 export const GET = () => {
   return (
-    <h1>Hello from JSX!</h1>
+    <h1>Welcome to xink!</h1>
   )
 }
 ```
@@ -427,14 +427,14 @@ Returns an application/json response.
 ```js
 export const GET = () => {
   return {
-    "message": "hello"
+    "message": "Welcome to xink!"
   }
 }
 ```
 
 ## Helper Functions
 
-All helper functions are available within `event` but can also be top-level imported if needed.
+All helper functions are available within `event` but can also be top-level imported from `@xinkjs/xink` if needed.
 
 ### html
 Returns an html response. It sends a `Content-Length` header and a `Content-Type` header of `text/html`.
@@ -499,7 +499,7 @@ export const GET = ({ cookies }) => {
 
 ## Locals
 
-`event.locals` is available for you to define custom information per request. These are typically defined in middleware and used in route handlers.
+`event.locals` is available for you to define custom information per request. These are typically defined in middleware and then used in route handlers.
 
 ```ts
 /* src/middleware/middleware.ts */
@@ -605,11 +605,7 @@ api.openapi({
   }
 })
 
-export default {
-  fetch(req: Request) {
-    return api.fetch(req)
-  }
-}
+export default api
 ```
 
 ## 404 and 405 handling
@@ -643,7 +639,7 @@ import { xink } from '@xinkjs/xink'
 import { defineConfig } from 'vite'
 import adapter from '@xinkjs/adapter-bun'
 
-export default defineConfig(async function () {
+export default defineConfig(function () {
   return {
     plugins: [
       xink({ 
@@ -666,7 +662,7 @@ import { xink } from '@xinkjs/xink'
 import { defineConfig } from 'vite'
 import adapter from '@xinkjs/adapter-bun'
 
-export default defineConfig(async function () {
+export default defineConfig(function () {
   return {
     plugins: [
       xink({ 
