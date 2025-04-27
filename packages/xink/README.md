@@ -62,7 +62,7 @@ xink supports these route handler exports: `GET`, `POST`, `PUT`, `PATCH`, `DELET
 import type { RequestEvent } from '@xinkjs/xink'
 
 export const GET = () => {
-  return event.text('Welcome to xink!')
+  return 'Welcome to xink!'
 }
 
 /* handle all other http methods */
