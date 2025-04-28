@@ -43,7 +43,7 @@ export const createXink = (project_path: string, runtime: string, language: stri
         "../vite.config.ts",
         "../src/**/*.js",
         "../src/**/*.ts",
-        "../src/**/*.tsx
+        "../src/**/*.tsx"
     ],
     "exclude": [
         "../node_modules/**"
@@ -86,7 +86,7 @@ export default api
     writeFileSync(join(project_path, 'vite.config.js'),
         `import { xink } from '@xinkjs/xink'
 import { defineConfig } from 'vite'
-import adapter from 'adapter-${runtime}'
+import adapter from '@xinkjs/adapter-${runtime}'
 
 export default defineConfig(async function () {
     return {
