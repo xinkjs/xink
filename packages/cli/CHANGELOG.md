@@ -1,5 +1,11 @@
 # xk
 
+## 0.2.0
+
+### Minor Changes
+
+- 0edade6: Add wrangler config for cloudflare
+
 ## 0.1.7
 
 ### Patch Changes
