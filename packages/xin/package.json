@@ -1,6 +1,6 @@
 {
   "name": "@xinkjs/xin",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "An enhanced javascript URL router",
   "type": "module",
   "types": "types.d.ts",

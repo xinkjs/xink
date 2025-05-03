@@ -1,5 +1,13 @@
 # @xinkjs/adapter-cloudflare
 
+## 0.2.6
+
+### Patch Changes
+
+- f9e131b: Fix package.json contents
+- Updated dependencies [f9e131b]
+  - @xinkjs/xink@0.15.2
+
 ## 0.2.5
 
 ### Patch Changes
