@@ -24,11 +24,12 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/xinkjs/xink/packages/adapter-bun.git"
+    "url": "git+https://github.com/xinkjs/xink.git",
+    "directory": "packages/adapter-bun"
   },
   "bugs": {
     "url": "https://github.com/xinkjs/xink/issues"
   },
-  "homepage": "https://github.com/xinkjs/xink/packages/adapter-bun#readme",
+  "homepage": "https://github.com/xinkjs/xink/tree/main/packages/adapter-bun#readme",
   "license": "MIT"
 }

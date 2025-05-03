@@ -27,11 +27,12 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/xinkjs/xink/packages/adapter-cloudflare.git"
+    "url": "git+https://github.com/xinkjs/xink.git",
+    "directory": "packages/adapter-cloudflare"
   },
   "bugs": {
     "url": "https://github.com/xinkjs/xink/issues"
   },
-  "homepage": "https://github.com/xinkjs/xink/packages/adapter-cloudflare#readme",
+  "homepage": "https://github.com/xinkjs/xink/tree/main/packages/adapter-cloudflare#readme",
   "license": "MIT"
 }
