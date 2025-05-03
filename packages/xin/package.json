@@ -32,11 +32,12 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/xinkjs/xink/packages/cli.git"
+    "url": "git+https://github.com/xinkjs/xink.git",
+    "directory": "packages/xin"
   },
   "bugs": {
     "url": "https://github.com/xinkjs/xink/issues"
   },
-  "homepage": "https://github.com/xinkjs/xink/packages/cli#readme",
+  "homepage": "https://github.com/xinkjs/xink/tree/main/packages/xin#readme",
   "license": "MIT"
 }

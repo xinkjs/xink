@@ -47,12 +47,13 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/xinkjs/xink/packages/xink.git"
+    "url": "git+https://github.com/xinkjs/xink.git",
+    "directory": "packages/xink"
   },
   "bugs": {
     "url": "https://github.com/xinkjs/xink/issues"
   },
-  "homepage": "https://github.com/xinkjs/xink/packages/xink#readme",
+  "homepage": "https://github.com/xinkjs/xink/tree/main/packages/xink#readme",
   "license": "MIT",
   "sideEffects": false
 }

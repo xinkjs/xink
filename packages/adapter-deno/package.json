@@ -24,11 +24,12 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/xinkjs/xink/packages/adapter-deno.git"
+    "url": "git+https://github.com/xinkjs/xink.git",
+    "directory": "packages/adapter-deno"
   },
   "bugs": {
     "url": "https://github.com/xinkjs/xink/issues"
   },
-  "homepage": "https://github.com/xinkjs/xink/packages/adapter-deno#readme",
+  "homepage": "https://github.com/xinkjs/xink/tree/main/packages/adapter-deno#readme",
   "license": "MIT"
 }
