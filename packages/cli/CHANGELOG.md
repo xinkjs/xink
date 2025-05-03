@@ -1,5 +1,11 @@
 # xk
 
+## 0.2.1
+
+### Patch Changes
+
+- f9e131b: Fix package.json contents
+
 ## 0.2.0
 
 ### Minor Changes

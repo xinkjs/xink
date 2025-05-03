@@ -1,5 +1,13 @@
 # @xinkjs/xink
 
+## 0.15.2
+
+### Patch Changes
+
+- f9e131b: Fix package.json contents
+- Updated dependencies [f9e131b]
+  - @xinkjs/xin@0.4.1
+
 ## 0.15.1
 
 ### Patch Changes
