@@ -2,7 +2,7 @@
 /** @import { CookieParseOptions, CookieSerializeOptions } from 'cookie' */
 
 import { parse, serialize } from 'cookie'
-import { isContentType } from './utils.js'
+import { inferObjectValueTypes, isContentType } from './utils.js'
 import { DISALLOWED_METHODS } from '../constants.js'
 import { StandardSchemaError, json, text, html } from './helpers.js'
 import { isVNode, renderToString } from "./jsx.js"
@@ -340,12 +340,18 @@ export const resolve = async (event) => {
           form_values[p[0]] = p[1]
         }
 
-        event.valid.form = using_schema ? await standardValidator(validator, form_values) : validator(form_values)
+        /* Apply type inference. */
+        const inferred_form_data = inferObjectValueTypes(form_values)
+
+        event.valid.form = using_schema ? await standardValidator(validator, inferred_form_data) : validator(inferred_form_data)
         continue
       }
 
       if (validator_type === 'params') {
-        event.valid.params = using_schema ? await standardValidator(validator, event.params) : validator(event.params)
+        /* Apply type inference. */
+        const inferred_params = inferObjectValueTypes(event.params)
+
+        event.valid.params = using_schema ? await standardValidator(validator, inferred_params) : validator(inferred_params)
         continue
       }
       
@@ -357,7 +363,10 @@ export const resolve = async (event) => {
           query_obj[key] = value
         }
 
-        event.valid.query = using_schema ? await standardValidator(validator, query_obj) : validator(query_obj)
+        /* Apply type inference. */
+        const inferred_search_params = inferObjectValueTypes(query_obj)
+
+        event.valid.query = using_schema ? await standardValidator(validator, inferred_search_params) : validator(inferred_search_params)
         continue
       }
     }

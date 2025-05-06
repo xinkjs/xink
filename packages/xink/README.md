@@ -237,6 +237,11 @@ export const POST = (event) => {
 
 Validate incoming route data for types `form`, `json`, route `params`, or `query` search params. Validated data is available as an object within `event.valid`. You can validate using either validator functions or schemas.
 
+Any "string" values within `form`, `params`, and `query`, are automatically inferred to their intended type. For example:
+- "42" -> 42 (number)
+- "false" -> false (boolean)
+- "null" -> null (null)
+
 Any thrown errors can be handled by `handleError()` (see further below).
 
 ### Using Validators
