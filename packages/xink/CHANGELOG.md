@@ -1,5 +1,11 @@
 # @xinkjs/xink
 
+## 0.15.3
+
+### Patch Changes
+
+- 9494010: Infer validation types for strings
+
 ## 0.15.2
 
 ### Patch Changes
