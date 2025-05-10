@@ -324,6 +324,8 @@ export const POST = async (event: RequestEvent<PostTypes>) => {
 
 `SCHEMAS` is a built-in `HOOKS` object. For each route handler and data type, you can define a schema to validate data. You can only use SCHEMAS when using a validation library that is [Standard Schema](https://standardschema.dev) compliant. You can use types with this as well.
 
+> With the information you define here, xink will automatically create OpenAPI docs for the endpoint. The only requirement is that you set your openapi docs path - see [openapi config](#openapi-configuration)
+
 ```js
 /* src/routes/route.js */
 import * as v from 'valibot'
@@ -391,6 +393,88 @@ export const handleError = (e: any) => {
     error: e.message 
   })
 }
+```
+
+## OpenAPI
+
+xink makes it easy for you to create OpenAPI reference docs, powered by [Scalar](https://scalar.com/) to render them in a browser.
+
+You can let xink handle your basic route info by using the [SCHEMAS](#using-standard-schema) hook to define your request schemas. Any additional information, like responses, still need to be defined in the `OPENAPI` export.
+
+When using `SCHEMAS`, we merge data from the `OPENAPI` export (which takes priority if there is conflicting configuration). Be aware that you need to provide JSON schema for this, which a lot of validation libraries have a utility for.
+
+### Endpoint configuration
+
+First, define your `OPENAPI` export within each route file.
+
+```js
+/* src/routes/route.ts */
+import * as v from 'valibot'
+import { toJsonSchema } from "@valibot/to-json-schema"
+
+const post_json_schema = v.object({
+  hello: v.string(),
+  goodbye: v.string()
+})
+
+const post_res_schema = v.object({
+  data: v.nullable(v.object({
+    message: v.string()
+  })),
+  error: v.nullable(v.unknown())
+})
+
+/* Define route endpoints. */
+...
+
+/* Define SCHEMAS within the HOOKS export. */
+export const HOOKS = {
+  SCHEMAS: {
+    POST: {
+      json: toJsonSchema(post_json_schema)
+    }
+  }
+}
+
+/* Define OpenAPI definitions. */
+export const OPENAPI = {
+  post: {
+    summary: "Post root route", // defaults to the route's path if not defined
+    responses: {
+      200: {
+        description: "OK",
+        content: {
+          "application/json": {
+            schema: toJsonSchema(post_res_schema)
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+### OpenAPI configuration
+
+Then, within your project's entrypoint file, define your desired path to the OpenAPI docs and any optional metadata. When the router is started, you can visit the reference docs in a browser - e.g. http://localhost:3000/reference
+
+```ts
+/* e.g. index.ts */
+import { Xink } from "@xinkjs/xink"
+
+const api = new Xink()
+
+api.openapi({ 
+  path: "/reference", 
+  data: { 
+    "info": {
+      "title": "Xink API",
+      "version": "0.0.0"
+    }
+  }
+})
+
+export default api
 ```
 
 ## JSX and fallback handling
@@ -533,84 +617,6 @@ declare global {
 }
 
 export {}
-```
-
-## OpenAPI
-
-xink makes it easy for you to create OpenAPI reference docs, powered by [Scalar](https://scalar.com/) to render them in a browser.
-
-### Endpoint configuration
-
-First, define your `OPENAPI` export within each route file.
-
-```js
-/* src/routes/route.ts */
-import * as v from 'valibot'
-import { toJsonSchema } from "@valibot/to-json-schema"
-
-const post_json_schema = v.object({
-  hello: v.string(),
-  goodbye: v.string()
-})
-
-const post_res_schema = v.object({
-  data: v.nullable(v.object({
-    message: v.string()
-  })),
-  error: v.nullable(v.unknown())
-})
-
-/* Define route endpoints. */
-...
-
-/* Define OpenAPI definitions. */
-export const OPENAPI = {
-  post: {
-    summary: "Post root route",
-    requestBody: {
-      required: true,
-      content: {
-        "application/json": {
-          schema: toJsonSchema(post_json_schema)
-        }
-      }
-    },
-    responses: {
-      200: {
-        description: "OK",
-        content: {
-          "application/json": {
-            schema: toJsonSchema(post_res_schema)
-          }
-        }
-      }
-    }
-  }
-}
-```
-
-### API configuration
-
-Then, within your project's entrypoint file, define your desired path to the OpenAPI docs, and any optional metadata. When the router is started, you can visit the reference docs in a browser - e.g. http://localhost:3000/reference
-
-```ts
-/* e.g. index.ts */
-import { Xink } from "@xinkjs/xink"
-
-const api = new Xink()
-
-api.openapi({ 
-  path: "/reference", 
-  data: { 
-    "openapi": "3.1.0",
-    "info": {
-      "title": "Xink API",
-      "version": "0.0.0"
-    }
-  }
-})
-
-export default api
 ```
 
 ## 404 and 405 handling
