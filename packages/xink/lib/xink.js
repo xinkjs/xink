@@ -5,7 +5,7 @@ import { json, text, html, redirect } from './runtime/helpers.js'
 import { addCookiesToHeaders, getCookies, isFormContentType, redirectResponse, resolve } from './runtime/fetch.js'
 import { Redirect } from './runtime/shared.js'
 import { ALLOWED_HANDLERS } from './constants.js'
-import { template } from "./runtime/openapi.js"
+import { generateOpenapiForRouteMethods, openapi_template } from "./runtime/openapi.js"
 
 export class Xink extends Router {
   /** @type {string} */
@@ -16,7 +16,10 @@ export class Xink extends Router {
   #middleware = (event, resolve) => resolve(event)
   /** @type {object} */
   #openapi = {
-    paths: {}
+    paths: {},
+    metadata: { 
+      openapi: "3.1.0"
+    }
   }
   #is_initialized = false
   #router = false
@@ -66,9 +69,8 @@ export class Xink extends Router {
     const url = new URL(request.url)
 
     /* Handle OpenAPI request. */
-    if (url.pathname === this.#openapi.path) {
-      return html(template({ ...this.#openapi.metadata, paths: this.#openapi.paths }))
-    }
+    if (this.#openapi.path && this.#openapi.metadata && url.pathname === this.#openapi.path)
+      return html(openapi_template({ ...this.#openapi.metadata, paths: this.#openapi.paths }))
 
     /* CSRF Content Type and Origin Check. */
     const check_origin = XINK_CHECK_ORIGIN
@@ -206,7 +208,12 @@ export class Xink extends Router {
 
   openapi({ path, data }) {
     this.#openapi.path = path
-    if (data) this.#openapi.metadata = data
+    if (data)
+      /* Merge provided metadata with existing (paths are built during init). */
+      this.#openapi.metadata = {
+        ...(this.#openapi.metadata),
+        ...data,
+      }
   }
 
   /* Initialize the router. */
@@ -230,23 +237,41 @@ export class Xink extends Router {
       if (this.#manifest.error) this.#error_handler = this.#manifest.error
 
       /* Register routes. */
-      for (const route of this.#manifest.routes.values()) {
-        const handlers = route.handlers
-        const derived_path = this.#base_path ? this.#base_path + (route.path === '/' ? '' : route.path) : route.path
+      for (const route_info of this.#manifest.routes) {
+        const derived_path = this.#base_path ? this.#base_path + (route_info.path === '/' ? '' : route_info.path) : route_info.path
         const store = this.register(derived_path)
 
+        const handlers = route_info.handlers
+        const schemas_export = handlers.HOOKS?.SCHEMAS || null
+        const openapi_export = handlers.OPENAPI || null
+
+        /* Generate the OpenAPI definitions for all methods in this route module. */
+        const openapi_for_methods_on_this_path = generateOpenapiForRouteMethods(schemas_export, openapi_export)
+
+        if (Object.keys(openapi_for_methods_on_this_path).length > 0) {
+          if (!this.#openapi.paths[derived_path]) {
+            this.#openapi.paths[derived_path] = {}
+          }
+          /* Merge with any existing path definitions (shouldn't happen if paths are unique). */
+          this.#openapi.paths[derived_path] = {
+            ...this.#openapi.paths[derived_path],
+            ...openapi_for_methods_on_this_path
+          }
+        }
+
+        /* Register actual HTTP handlers. */
         for (const method in handlers) {
-          if (method === 'OPENAPI' && typeof handlers[method] === 'object') {
-            this.#openapi.paths[derived_path] = handlers[method]
+          /* Do not store OPENAPI object. */
+          if (method === 'OPENAPI') continue
+
+          /* Ensure HTTP handlers are functions. */
+          if (typeof handlers[method] !== 'function' && method !== 'HOOKS')
+            throw new Error(`Handler ${method} for route ${route_info.path} is not a function.`)
+
+          if (!ALLOWED_HANDLERS.has(method)) {
+            console.warn(`Unsupported handler method '${method}' found for route ${route_info.path}. Skipping.`)
             continue
           }
-
-          if (typeof handlers[method] !== 'function' && method !== 'HOOKS')
-            throw new Error(`Handler ${method} for route ${route.path} is not a function.`)
-
-          if (!ALLOWED_HANDLERS.has(method))
-            throw new Error(`xink does not support the ${method} endpoint handler, found for ${route.path}`)
-
           store[method] = handlers[method]
         }
       }
