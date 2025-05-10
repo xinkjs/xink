@@ -1,5 +1,11 @@
 # @xinkjs/xink
 
+## 0.16.0
+
+### Minor Changes
+
+- 9ddfae3: Use SCHEMAS hook for OpenAPI docs data
+
 ## 0.15.3
 
 ### Patch Changes

@@ -1,6 +1,6 @@
 {
   "name": "@xinkjs/adapter-deno",
-  "version": "0.2.6",
+  "version": "0.3.0",
   "description": "Deno adapter for xink",
   "main": "index.js",
   "module": "index.js",
@@ -10,7 +10,7 @@
     "@types/bun": "latest"
   },
   "peerDependencies": {
-    "@xinkjs/xink": "^0.15.2"
+    "@xinkjs/xink": "^0.16.0"
   },
   "files": [
     "index.js",
