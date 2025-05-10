@@ -16,11 +16,22 @@ export const mergeObjects = (current, updates) => {
   let merged = { ...current }
 
   for (let key of Object.keys(updates)) {
-    if (typeof updates[key] !== 'object') {
-      merged[key] = updates[key]
+    const current_value = merged[key]
+    const update_value = updates[key]
+
+    if (Array.isArray(current_value) && Array.isArray(update_value)) {
+      /* Merge arrays. */
+      merged[key] = [...new Set([...current_value, ...update_value])]
+    } else if (typeof update_value === 'object' && update_value !== null && Array.isArray(update_value) &&
+      typeof current_value === 'object' && current_value !== null && !Array.isArray(current_value)) {
+      /* Both are non-null, non-array objects, so recurse. */
+      merged[key] = mergeObjects(current_value, update_value)
     } else {
-      /* key is an object, run mergeObjects again. */
-      merged[key] = mergeObjects(merged[key] || {}, updates[key])
+      /**
+       * Otherwise (primitive, null, or current_value is not an object to merge into),
+       * the update value simply overwrites.
+       */
+      merged[key] = update_value
     }
   }
 
