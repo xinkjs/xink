@@ -255,7 +255,7 @@ In the Zod example below, only json data which matches your schema, will be avai
 import { z } from 'zod'
 
 const VALIDATORS = {
-  POST: {
+  post: {
     json: (z.object({
       hello: z.string(),
       goodbye: z.number()
@@ -303,7 +303,7 @@ type PostTypes = {
 }
 
 const VALIDATORS: Validators = {
-  POST: {
+  post: {
     json: v.parser(post_json_schema)
   }
 }
@@ -331,7 +331,7 @@ export const POST = async (event: RequestEvent<PostTypes>) => {
 import * as v from 'valibot'
 
 const SCHEMAS = {
-  POST: {
+  post: {
     json: v.object({
       hello: v.string(),
       goodbye: v.number()
@@ -430,7 +430,7 @@ const post_res_schema = v.object({
 /* Define SCHEMAS within the HOOKS export. */
 export const HOOKS = {
   SCHEMAS: {
-    POST: {
+    post: {
       json: toJsonSchema(post_json_schema)
     }
   }
@@ -818,14 +818,25 @@ interface RequestEvent<V extends AllowedValidatorTypes = AllowedValidatorTypes> 
   valid: V
 }
 
+export interface Schemas {
+  get?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'params' | 'query'>;
+  post?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'params' | 'query'>;
+  put?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'params' | 'query'>;
+  patch?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'params' | 'query'>;
+  delete?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'params' | 'query'>;
+  head?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'params' | 'query'>;
+  options?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'params' | 'query'>;
+  default?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'params' | 'query'>;
+}
+
 interface Validators {
-  GET?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'params' | 'query'>;
-  POST?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'params' | 'query'>;
-  PUT?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'params' | 'query'>;
-  PATCH?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'params' | 'query'>;
-  DELETE?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'params' | 'query'>;
-  HEAD?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'params' | 'query'>;
-  OPTIONS?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'params' | 'query'>;
+  get?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'params' | 'query'>;
+  post?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'params' | 'query'>;
+  put?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'params' | 'query'>;
+  patch?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'params' | 'query'>;
+  delete?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'params' | 'query'>;
+  head?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'params' | 'query'>;
+  options?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'params' | 'query'>;
   default?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'params' | 'query'>;
 }
 ```

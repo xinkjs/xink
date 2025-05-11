@@ -66,15 +66,14 @@ export const generateOpenapiForRouteMethods = (schemas_export, openapi_export) =
   const methods_to_process = new Set()
 
   if (schemas_export)
-    Object.keys(schemas_export).forEach(method => methods_to_process.add(method.toUpperCase()))
+    Object.keys(schemas_export).forEach(method => methods_to_process.add(method))
 
   if (openapi_export)
-    Object.keys(openapi_export).forEach(method => methods_to_process.add(method.toUpperCase()))
+    Object.keys(openapi_export).forEach(method => methods_to_process.add(method))
 
-  for (const http_method_upper of methods_to_process) {
-    const http_method_lower = http_method_upper.toLowerCase()
-    const method_schemas = schemas_export?.[http_method_upper] || {}
-    const manual_method_openapi = openapi_export?.[http_method_lower] || {} // OpenAPI usually uses lowercase methods
+  for (const method of methods_to_process) {
+    const method_schemas = schemas_export?.[method] || {}
+    const manual_method_openapi = openapi_export?.[method] || {}
 
     const inferred_operation = {}
 
@@ -176,7 +175,7 @@ export const generateOpenapiForRouteMethods = (schemas_export, openapi_export) =
 
 
     if (Object.keys(final_operation).length > 0)
-      openapi_by_method[http_method_lower] = final_operation
+      openapi_by_method[method] = final_operation
   }
 
   return openapi_by_method

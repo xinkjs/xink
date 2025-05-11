@@ -373,14 +373,15 @@ export const resolve = async (event) => {
   }
 
   const hooks = event.store.HOOKS ?? null
+  const method = event.request.method.toLowerCase()
 
   if (hooks) {
-    if (hooks.VALIDATORS?.[event.request.method]) {
-      const validators = Object.entries(hooks.VALIDATORS[event.request.method])
+    if (hooks.VALIDATORS?.[method]) {
+      const validators = Object.entries(hooks.VALIDATORS[method])
       await validation(validators)
-    } else if (hooks?.SCHEMAS?.[event.request.method]) {
+    } else if (hooks?.SCHEMAS?.[method]) {
       using_schema = true
-      const schemas = Object.entries(hooks.SCHEMAS[event.request.method])
+      const schemas = Object.entries(hooks.SCHEMAS[method])
       await validation(schemas)
     }
 
