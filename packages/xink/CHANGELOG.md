@@ -1,5 +1,11 @@
 # @xinkjs/xink
 
+## 0.17.1
+
+### Patch Changes
+
+- b114c7b: refactor, clarify hook processing
+
 ## 0.17.0
 
 ### Breaking Changes
