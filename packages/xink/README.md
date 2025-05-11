@@ -193,30 +193,19 @@ You can define hooks for each route, with the `HOOKS` export. They are run for a
 
 - Have access to `Request`.
 - Do not have access to `Response`.
-- Must return either `null` or `event`. If `event` is changed, it needs to be returned in order to access the updated version in handlers.
 - Functions can be sync or async.
-- Are not guaranteed to run in any particular order.
+- Highly likely to run in top-down order, as we use `Object.entries()` to process them.
 
 ```ts
 /* src/routes/route.ts */
 import logger from 'pino'
 
 export const HOOKS = {
-  state: (event: RequestEvent) => {
-    event.locals.state = { some: 'thing' }
-
-    return event
-  },
-  log: () => {
-    logger().info('Hello from Pino!')
-
-    return null
-  },
+  state: (event: RequestEvent) => event.locals.state = { some: 'thing' },
+  log: () => logger().info('Hello from Pino!'),
   poki: async (event: RequestEvent) => {
     const res = await fetch('https://pokeapi.co/api/v2/pokemon/pikachu')
     event.locals.poki = await res.json()
-
-    return event
   }
 }
 
@@ -265,7 +254,7 @@ const VALIDATORS = {
 
 export const HOOKS = {
   VALIDATORS,
-  someOtherHook: () => null
+  someOtherHook: () => console.log('the right stuff')
 }
 
 /**
@@ -341,7 +330,7 @@ const SCHEMAS = {
 
 export const HOOKS = {
   SCHEMAS,
-  someOtherHook: () => null
+  someOtherHook: () => console.log('the right stuff')
 }
 
 /**

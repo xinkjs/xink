@@ -21,4 +21,8 @@ export const DISALLOWED_METHODS = new Set([
   'default', 'HOOKS', 'OPENAPI'
 ])
 
+export const SPECIAL_HOOKS = new Set([
+  'SCHEMAS', 'VALIDATORS'
+])
+
 export const MAX_COOKIE_SIZE = 4129
