@@ -1,13 +1,13 @@
 {
   "name": "@xinkjs/adapter-cloudflare",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Cloudflare Workers adapter for xink",
   "main": "index.js",
   "module": "index.js",
   "types": "index.d.ts",
   "type": "module",
   "peerDependencies": {
-    "@xinkjs/xink": "^0.16.0"
+    "@xinkjs/xink": "^0.17.0"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20240403.0",
