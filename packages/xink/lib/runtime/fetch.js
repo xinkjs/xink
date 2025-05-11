@@ -3,7 +3,7 @@
 
 import { parse, serialize } from 'cookie'
 import { inferObjectValueTypes, isContentType } from './utils.js'
-import { DISALLOWED_METHODS } from '../constants.js'
+import { DISALLOWED_METHODS, SPECIAL_HOOKS } from '../constants.js'
 import { StandardSchemaError, json, text, html } from './helpers.js'
 import { isVNode, renderToString } from "./jsx.js"
 
@@ -385,12 +385,16 @@ export const resolve = async (event) => {
       await validation(schemas)
     }
 
-    const route_hooks = Object.entries(hooks).filter((h) => (h[0] !== 'VALIDATORS' || h[0] !== 'SCHEMAS'))
+    for (const [name, fn] of Object.entries(hooks)) {
+      if (SPECIAL_HOOKS.has(name) || typeof fn !== 'function')
+        continue
 
-    for (let h = 0; h < route_hooks.length; h++) {
-      if (typeof route_hooks[h][1] === 'function') {
-        const result = await route_hooks[h][1](event)
-        if (result) event = result
+      /* Include try/catch here, so we can log any thrown error. */
+      try {
+        await fn(event)
+      } catch (err) {
+        console.log(err)
+        throw err // rethrow, for handling by try/catch in xink.js
       }
     }
   }
