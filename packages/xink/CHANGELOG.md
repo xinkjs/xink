@@ -1,5 +1,11 @@
 # @xinkjs/xink
 
+## 0.17.0
+
+### Breaking Changes
+
+- 709f7ad: SCHEMAS and VALIDATORS methods must be lowercase
+
 ## 0.16.0
 
 ### Minor Changes
