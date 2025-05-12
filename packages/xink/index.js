@@ -7,8 +7,8 @@ import { statSync, mkdirSync, writeFileSync } from 'node:fs'
 import { join, relative } from 'node:path'
 import { Glob } from 'glob'
 
-const virtualManifestId = 'virtual:xink-manifest'
-const resolvedVirtualManifestId = '\0' + virtualManifestId
+const virtual_manifest_id = 'virtual:xink-manifest'
+const resolved_virtual_manifest_id = '\0' + virtual_manifest_id
 
 let vite_config
 /** @type {XinkAdapter | undefined} */
@@ -32,8 +32,8 @@ export function xink(xink_config = {}) {
   const middleware_dir = validated_config.middleware_dir
   const error_file_path = join('src', 'error')
 
-  let virtualManifestContent = ''
-  let isBuild = false
+  let virtual_manifest_content = ''
+  let is_build = false
 
   let tsconfig_file_exists = false
   const tsconfig_path = join(cwd, '.xink/tsconfig.json')
@@ -125,13 +125,13 @@ export function xink(xink_config = {}) {
     },
 
     resolveId(id) {
-      if (id === virtualManifestId)
-        return resolvedVirtualManifestId
+      if (id === virtual_manifest_id)
+        return resolved_virtual_manifest_id
     },
 
     async load(id) {
-      if (id === resolvedVirtualManifestId) {
-        if (isBuild) {
+      if (id === resolved_virtual_manifest_id) {
+        if (is_build) {
           try {
             return await createManifestVirtualModule(validated_config)
           } catch (error) {
@@ -139,7 +139,7 @@ export function xink(xink_config = {}) {
             throw error
           }
         } else {
-          return virtualManifestContent
+          return virtual_manifest_content
         }
       }
 
@@ -147,9 +147,9 @@ export function xink(xink_config = {}) {
     },
 
     async config(config, env) {
-      isBuild = env.command === 'build'
+      is_build = env.command === 'build'
 
-      if (isBuild) {
+      if (is_build) {
         const routes_glob = new Glob(
           join(cwd, routes_dir, '**/route.{js,ts,tsx}'),
           {},
@@ -220,9 +220,9 @@ export function xink(xink_config = {}) {
       }
     },
     async configureServer(server) {
-      // Generate initial manifest content on server start
+      /* Generate initial manifest content on server start. */
       try {
-        virtualManifestContent = await createManifestVirtualModule(
+        virtual_manifest_content = await createManifestVirtualModule(
           validated_config,
         )
       } catch (error) {
@@ -230,7 +230,6 @@ export function xink(xink_config = {}) {
         throw error
       }
 
-      // Keep existing middleware for handling requests
       server.middlewares.use(async (req, res) => {
         try {
           /** @type {{ default: { fetch: (request: Request) => Promise<Response> }}} */
@@ -245,7 +244,6 @@ export function xink(xink_config = {}) {
           console.error('[Xink] Error processing request:', error)
           res.statusCode = 500
           res.end('Internal Server Error')
-          // Optionally pass error to Vite's error overlay
           server.ssrFixStacktrace(error)
         }
       })
@@ -271,55 +269,52 @@ export function xink(xink_config = {}) {
     },
 
     async hotUpdate(context) {
-      // Get file path relative to CWD for easier comparison
-      const changedFileRelative = relative(cwd, context.file)
+      const env = this.environment.name
 
-      // Check if the changed file is relevant to the manifest
-      const isRouteFile = changedFileRelative.startsWith(routes_dir) && /route\.[jt]s$/.test(changedFileRelative)
-      const isParamFile = changedFileRelative.startsWith(params_dir) && /\.[jt]s$/.test(changedFileRelative)
-      const isMiddlewareFile = changedFileRelative.startsWith(middleware_dir) && /middleware\.[jt]s$/.test(changedFileRelative)
-      const isErrorFile = changedFileRelative.startsWith(error_file_path) && /\.[jt]s$/.test(changedFileRelative) // Check prefix and extension
+      if (env === 'ssr') {
+        const changed_file_relative = relative(cwd, context.file)
 
-      if (isRouteFile || isParamFile || isMiddlewareFile || isErrorFile) {
-        console.log(`[Xink] Relevant file changed: ${changedFileRelative}. Regenerating manifest...`)
-        try {
-          // Regenerate the manifest content
-          virtualManifestContent = await createManifestVirtualModule(
-            validated_config,
-          )
+        /* Check if the changed file is relevant to the manifest. */
+        const is_route_file = changed_file_relative.startsWith(routes_dir) && /route\.[jt]s$/.test(changed_file_relative)
+        const is_param_file = changed_file_relative.startsWith(params_dir) && /\.[jt]s$/.test(changed_file_relative)
+        const is_middleware_file = changed_file_relative.startsWith(middleware_dir) && /middleware\.[jt]s$/.test(changed_file_relative)
+        const is_error_file = changed_file_relative.startsWith(error_file_path) && /\.[jt]s$/.test(changed_file_relative) // Check prefix and extension
 
-          // Find the virtual module in the graph
-          const mod =
-            context.server.moduleGraph.getModuleById(
-              resolvedVirtualManifestId,
+        if (is_route_file || is_param_file || is_middleware_file || is_error_file) {
+          console.log(`[Xink] Relevant file changed: ${changed_file_relative}. Regenerating manifest...`)
+          try {
+            /* Regenerate the manifest content. */
+            virtual_manifest_content = await createManifestVirtualModule(
+              validated_config,
             )
 
-          if (mod) {
-            // Invalidate the virtual module to trigger reload
-            context.server.moduleGraph.invalidateModule(mod)
-            console.log('[Xink] Virtual manifest module invalidated.')
+            /* Find the virtual module in the graph. */
+            const mod =
+              context.server.moduleGraph.getModuleById(
+                resolved_virtual_manifest_id,
+              )
 
-            // Return an empty array to signal HMR update is handled
-            // Vite will likely trigger a reload for SSR modules importing this.
+            if (mod) {
+              /* Invalidate the virtual module to trigger reload. */
+              context.server.moduleGraph.invalidateModule(mod)
+              console.log('[Xink] Virtual manifest module reloaded.')
+
+              /**
+               * Return an empty array to signal HMR update is handled.
+               * Vite will likely trigger a reload for SSR modules importing this.
+               */
+              return []
+            }
+          } catch (error) {
+            console.error('[Xink] Error regenerating manifest during HMR:', error)
+
+            /* Prevent Vite's default handling for this file change. */
             return []
           }
-        } catch (error) {
-          console.error('[Xink] Error regenerating manifest during HMR:', error)
-          // Optional: Send error to Vite overlay
-          context.server.ws.send({
-            type: 'error',
-            err: {
-              message: error.message,
-              stack: error.stack,
-              plugin: 'vite-plugin-xink',
-            },
-          })
-          // Prevent Vite's default handling for this file change
-          return []
         }
       }
 
-      // If not a relevant file, let Vite handle it normally
+      /* If not an ssr environment or relevant file, let Vite handle it normally. */
       return context.modules
     },
   }
