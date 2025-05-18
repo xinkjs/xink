@@ -468,16 +468,28 @@ export default api
 
 ## JSX and fallback handling
 
-Basic JSX is supported, as well as directly returning text, numbers, and json.
+JSX and components are supported, as well as directly returning text, numbers, and json.
 
 ### JSX
 
-Ensure the following is in your `tsconfig.json` file:
+If you're using Deno, add this to your `deno.json` file:
 ```json
-"extends": "./.xink/tsconfig.json",
-"compilerOptions": {
-  "jsx": "react-jsx",
-  "jsxImportSource": "@xinkjs/xink"
+{
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "jsxImportSource": "@xinkjs/xink"
+  }
+}
+```
+
+Otherwise, add to your `tsconfig.json` file:
+```json
+{
+  "extends": "./.xink/tsconfig.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "jsxImportSource": "@xinkjs/xink"
+  }
 }
 ```
 

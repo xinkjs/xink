@@ -244,10 +244,10 @@ export const redirectResponse = (status, location) => {
 	return response
 }
 
-const processHandler = (result) => {
+const processHandler = async (result) => {
   if (isVNode(result)) {
     // Handle JSX VNode result
-    return html(renderToString(result))
+    return html(await renderToString(result))
   } else if (result instanceof Response) {
     return result
   } else if (typeof result === 'object' && result !== null) {
@@ -399,5 +399,5 @@ export const resolve = async (event) => {
     }
   }
 
-  return processHandler(await handler(event))
+  return await processHandler(await handler(event))
 }

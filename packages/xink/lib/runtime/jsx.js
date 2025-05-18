@@ -23,7 +23,7 @@ export const Fragment = Symbol.for('xink.jsx.fragment')
 /**
  * JSX transformer function (for single elements/components).
  * 
- * @param {string | symbol} tag HTML tag name or Fragment
+ * @param {string | symbol | function} tag HTML tag name or Fragment
  * @param {object} props Props object (children are under props.children)
  * @param {string | undefined} key Optional key
  * @returns {XinkVNode}
@@ -37,7 +37,7 @@ export function jsx(tag, props, key) {
  * In dev mode, Vite/compilers call this. It receives extra args for debugging.
  * For a minimal runtime, we can just call the regular jsx function.
  *
- * @param {string | symbol} tag
+ * @param {string | symbol | function} tag
  * @param {object} props
  * @param {string | undefined} key
  * @param {boolean} isStaticChildren - Indicates if children are static (for jsxs optimization)
@@ -55,7 +55,7 @@ export function jsxDEV(tag, props, key, isStaticChildren, sourceDebugInfo, thisA
  * JSX transformer function (optimized for multiple static children).
  * Same implementation as jsx for this minimal runtime.
  * 
- * @param {string | symbol} tag HTML tag name or Fragment
+ * @param {string | symbol | function} tag HTML tag name or Fragment
  * @param {object} props Props object (children are under props.children)
  * @param {string | undefined} key Optional key
  * @returns {XinkVNode}
@@ -94,9 +94,9 @@ const VOID_ELEMENTS = new Set([
  * Renders a VNode or other value to an HTML string.
  * 
  * @param {any} node The node/value to render.
- * @returns {string} The rendered HTML string.
+ * @returns {Promise<string>} The rendered HTML string.
  */
-export function renderToString(node) {
+export const renderToString = async (node) => {
   if (node === null || node === undefined || typeof node === 'boolean')
     return ''
 
@@ -105,18 +105,37 @@ export function renderToString(node) {
 
   if (Array.isArray(node)) {
     // Render each item in the array recursively
-    return node.map(child => renderToString(child)).join('')
+    const rendered_children_promises = node.map(async (child) => await renderToString(child))
+
+    // Await ALL the promises before joining
+    const rendered_children = await Promise.all(rendered_children_promises)
+
+    // Now join the array of resolved strings
+    return rendered_children.join('')
   }
 
   // Check if it's our VNode structure
   if (isVNode(node)) {
     const { tag, props } = node
 
+    // Handle Component
+    if (typeof tag === 'function') {
+      try {
+        // Call the component function, passing props
+        const component_result = await tag(props)
+        // Recursively render the component's return value
+        return await renderToString(component_result)
+      } catch (error) {
+        console.error('Error rendering component:', error)
+        throw error // throw, so the developer can handle in handleError
+      }
+    }
+
     // Handle Fragment: just render children
     if (tag === Fragment)
-      return renderToString(props.children)
+      return await renderToString(props.children)
 
-    // Handle HTML elements (tag is a string)
+    // Handle HTML elements
     if (typeof tag === 'string') {
       let html = `<${tag}`
       let children_html = ''
@@ -124,7 +143,7 @@ export function renderToString(node) {
       // Process props (attributes and children)
       for (const prop_name in props) {
         if (prop_name === 'children') {
-          children_html = renderToString(props.children)
+          children_html = await renderToString(props.children)
           continue
         }
 
