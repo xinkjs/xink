@@ -1,5 +1,11 @@
 # @xinkjs/xink
 
+## 0.17.2
+
+### Patch Changes
+
+- 84e8c1f: Add JSX Component support
+
 ## 0.17.1
 
 ### Patch Changes
