@@ -1,0 +1,53 @@
+---
+title: Welcome
+description: A javascript api router unlike any other.
+template: splash
+hero:
+  title: |
+    <span
+      class="font-black text-transparent
+        bg-clip-text bg-gradient-to-b
+        from-accent-700 to-accent-400
+        dark:from-accent-500 dark:to-accent-200"
+    >
+      xink
+    </span>
+    api router
+  tagline: Different feels good.
+  image:
+    file: ../../assets/xink-color-transparent.png
+  actions:
+    - text: Get Started
+      link: /start/quickstart
+      icon: rocket
+    - text: Or learn more below
+      link: /#why-xink
+      variant: minimal
+---
+
+import { Card, CardGrid, LinkButton } from '@astrojs/starlight/components';
+
+## Why xink?
+
+<CardGrid stagger>
+  <Card title="It's a Vite Plugin" icon="seti:vite">
+		Powered by the best and the brightest.
+	</Card>
+  <Card title="Directory-based Routing" icon="seti:folder">
+		Organized, standardized, and ready to go.
+	</Card>
+	<Card title="Supports JSX" icon="seti:react">
+		Components? With types? Let's go!
+	</Card>
+	<Card title="Easy Data Validation" icon="seti:db">
+		Using Standard Schema or validator functions.
+	</Card>
+	<Card title="Automatic OpenAPI Docs" icon="document">
+		From your Standard Schema, and more.
+	</Card>
+  <Card title="Setup is a one-liner" icon="forward-slash">
+		npx xk create myapi
+	</Card>
+</CardGrid>
+
+<LinkButton href="/start/quickstart" icon="right-arrow">Docs</LinkButton>
