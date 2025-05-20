@@ -8,8 +8,7 @@
     "@changesets/changelog-github": "^0.5.1",
     "@changesets/cli": "^2.29.2",
     "@types/bun": "latest",
-    "husky": "^9.1.7",
-    "is-ci": "^4.1.0"
+    "husky": "^9.1.7"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
@@ -18,7 +17,7 @@
     "docs": "bun run --filter docs dev",
     "release": "bun run build && changeset publish",
     "build": "bun run --filter \"./packages/*\" build",
-    "prepare": "is-ci || husky"
+    "prepare": "npx is-ci || husky"
   },
   "workspaces": [
     "packages/*",
