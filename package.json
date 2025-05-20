@@ -17,7 +17,7 @@
     "docs": "bun run --filter docs dev",
     "release": "bun run build && changeset publish",
     "build": "bun run --filter \"./packages/*\" build",
-    "prepare": "husky"
+    "prepare": "npx is-ci || husky"
   },
   "workspaces": [
     "packages/*",
