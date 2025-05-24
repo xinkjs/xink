@@ -1,5 +1,11 @@
 # @xinkjs/xink
 
+## 0.17.3
+
+### Patch Changes
+
+- 953b019: Fix adapter output and various types
+
 ## 0.17.2
 
 ### Patch Changes

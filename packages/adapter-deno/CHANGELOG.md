@@ -1,5 +1,13 @@
 # @xinkjs/adapter-deno
 
+## 0.4.1
+
+### Patch Changes
+
+- 953b019: Fix adapter output and various types
+- Updated dependencies [953b019]
+  - @xinkjs/xink@0.17.3
+
 ## 0.4.0
 
 ### Patch Changes
