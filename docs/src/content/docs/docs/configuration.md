@@ -77,12 +77,12 @@ the resulting build server.js file would be:
 import api from './index.js';
 import { serve as bunServe } from 'bun';
 
-const options = {"port":3500};
+const options = {"port":3500,"hostname":"0.0.0.0"};
 
 console.log(`Starting server on port ${options.port}...`);
 
 const server = bunServe({
-  port: options.port,
+  ...options,
   fetch: api.fetch,
   error: (err) => { /* ... */ }
 });
