@@ -1,4 +1,4 @@
-/** @import { Config, XinkAdapter } from './types.js' */
+/** @import { XinkConfig, XinkAdapter } from './types.js' */
 
 import { validateConfig } from './lib/utils/config.js'
 import { getRequest, setResponse } from './lib/utils/vite.js'
@@ -18,7 +18,7 @@ let entrypoint
 let entrypoint_path
 
 /**
- * @param {Config} [xink_config]
+ * @param {XinkConfig} [xink_config]
  * @returns {import('vite').Plugin}
  */
 export function xink(xink_config = {}) {
@@ -85,7 +85,7 @@ export function xink(xink_config = {}) {
       vite_config = resolved_config
       const this_plugin_instance = resolved_config.plugins.find(p => p.name === 'vite-plugin-xink' && p.xink_adapter)
       if (this_plugin_instance)
-        stored_adapter = this_plugin_instance.xink_adapter()
+        stored_adapter = this_plugin_instance.xink_adapter(validated_config.serve_options)
     },
 
     generateBundle(options, bundle) {

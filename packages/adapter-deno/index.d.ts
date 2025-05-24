@@ -1,6 +1,6 @@
 import type { XinkAdapter, XinkAdaptContext } from '@xinkjs/xink'
 
-export interface XinkDenoServeOptions {
+export interface ServeOptions {
   /** The port to listen on. @default 8000 */
   port?: number;
   /** A literal IP address or host name that can be resolved to an IP address.
@@ -15,11 +15,10 @@ export interface XinkDenoServeOptions {
   /** If the server should reuse the port.
    * @default false */
   reusePort?: boolean;
-
-  // --- Xink Adapter Specific Options ---
-  /** Output filename for the generated Deno server entry point.
-   * @default "server.js" */
-  serverEntry?: string;
 }
 
-export default function adapter(options?: XinkDenoServeOptions): XinkAdapter;
+declare module '@xinkjs/xink' {
+  interface DenoServeOptions extends ServeOptions {};
+}
+
+export default function adapter(options?: ServeOptions): XinkAdapter;

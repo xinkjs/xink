@@ -4,6 +4,10 @@ import type { Plugin } from 'vite'
 import type { Config } from './lib/types/internal'
 import type { XinkVNode, Fragment } from './lib/runtime/jsx'
 
+export interface BunServeOptions {}
+export interface DenoServeOptions {}
+type AdapterFunctionOptions<TFunc> = TFunc extends (options?: infer O) => XinkAdapter ? O : never;
+
 type AtLeastOne<T, P> = { [K in keyof T]: Pick<T, K> }[keyof T]
 interface AllowedValidatorTypes {
   form?: any;
@@ -80,12 +84,13 @@ export interface XinkAdapter {
   name: string;
   adapt: (context: XinkAdaptContext) => Promise<void> | void;
 }
-export type XinkConfig = {
-  adapter: (options?: any) => XinkAdapter;
+export type XinkConfig<
+TAdapterFunc extends (options?: any) => XinkAdapter> = {
+  adapter: TAdapterFunc;
   check_origin?: boolean;
   entrypoint?: string; 
   out_dir?: string;
-  serve_options?: { [key: string]: any; };
+  serve_options?: AdapterFunctionOptions<TAdapterFunc>;
 }
 
 export interface PlatformContext {
@@ -96,7 +101,9 @@ export interface PlatformContext {
   };
 }
 
-export function xink(xink_config?: XinkConfig): Promise<Plugin>;
+export function xink<TAdapterFunc extends (options?: any) => XinkAdapter>(
+  xink_config: XinkConfig<TAdapterFunc>
+): Plugin;
 export function html(data: any, init?: ResponseInit | undefined): Response;
 export function json(data: any, init?: ResponseInit | undefined): Response;
 export function redirect(status: number, location: string): never;
