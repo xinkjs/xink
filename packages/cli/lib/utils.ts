@@ -11,56 +11,39 @@ export const createXink = (project_path: string, runtime: string, language: stri
     /* Create project path. */
     mkdirSync(project_path, { recursive: true })
 
-    if (language !== 'none') {
-        /* Create xink type-checking file. */
-        mkdirSync(join(project_path, '.xink'), { recursive: true })
-        writeFileSync(join(project_path, `.xink/tsconfig.json`),
-            `{
-    "compilerOptions": {
-        "paths": {
-            "$lib": [
-                "../src/lib"
-            ],
-            "$lib/*": [
-                "../src/lib/*"
-            ]
-        },
-        "verbatimModuleSyntax": true,
-        "isolatedModules": true,
-        "moduleResolution": "bundler",
-        "module": "esnext",
-        "noEmit": true,
-        "target": "esnext"
-    },
-    "include": [
-        "../vite.config.js",
-        "../vite.config.ts",
-        "../src/**/*.js",
-        "../src/**/*.ts",
-        "../src/**/*.tsx"
-    ],
-    "exclude": [
-        "../node_modules/**"
-    ]
-}
-`
-        )
-
-        /* Create project type-checking file. */
+    if (language === 'bun' || language === 'cloudflare') {
+        /* Create project type-checking file. Deno is handled in package.ts */
         writeFileSync(join(project_path, `${type}config.json`),
             `{
-    "extends": "./.xink/${type}config.json",
     "compilerOptions": {
         "allowJs": true,
         "checkJs": true,
         "esModuleInterop": true,
         "forceConsistentCasingInFileNames": true,
+        "isolatedModules": true,
+        "moduleResolution": "bundler",
+        "module": "esnext",
+        "noEmit": true,
         "resolveJsonModule": true,
         "skipLibCheck": true,
         "sourceMap": true,
         "strict": true,
-        "moduleResolution": "bundler"
-    }
+        "target": "esnext",
+        "verbatimModuleSyntax": true,
+        "jsx": "react-jsx",
+        "jsxImportSource": "@xinkjs/xink"
+    },
+    "include": [
+        "vite.config.js",
+        "vite.config.ts",
+        "src/**/*.js",
+        "src/**/*.ts",
+        "src/**/*.tsx"
+    ],
+    "exclude": [
+        "node_modules",
+        "build"
+    ]
 }
 `
         )
@@ -82,7 +65,7 @@ export default api
 import { defineConfig } from 'vite'
 import adapter from '@xinkjs/adapter-${runtime}'
 
-export default defineConfig(async function () {
+export default defineConfig(function () {
     return {
         plugins: [
             xink({ 
