@@ -1,0 +1,7 @@
+{
+  "name": "@xinkjs/xin",
+  "version": "0.4.1",
+  "exports": {
+    ".": "./index.js"
+  }
+}
