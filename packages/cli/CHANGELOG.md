@@ -1,5 +1,11 @@
 # xk
 
+## 0.2.2
+
+### Patch Changes
+
+- 55dd3a9: Remove alias config and fix outputs
+
 ## 0.2.1
 
 ### Patch Changes
