@@ -3,7 +3,6 @@
 import { validateConfig } from './lib/utils/config.js'
 import { getRequest, setResponse } from './lib/utils/vite.js'
 import { createManifestVirtualModule } from './lib/utils/manifest.js'
-import { statSync, mkdirSync, writeFileSync } from 'node:fs'
 import { join, relative } from 'node:path'
 import { Glob } from 'glob'
 
@@ -34,47 +33,6 @@ export function xink(xink_config = {}) {
 
   let virtual_manifest_content = ''
   let is_build = false
-
-  let tsconfig_file_exists = false
-  const tsconfig_path = join(cwd, '.xink/tsconfig.json')
-  try {
-    statSync(tsconfig_path).isFile()
-    tsconfig_file_exists = true
-  } catch (error) {}
-  
-  if (!tsconfig_file_exists) {
-    mkdirSync(join(cwd, '.xink'), { recursive: true })
-    writeFileSync(join(cwd, '.xink/tsconfig.json'),
-      `{
-  "compilerOptions": {
-    "paths": {
-      "$lib": [
-        "../src/lib"
-      ],
-      "$lib/*": [
-        "../src/lib/*"
-      ]
-    },
-    "verbatimModuleSyntax": true,
-    "isolatedModules": true,
-    "moduleResolution": "bundler",
-    "module": "esnext",
-    "noEmit": true,
-    "target": "esnext"
-  },
-  "include": [
-    "../vite.config.js",
-    "../vite.config.ts",
-    "../src/**/*.js",
-    "../src/**/*.ts",
-    "../src/**/*.tsx"
-  ],
-  "exclude": [
-    "../node_modules/**"
-  ]
-}`
-    )
-  }
 
   return {
     name: 'vite-plugin-xink',
@@ -211,12 +169,7 @@ export function xink(xink_config = {}) {
         define: {
           XINK_CHECK_ORIGIN: validated_config.check_origin,
         },
-        ssr: { noExternal: ['@xinkjs/xink'] },
-        resolve: {
-          alias: {
-            $lib: join(cwd, 'src/lib'),
-          },
-        },
+        ssr: { noExternal: ['@xinkjs/xink'] }
       }
     },
     async configureServer(server) {

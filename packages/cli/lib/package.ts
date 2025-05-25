@@ -29,7 +29,29 @@ const deno = `{
     "preview": "vite preview",
     "start": "deno run --allow-net --allow-sys --allow-read=build build/server.js"
   },
-  "nodeModulesDir": "auto"
+  "nodeModulesDir": "auto",
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "moduleResolution": "bundler",
+    "module": "esnext",
+    "noEmit": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "sourceMap": true,
+    "strict": true,
+    "target": "esnext",
+    "verbatimModuleSyntax": true,
+    "jsx": "react-jsx",
+    "jsxImportSource": "@xinkjs/xink"
+  },
+  "exclude": [
+    "node_modules/",
+    "build/"
+  ]
 }
 `
 
