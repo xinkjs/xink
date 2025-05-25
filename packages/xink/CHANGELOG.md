@@ -1,5 +1,11 @@
 # @xinkjs/xink
 
+## 0.17.4
+
+### Patch Changes
+
+- 55dd3a9: Remove alias config and fix outputs
+
 ## 0.17.3
 
 ### Patch Changes
