@@ -2,24 +2,21 @@
 title: JSX
 ---
 
+> `compilerOptions` are already included if you used `xk` to create your project.
+
 If you're using Deno, add this to your `deno.json` file:
 ```json
-{
-  "compilerOptions": {
-    "jsx": "react-jsx",
-    "jsxImportSource": "@xinkjs/xink"
-  }
+"compilerOptions": {
+  "jsx": "react-jsx",
+  "jsxImportSource": "@xinkjs/xink"
 }
 ```
 
 Otherwise, add to your `tsconfig.json` file:
 ```json
-{
-  "extends": "./.xink/tsconfig.json",
-  "compilerOptions": {
-    "jsx": "react-jsx",
-    "jsxImportSource": "@xinkjs/xink"
-  }
+"compilerOptions": {
+  "jsx": "react-jsx",
+  "jsxImportSource": "@xinkjs/xink"
 }
 ```
 

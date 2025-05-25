@@ -14,7 +14,7 @@ You can set the below options in the plugin's configuration.
 
 ```ts
 type XinkConfig = {
-  adapter: (options?: any) => XinkAdapter;
+  adapter: (options?: ServeOptions) => XinkAdapter;
   check_origin?: boolean;
   entrypoint?: string; 
   out_dir?: string;
@@ -103,17 +103,6 @@ const api = new Xink()
 api.path('/api')
 
 export default api
-```
-
-## Import Aliases
-
-Use `$lib` for importing from `src/lib`, instead of having to deal with things like `../../utils.ts`. This requires extending your tsconfig.json file. If you used the `xk` CLI tool to create your project, this should already be done for you.
-
-```ts
-"extends": "./.xink/tsconfig.json",
-```
-```js
-import { thing } from '$lib/utils.ts'
 ```
 
 ## Cloudflare Workers
