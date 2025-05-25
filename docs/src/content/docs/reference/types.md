@@ -2,13 +2,15 @@
 title: Types
 ---
 
+`ServeOptions` are Bun or Deno serve options. We take care of passing these, from `serve_options`, to `adapter` internally.
+
 ```ts
 type XinkConfig = {
-  adapter: (options?: any) => XinkAdapter; // null
+  adapter: (options?: ServeOptions) => XinkAdapter; // null
   check_origin?: boolean; // true
   entrypoint?: string; // index.ts
   out_dir?: string; // build
-  serve_options?: { [key: string]: any; };
+  serve_options?: ServeOptions; // {}
 }
 
 type AtLeastOne<T, P> = { [K in keyof T]: Pick<T, K> }[keyof T]
