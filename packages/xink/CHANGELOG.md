@@ -1,5 +1,11 @@
 # @xinkjs/xink
 
+## 0.17.5
+
+### Patch Changes
+
+- d405679: Fix JSX types
+
 ## 0.17.4
 
 ### Patch Changes
