@@ -8,9 +8,10 @@
     "@changesets/changelog-github": "^0.5.1",
     "@changesets/cli": "^2.29.2",
     "@types/bun": "latest",
+    "csstype": "^3.1.3",
     "husky": "^9.1.7",
-    "vitest": "^3.1.4",
-    "vite": "^6.3.5"
+    "vite": "^6.3.5",
+    "vitest": "^3.1.4"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"

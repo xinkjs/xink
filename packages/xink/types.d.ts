@@ -3,6 +3,7 @@ import type { SerializeOptions, ParseOptions } from 'cookie'
 import type { Plugin } from 'vite'
 import type { Config } from './lib/types/internal'
 import type { XinkVNode, Fragment } from './lib/runtime/jsx'
+import * as CSS from 'csstype'
 
 export interface BunServeOptions {}
 export interface DenoServeOptions {}
@@ -239,6 +240,149 @@ declare global {
      */
     type Element = XinkVNode;
 
+    // TODO: change any to unknown when moving to TS v3
+    interface BaseSyntheticEvent<E = object, C = any, T = any> {
+      nativeEvent: E;
+      currentTarget: C;
+      target: T;
+      bubbles: boolean;
+      cancelable: boolean;
+      defaultPrevented: boolean;
+      eventPhase: number;
+      isTrusted: boolean;
+      preventDefault(): void;
+      isDefaultPrevented(): boolean;
+      stopPropagation(): void;
+      isPropagationStopped(): boolean;
+      persist(): void;
+      timeStamp: number;
+      type: string;
+    }
+
+    /**
+     * currentTarget - a reference to the element on which the event listener is registered.
+     *
+     * target - a reference to the element from which the event was originally dispatched.
+     * This might be a child element to the element on which the event listener is registered.
+     * If you thought this should be `EventTarget & T`, see https://github.com/DefinitelyTyped/DefinitelyTyped/issues/11508#issuecomment-256045682
+     */
+    interface SyntheticEvent<T = Element, E = Event> extends BaseSyntheticEvent<E, EventTarget & T, EventTarget> {}
+
+    type EventHandler<E extends SyntheticEvent<any>> = { bivarianceHack(event: E): void }["bivarianceHack"];
+    type ReactEventHandler<T = Element> = EventHandler<SyntheticEvent<T>>;
+    type ChangeEventHandler<T = Element> = EventHandler<ChangeEvent<T>>;
+
+    type Booleanish = boolean | "true" | "false";
+
+    /**
+     * @see {@link https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/crossorigin MDN}
+     */
+    type CrossOrigin = "anonymous" | "use-credentials" | "" | undefined;
+
+    type HTMLInputAutoCompleteAttribute = AutoFill | (string & {});
+
+    interface CSSProperties extends CSS.Properties<string | number> {
+      /**
+       * The index signature was removed to enable closed typing for style
+       * using CSSType. You're able to use type assertion or module augmentation
+       * to add properties or an index signature of your own.
+       *
+       * For examples and more information, visit:
+       * https://github.com/frenic/csstype#what-should-i-do-when-i-get-type-errors
+       */
+    }
+
+    // All the WAI-ARIA 1.1 role attribute values from https://www.w3.org/TR/wai-aria-1.1/#role_definitions
+    type AriaRole =
+      | "alert"
+      | "alertdialog"
+      | "application"
+      | "article"
+      | "banner"
+      | "button"
+      | "cell"
+      | "checkbox"
+      | "columnheader"
+      | "combobox"
+      | "complementary"
+      | "contentinfo"
+      | "definition"
+      | "dialog"
+      | "directory"
+      | "document"
+      | "feed"
+      | "figure"
+      | "form"
+      | "grid"
+      | "gridcell"
+      | "group"
+      | "heading"
+      | "img"
+      | "link"
+      | "list"
+      | "listbox"
+      | "listitem"
+      | "log"
+      | "main"
+      | "marquee"
+      | "math"
+      | "menu"
+      | "menubar"
+      | "menuitem"
+      | "menuitemcheckbox"
+      | "menuitemradio"
+      | "navigation"
+      | "none"
+      | "note"
+      | "option"
+      | "presentation"
+      | "progressbar"
+      | "radio"
+      | "radiogroup"
+      | "region"
+      | "row"
+      | "rowgroup"
+      | "rowheader"
+      | "scrollbar"
+      | "search"
+      | "searchbox"
+      | "separator"
+      | "slider"
+      | "spinbutton"
+      | "status"
+      | "switch"
+      | "tab"
+      | "table"
+      | "tablist"
+      | "tabpanel"
+      | "term"
+      | "textbox"
+      | "timer"
+      | "toolbar"
+      | "tooltip"
+      | "tree"
+      | "treegrid"
+      | "treeitem"
+      | (string & {});
+
+    type HTMLAttributeReferrerPolicy =
+      | ""
+      | "no-referrer"
+      | "no-referrer-when-downgrade"
+      | "origin"
+      | "origin-when-cross-origin"
+      | "same-origin"
+      | "strict-origin"
+      | "strict-origin-when-cross-origin"
+      | "unsafe-url";
+
+    type HTMLAttributeAnchorTarget =
+      | "_self"
+      | "_blank"
+      | "_parent"
+      | "_top"
+      | (string & {});
+
     // All the WAI-ARIA 1.1 attributes from https://www.w3.org/TR/wai-aria-1.1/
     interface AriaAttributes {
       /** Identifies the currently active element when DOM focus is on a composite widget, textbox, group, or application. */
@@ -463,7 +607,7 @@ declare global {
       "aria-valuetext"?: string | undefined;
     }
 
-    interface JSXAttributes<T> {
+    interface JSXAttributes {
       dangerouslySetInnerHTML?: {
         // Should be InnerHTML['innerHTML'].
         // But unfortunately we're mixing renderer-specific type declarations.
@@ -733,9 +877,6 @@ declare global {
       formAction?:
         | string
         | ((formData: FormData) => void | Promise<void>)
-        | DO_NOT_USE_OR_YOU_WILL_BE_FIRED_EXPERIMENTAL_FORM_ACTIONS[
-          keyof DO_NOT_USE_OR_YOU_WILL_BE_FIRED_EXPERIMENTAL_FORM_ACTIONS
-        ]
         | undefined;
       formEncType?: string | undefined;
       formMethod?: string | undefined;
@@ -798,10 +939,7 @@ declare global {
       action?:
         | string
         | undefined
-        | ((formData: FormData) => void | Promise<void>)
-        | DO_NOT_USE_OR_YOU_WILL_BE_FIRED_EXPERIMENTAL_FORM_ACTIONS[
-          keyof DO_NOT_USE_OR_YOU_WILL_BE_FIRED_EXPERIMENTAL_FORM_ACTIONS
-        ];
+        | ((formData: FormData) => void | Promise<void>);
       autoComplete?: string | undefined;
       encType?: string | undefined;
       method?: string | undefined;
@@ -837,8 +975,6 @@ declare global {
       width?: number | string | undefined;
     }
 
-    interface DO_NOT_USE_OR_YOU_WILL_BE_FIRED_EXPERIMENTAL_IMG_SRC_TYPES {}
-
     interface ImgHTMLAttributes<T> extends HTMLAttributes<T> {
       alt?: string | undefined;
       crossOrigin?: CrossOrigin;
@@ -850,9 +986,6 @@ declare global {
       sizes?: string | undefined;
       src?:
         | string
-        | DO_NOT_USE_OR_YOU_WILL_BE_FIRED_EXPERIMENTAL_IMG_SRC_TYPES[
-          keyof DO_NOT_USE_OR_YOU_WILL_BE_FIRED_EXPERIMENTAL_IMG_SRC_TYPES
-        ]
         | undefined;
       srcSet?: string | undefined;
       useMap?: string | undefined;
@@ -900,9 +1033,6 @@ declare global {
       formAction?:
         | string
         | ((formData: FormData) => void | Promise<void>)
-        | DO_NOT_USE_OR_YOU_WILL_BE_FIRED_EXPERIMENTAL_FORM_ACTIONS[
-            keyof DO_NOT_USE_OR_YOU_WILL_BE_FIRED_EXPERIMENTAL_FORM_ACTIONS
-        ]
         | undefined;
       formEncType?: string | undefined;
       formMethod?: string | undefined;
@@ -975,8 +1105,6 @@ declare global {
       type?: string | undefined;
     }
 
-    interface DO_NOT_USE_OR_YOU_WILL_BE_FIRED_EXPERIMENTAL_MEDIA_SRC_TYPES {}
-
     interface MediaHTMLAttributes<T> extends HTMLAttributes<T> {
       autoPlay?: boolean | undefined;
       controls?: boolean | undefined;
@@ -989,9 +1117,6 @@ declare global {
       preload?: string | undefined;
       src?:
         | string
-        | DO_NOT_USE_OR_YOU_WILL_BE_FIRED_EXPERIMENTAL_MEDIA_SRC_TYPES[
-            keyof DO_NOT_USE_OR_YOU_WILL_BE_FIRED_EXPERIMENTAL_MEDIA_SRC_TYPES
-        ]
         | undefined;
     }
 
