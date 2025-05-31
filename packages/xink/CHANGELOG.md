@@ -1,5 +1,11 @@
 # @xinkjs/xink
 
+## 0.18.0
+
+### Minor Changes
+
+- 367e4ae: Support requesting OpenAPI schema for code generators
+
 ## 0.17.5
 
 ### Patch Changes
