@@ -68,9 +68,13 @@ export class Xink extends Router {
     const headers = {}
     const url = new URL(request.url)
 
-    /* Handle OpenAPI request. */
-    if (this.#openapi.path && this.#openapi.metadata && url.pathname === this.#openapi.path)
+    /* Handle OpenAPI docs request. */
+    if (url.pathname === this.#openapi.path)
       return html(openapi_template({ ...this.#openapi.metadata, paths: this.#openapi.paths }))
+
+    /* Handle OpenAPI schema request. */
+    if (url.pathname === this.#openapi.path + '/schema')
+      return json({ ...this.#openapi.metadata, paths: this.#openapi.paths })
 
     /* CSRF Content Type and Origin Check. */
     const check_origin = XINK_CHECK_ORIGIN
@@ -245,21 +249,27 @@ export class Xink extends Router {
         const schemas_export = handlers.HOOKS?.SCHEMAS || null
         const openapi_export = handlers.OPENAPI || null
 
-        /* Generate the OpenAPI definitions for all methods in this route module. */
-        const openapi_for_methods_on_this_path = generateOpenapiForRouteMethods(schemas_export, openapi_export)
+        /* Create OpenAPI definition for route. */
+        if (schemas_export || openapi_export) {
+          /* Generate the OpenAPI definitions for all methods in this route module. */
+          const openapi_for_methods_on_this_path = generateOpenapiForRouteMethods(schemas_export, openapi_export)
 
-        if (Object.keys(openapi_for_methods_on_this_path).length > 0) {
-          if (!this.#openapi.paths[derived_path]) {
-            this.#openapi.paths[derived_path] = {}
-          }
-          /* Merge with any existing path definitions (shouldn't happen if paths are unique). */
-          this.#openapi.paths[derived_path] = {
-            ...this.#openapi.paths[derived_path],
-            ...openapi_for_methods_on_this_path
+          /* Replace colons with surrounding curly braces, per OpenAPI spec. */
+          const openapi_route_path = derived_path.replace(/:([\w.~-]+)/g, '{$1}')
+
+          if (Object.keys(openapi_for_methods_on_this_path).length > 0) {
+            if (!this.#openapi.paths[openapi_route_path]) {
+              this.#openapi.paths[openapi_route_path] = {}
+            }
+            /* Merge with any existing path definitions (shouldn't happen if paths are unique). */
+            this.#openapi.paths[openapi_route_path] = {
+              ...this.#openapi.paths[openapi_route_path],
+              ...openapi_for_methods_on_this_path
+            }
           }
         }
 
-        /* Register actual HTTP handlers. */
+        /* Register HTTP handlers. */
         for (const method in handlers) {
           /* Do not store OPENAPI object. */
           if (method === 'OPENAPI') continue
