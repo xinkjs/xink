@@ -28,6 +28,7 @@ export default defineConfig({
 						{ label: 'Hooks', slug: 'docs/hooks' },
 						{ label: 'Errors', slug: 'docs/errors' },
 						{ label: 'OpenAPI', slug: 'docs/openapi' },
+						{ label: 'API Client', slug: 'docs/client'},
 						{ label: 'JSX', slug: 'docs/jsx' },
 						{ label: 'Return Types', slug: 'docs/return-types' },
 						{ label: 'Helpers', slug: 'docs/helpers' },
