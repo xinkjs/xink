@@ -1,5 +1,11 @@
 # @xinkjs/xink
 
+## 0.18.2
+
+### Patch Changes
+
+- 146bbad: fix openapi method types
+
 ## 0.18.1
 
 ### Patch Changes
