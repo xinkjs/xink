@@ -45,7 +45,7 @@ export const mergeObjects = (current, updates) => {
  * @returns {Generator<string>}
  */
 export function* readFiles(dir, options) {
-  const glob = options?.exact ? new Glob(`${dir}/${options?.filename}.{js,ts,tsx}`, {}) : new Glob(`${dir}/**/${options?.filename ?? '*'}.{js,ts,tsx}`, {})
+  const glob = options?.exact ? new Glob(`${dir}/${options?.filename}.{js,ts,jsx,tsx}`, {}) : new Glob(`${dir}/**/${options?.filename ?? '*'}.{js,ts,jsx,tsx}`, {})
 
   for (const file of glob) {
     yield file
