@@ -1,5 +1,11 @@
 # xk
 
+## 0.2.3
+
+### Patch Changes
+
+- 5a8b166: Support jsx file extension
+
 ## 0.2.2
 
 ### Patch Changes
