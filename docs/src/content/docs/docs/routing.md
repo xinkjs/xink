@@ -2,7 +2,7 @@
 title: Routing
 ---
 
-Create your routes in `src/routes`. xink is a directory-based router where endpoint files are named `route`. They can have a `.js`, `.ts`, or `.tsx` extension.
+Create your routes in `src/routes`. xink is a directory-based router where endpoint files are named `route`. They can have a `.js`, `.ts`, `.jsx`, or `.tsx` extension.
 
 ```
 src/

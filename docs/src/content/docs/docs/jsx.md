@@ -20,7 +20,7 @@ Otherwise, add to your `tsconfig.json` file:
 }
 ```
 
-Be sure to use a `.tsx` file extension with your route filename.
+Be sure to use a `.jsx` or `.tsx` file extension with your route filename.
 ```js
 /* src/routes/route.tsx */
 export const GET = () => {
