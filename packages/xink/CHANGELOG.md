@@ -1,5 +1,11 @@
 # @xinkjs/xink
 
+## 0.18.1
+
+### Patch Changes
+
+- 5a8b166: Support jsx file extension
+
 ## 0.18.0
 
 ### Minor Changes
