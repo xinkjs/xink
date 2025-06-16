@@ -109,7 +109,7 @@ export function xink(xink_config = {}) {
 
       if (is_build) {
         const routes_glob = new Glob(
-          join(cwd, routes_dir, '**/route.{js,ts,tsx}'),
+          join(cwd, routes_dir, '**/route.{js,ts,jsx,tsx}'),
           {},
         )
         const params_glob = new Glob(

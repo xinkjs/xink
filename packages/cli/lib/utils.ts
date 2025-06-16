@@ -38,6 +38,7 @@ export const createXink = (project_path: string, runtime: string, language: stri
         "vite.config.ts",
         "src/**/*.js",
         "src/**/*.ts",
+        "src/**/*.jsx",
         "src/**/*.tsx"
     ],
     "exclude": [
