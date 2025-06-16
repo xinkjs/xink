@@ -71,9 +71,9 @@ const api = new Xink()
 api.openapi({ 
   path: "/reference", 
   data: { 
-    "info": {
-      "title": "Xink API",
-      "version": "0.0.0"
+    info: {
+      title: "Xink API",
+      version: "0.0.0"
     }
   }
 })
