@@ -117,10 +117,10 @@ export class Xink extends Router {
   openapi(metadata: { 
     path: string; 
     data?: {
-      "openapi": string;
-      "info": {
-        "title": string;
-        "version": string;
+      openapi?: string;
+      info?: {
+        title?: string;
+        version?: string;
       }
     }
   }): void;
