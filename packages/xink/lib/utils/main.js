@@ -1,4 +1,4 @@
-import { readdirSync, lstatSync } from 'node:fs'
+import { readdirSync, lstatSync, existsSync } from 'node:fs'
 import { join, relative, basename } from 'node:path'
 
 /**
@@ -72,6 +72,10 @@ function getAllFilesRecursive(dir_path, files_array = []) {
 export function* readFiles(base_dir, options) {
   const cwd = process.cwd()
   const absolute_base_dir = join(cwd, base_dir)
+
+  /* This check is now also in the calling config hook, but good to have here as well. */
+  if (!existsSync(base_dir) || !lstatSync(base_dir).isDirectory())
+    return
 
   /* Define default extensions if not provided. */
   const allowed_extensions = options?.extensions ?? ['js', 'ts']
