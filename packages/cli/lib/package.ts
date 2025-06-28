@@ -33,17 +33,7 @@ const deno = `{
   "compilerOptions": {
     "allowJs": true,
     "checkJs": true,
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "isolatedModules": true,
-    "moduleResolution": "bundler",
-    "module": "esnext",
-    "noEmit": true,
-    "resolveJsonModule": true,
-    "skipLibCheck": true,
-    "sourceMap": true,
     "strict": true,
-    "target": "esnext",
     "verbatimModuleSyntax": true,
     "jsx": "react-jsx",
     "jsxImportSource": "@xinkjs/xink"
