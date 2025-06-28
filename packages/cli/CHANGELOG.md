@@ -1,5 +1,11 @@
 # xk
 
+## 0.2.4
+
+### Patch Changes
+
+- 642a244: Fix deno build. Update to vite v7
+
 ## 0.2.3
 
 ### Patch Changes
