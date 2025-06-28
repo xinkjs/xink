@@ -4,7 +4,7 @@ import { validateConfig } from './lib/utils/config.js'
 import { getRequest, setResponse } from './lib/utils/vite.js'
 import { createManifestVirtualModule } from './lib/utils/manifest.js'
 import { join, relative } from 'node:path'
-import { Glob } from 'glob'
+import { readFiles } from './lib/utils/main.js'
 
 const virtual_manifest_id = 'virtual:xink-manifest'
 const resolved_virtual_manifest_id = '\0' + virtual_manifest_id
@@ -108,20 +108,23 @@ export function xink(xink_config = {}) {
       is_build = env.command === 'build'
 
       if (is_build) {
-        const routes_glob = new Glob(
-          join(cwd, routes_dir, '**/route.{js,ts,jsx,tsx}'),
-          {},
+        const routes_glob = readFiles(
+          routes_dir,
+          { filename: 'route', extensions: ['js', 'ts', 'jsx', 'tsx'] }
         )
-        const params_glob = new Glob(
-          join(cwd, params_dir, '**/*.{js,ts}'),
-          {},
+        const params_glob = readFiles(params_dir)
+        const middleware_glob = readFiles(
+          middleware_dir,
+          { exact: true, filename: 'middleware' }
         )
-        const middleware_glob = new Glob(
-          join(cwd, middleware_dir, '**', 'middleware.{js,ts}'),
-          {},
+        const error_glob = readFiles(
+          'src',
+          { exact: true, filename: 'error' }
         )
-        const entrypoint_glob = new Glob(entrypoint_path, {})
+
         const input = []
+
+        input.push(entrypoint_path)
 
         for (const file of routes_glob) input.push(file)
         for (const file of params_glob) input.push(file)
@@ -129,13 +132,9 @@ export function xink(xink_config = {}) {
           input.push(file);
           break // there should only be one middleware file
         }
-        for (const file of new Glob(join(cwd, 'src/error.{js,ts}'), {})) {
+        for (const file of error_glob) {
           input.push(file)
           break // there should only be one error handling file
-        }
-        for (const file of entrypoint_glob) {
-          input.push(file)
-          break // there should only be one entrypoint file
         }
 
         config.build = {
@@ -144,7 +143,6 @@ export function xink(xink_config = {}) {
           target: 'esnext',
           minify: false,
           rollupOptions: {
-            external: ['glob'],
             input,
             output: {
               // --- (Keep output filename logic) ---

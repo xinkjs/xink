@@ -1,8 +1,8 @@
 /** @import { Config } from '../types/internal.js' */
 
 import { statSync } from 'node:fs'
-import { readFiles } from '../utils/main.js' // Assuming this returns paths relative to cwd
 import { join } from 'node:path'
+import { readFiles } from './main.js'
 
 /**
  * Generates the JavaScript code string for the virtual manifest module.
@@ -33,7 +33,7 @@ export const createManifestVirtualModule = async (config) => {
   // --- Params ---
   try {
     statSync(join(cwd, params_dir)).isDirectory()
-    for (const filePath of readFiles(params_dir)) {
+    for (const filePath of readFiles(params_dir, { extensions: ['js', 'ts'] })) {
       const type = filePath.split('.')[0].split('/').at(-1)
       const importName = addImport(filePath)
       // Assume the file exports 'match'
@@ -43,7 +43,7 @@ export const createManifestVirtualModule = async (config) => {
 
   // --- Middleware ---
   try {
-    for (const filePath of readFiles(middleware_dir, { exact: true, filename: 'middleware' })) {
+    for (const filePath of readFiles(middleware_dir, { exact: true, filename: 'middleware', extensions: ['js', 'ts'] })) {
       const importName = addImport(filePath)
       // Assume the file exports 'handle'
       middlewareHandlerRef = `${importName}.handle`
@@ -53,7 +53,7 @@ export const createManifestVirtualModule = async (config) => {
 
   // --- Error Handling ---
   try {
-    for (const filePath of readFiles('src', { exact: true, filename: 'error' })) {
+    for (const filePath of readFiles('src', { exact: true, filename: 'error', extensions: ['js', 'ts'] })) {
       const importName = addImport(filePath)
       // Assume the file exports 'handleError'
       errorHandlerRef = `${importName}.handleError`
