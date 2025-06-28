@@ -5,6 +5,7 @@ import { getRequest, setResponse } from './lib/utils/vite.js'
 import { createManifestVirtualModule } from './lib/utils/manifest.js'
 import { join, relative } from 'node:path'
 import { readFiles } from './lib/utils/main.js'
+import { existsSync } from 'node:fs'
 
 const virtual_manifest_id = 'virtual:xink-manifest'
 const resolved_virtual_manifest_id = '\0' + virtual_manifest_id
@@ -108,34 +109,42 @@ export function xink(xink_config = {}) {
       is_build = env.command === 'build'
 
       if (is_build) {
+        const input = []
+
         const routes_glob = readFiles(
           routes_dir,
           { filename: 'route', extensions: ['js', 'ts', 'jsx', 'tsx'] }
         )
-        const params_glob = readFiles(params_dir)
-        const middleware_glob = readFiles(
-          middleware_dir,
-          { exact: true, filename: 'middleware' }
-        )
-        const error_glob = readFiles(
-          'src',
-          { exact: true, filename: 'error' }
-        )
+        for (const file of routes_glob) input.push(file)
 
-        const input = []
+        const params_absolute_dir = join(cwd, params_dir)
+        if (existsSync(params_absolute_dir) && statSync(params_absolute_dir).isDirectory()) {
+          const params_glob = readFiles(params_dir)
+          for (const file of params_glob) input.push(file)
+        }
+
+        const middleware_absolute_dir = join(cwd, middleware_dir)
+        if (existsSync(middleware_absolute_dir) && statSync(middleware_absolute_dir).isDirectory()) {
+          const middleware_glob = readFiles(
+            middleware_dir,
+            { exact: true, filename: 'middleware' }
+          )
+          for (const file of middleware_glob) {
+            input.push(file)
+            break // there should only be one middleware file
+          }
+        }
+
+        const error_file_absolute_path = join(cwd, 'src', 'error.js')
+        const error_file_ts_absolute_path = join(cwd, 'src', 'error.ts')
+
+        if (existsSync(error_file_absolute_path) && statSync(error_file_absolute_path).isFile()) {
+          input.push(relative(cwd, error_file_absolute_path))
+        } else if (existsSync(error_file_ts_absolute_path) && statSync(error_file_ts_absolute_path).isFile()) {
+          input.push(relative(cwd, error_file_ts_absolute_path))
+        }
 
         input.push(entrypoint_path)
-
-        for (const file of routes_glob) input.push(file)
-        for (const file of params_glob) input.push(file)
-        for (const file of middleware_glob) {
-          input.push(file);
-          break // there should only be one middleware file
-        }
-        for (const file of error_glob) {
-          input.push(file)
-          break // there should only be one error handling file
-        }
 
         config.build = {
           outDir: validated_config.out_dir,
