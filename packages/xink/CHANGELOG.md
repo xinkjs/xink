@@ -1,5 +1,11 @@
 # @xinkjs/xink
 
+## 0.18.3
+
+### Patch Changes
+
+- 642a244: Fix deno build. Update to vite v7
+
 ## 0.18.2
 
 ### Patch Changes
