@@ -28,7 +28,6 @@
   },
   "dependencies": {
     "cookie": "^1.0.2",
-    "glob": "^11.0.1",
     "set-cookie-parser": "^2.7.1",
     "@xinkjs/xin": "^0.4.1"
   },
