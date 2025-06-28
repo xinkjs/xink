@@ -1,5 +1,11 @@
 # xk
 
+## 0.2.5
+
+### Patch Changes
+
+- 0a85197: refactor and remove glob
+
 ## 0.2.4
 
 ### Patch Changes
