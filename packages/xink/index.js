@@ -144,6 +144,7 @@ export function xink(xink_config = {}) {
           target: 'esnext',
           minify: false,
           rollupOptions: {
+            external: ['glob'],
             input,
             output: {
               // --- (Keep output filename logic) ---
