@@ -1,5 +1,11 @@
 # @xinkjs/xink
 
+## 0.18.4
+
+### Patch Changes
+
+- 0a85197: refactor and remove glob
+
 ## 0.18.3
 
 ### Patch Changes
