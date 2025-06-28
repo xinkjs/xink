@@ -1,5 +1,11 @@
 # @xinkjs/xink
 
+## 0.18.5
+
+### Patch Changes
+
+- 4bf9050: fix optional path checks when they do not exist
+
 ## 0.18.4
 
 ### Patch Changes
