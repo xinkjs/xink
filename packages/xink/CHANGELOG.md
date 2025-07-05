@@ -1,5 +1,11 @@
 # @xinkjs/xink
 
+## 0.18.6
+
+### Patch Changes
+
+- f882834: fix paths handling
+
 ## 0.18.5
 
 ### Patch Changes
