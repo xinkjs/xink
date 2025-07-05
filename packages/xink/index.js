@@ -3,9 +3,10 @@
 import { validateConfig } from './lib/utils/config.js'
 import { getRequest, setResponse } from './lib/utils/vite.js'
 import { createManifestVirtualModule } from './lib/utils/manifest.js'
-import { join, relative } from 'node:path'
+import { join, relative, resolve as path_resolve } from 'node:path'
 import { readFiles } from './lib/utils/main.js'
-import { existsSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
+import cleanJson from 'strip-json-comments'
 
 const virtual_manifest_id = 'virtual:xink-manifest'
 const resolved_virtual_manifest_id = '\0' + virtual_manifest_id
@@ -16,6 +17,50 @@ let stored_adapter
 let api_chunk_filename
 let entrypoint
 let entrypoint_path
+
+const getTsconfigPaths = (cwd) => {
+  let tsconfig_path = join(cwd, 'tsconfig.json')
+  let jsconfig_path = join(cwd, 'jsconfig.json')
+  let config_file_path = null
+
+  if (existsSync(tsconfig_path))
+    config_file_path = tsconfig_path
+  else if (existsSync(jsconfig_path)) 
+    config_file_path = jsconfig_path
+
+  if (!config_file_path)
+    return null
+
+  try {
+    const config_content = readFileSync(config_file_path, 'utf-8')
+    const config = JSON.parse(cleanJson(config_content))
+    
+    const compiler_options = config.compilerOptions
+    if (!compiler_options || !compiler_options.paths)
+      return null
+
+    const base_url = compiler_options.baseUrl ? path_resolve(cwd, compiler_options.baseUrl) : cwd
+    const aliases = {}
+
+    for (const alias_key in compiler_options.paths) {
+      const paths_array = compiler_options.paths[alias_key]
+      if (Array.isArray(paths_array) && paths_array.length > 0) {
+        // Vite expects alias keys without trailing '/*' if the path has '/*'
+        // and for the replacement path to be relative to root, or absolute.
+        const alias_name = alias_key.endsWith('/*') ? alias_key.slice(0, -2) : alias_key
+        // The value should be the absolute path to the directory
+        const alias_target_path = path_resolve(base_url, paths_array[0].endsWith('/*') ? paths_array[0].slice(0, -2) : paths_array[0])
+        
+        aliases[alias_name] = alias_target_path
+      }
+    }
+    return aliases
+
+  } catch (error) {
+    console.warn(`[Xink Plugin] Could not parse ${config_file_path} for 'paths' aliasing:`, error.message)
+    return null
+  }
+} 
 
 /**
  * @param {XinkConfig} [xink_config]
@@ -31,6 +76,8 @@ export function xink(xink_config = {}) {
   const params_dir = validated_config.params_dir
   const middleware_dir = validated_config.middleware_dir
   const error_file_path = join('src', 'error')
+  const user_tsconfig_paths = getTsconfigPaths(process.cwd())
+  console.log('paths', user_tsconfig_paths)
 
   let virtual_manifest_content = ''
   let is_build = false
@@ -107,6 +154,16 @@ export function xink(xink_config = {}) {
 
     async config(config, env) {
       is_build = env.command === 'build'
+
+      config.resolve = config.resolve || {}
+      config.resolve.alias = config.resolve.alias || {}
+
+      if (user_tsconfig_paths) {
+        config.resolve.alias = {
+          ...config.resolve.alias,
+          ...user_tsconfig_paths
+        }
+      }
 
       if (is_build) {
         const input = []
