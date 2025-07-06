@@ -5,7 +5,7 @@ import { json, text, html, redirect } from './runtime/helpers.js'
 import { addCookiesToHeaders, getCookies, isFormContentType, redirectResponse, resolve } from './runtime/fetch.js'
 import { Redirect } from './runtime/shared.js'
 import { ALLOWED_HANDLERS } from './constants.js'
-import { generateOpenapiForRouteMethods, openapi_template } from "./runtime/openapi.js"
+import { openapi_template } from "./runtime/openapi.js"
 
 export class Xink extends Router {
   /** @type {string} */
@@ -246,33 +246,13 @@ export class Xink extends Router {
         const store = this.register(derived_path)
 
         const handlers = route_info.handlers
-        const schemas_export = handlers.HOOKS?.SCHEMAS || null
-        const openapi_export = handlers.OPENAPI || null
-
-        /* Create OpenAPI definition for route. */
-        if (schemas_export || openapi_export) {
-          /* Generate the OpenAPI definitions for all methods in this route module. */
-          const openapi_for_methods_on_this_path = generateOpenapiForRouteMethods(schemas_export, openapi_export)
-
-          /* Replace colons with surrounding curly braces, per OpenAPI spec. */
-          const openapi_route_path = derived_path.replace(/:([\w.~-]+)/g, '{$1}')
-
-          if (Object.keys(openapi_for_methods_on_this_path).length > 0) {
-            if (!this.#openapi.paths[openapi_route_path]) {
-              this.#openapi.paths[openapi_route_path] = {}
-            }
-            /* Merge with any existing path definitions (shouldn't happen if paths are unique). */
-            this.#openapi.paths[openapi_route_path] = {
-              ...this.#openapi.paths[openapi_route_path],
-              ...openapi_for_methods_on_this_path
-            }
-          }
-        }
 
         /* Register HTTP handlers. */
         for (const method in handlers) {
-          /* Do not store OPENAPI object. */
-          if (method === 'OPENAPI') continue
+          if (method === 'OPENAPI' && typeof handlers[method] === 'object') {
+            this.#openapi.paths[derived_path] = handlers[method]
+            continue
+          }
 
           /* Ensure HTTP handlers are functions. */
           if (typeof handlers[method] !== 'function' && method !== 'HOOKS')
