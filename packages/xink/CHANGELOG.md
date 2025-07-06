@@ -1,5 +1,11 @@
 # @xinkjs/xink
 
+## 0.18.7
+
+### Patch Changes
+
+- 7253280: Revert SCHEMA-based OpenAPI docs
+
 ## 0.18.6
 
 ### Patch Changes
