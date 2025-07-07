@@ -1,5 +1,11 @@
 # @xinkjs/xink
 
+## 0.19.0
+
+### Minor Changes
+
+- a5f8b51: Add RouterHandler type
+
 ## 0.18.7
 
 ### Patch Changes
