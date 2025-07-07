@@ -1,0 +1,38 @@
+name: Create Release PR
+
+on:
+  # Allow manual triggering from the GitHub Actions UI
+  workflow_dispatch:
+
+jobs:
+  version:
+    name: Create Release PR
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: 1.2.10
+
+      - name: Install Dependencies
+        run: bun install --frozen-lockfile
+
+      # This action will find all accumulated changesets on main,
+      # bump versions, and create the "Upcoming Release Changes" PR.
+      # By OMITTING the `publish` script, its default behavior is to create a PR.
+      - name: Create Release Pull Request
+        id: changesets
+        uses: changesets/action@v1
+        with:
+          commit: "chore: update versions and changelogs for release"
+          title: "Upcoming Release Changes"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

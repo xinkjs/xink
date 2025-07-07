@@ -1,0 +1,55 @@
+name: Publish Packages
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  publish:
+    name: Publish Packages
+    # Add a condition to ONLY run this job if the commit message
+    # matches the one created by the changesets action.
+    # This prevents it from running on every feature PR merge.
+    if: |
+      ${{ contains(github.event.head_commit.message, 'chore: update versions and changelogs for release') }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Needed for creating GitHub Releases
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+        with:
+          fetch-tags: true
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: 1.2.10
+
+      - name: Install Dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Publish to npm
+        run: bun run release # This runs 'bun run build && changeset publish'
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # For GitHub Releases step
+
+      - name: Create GitHub Releases
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # This script assumes 'changeset publish' creates tags.
+          # We find tags pointing to the current commit and create releases.
+          echo "Creating releases for tags pointing to HEAD..."
+          tags_at_head=$(git tag --points-at HEAD)
+          if [ -z "$tags_at_head" ]; then
+            echo "No tags found at HEAD to create releases for."
+            exit 0
+          fi
+          echo "Tags found at HEAD: $tags_at_head"
+          for tag in $tags_at_head; do
+            echo "Creating GitHub release for tag $tag"
+            gh release create "$tag" --notes "Automatic release for $tag" || echo "Failed to create release for $tag"
+          done
