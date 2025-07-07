@@ -35,12 +35,12 @@ export type ErrorHandler = (error: unknown, event?: RequestEvent) => MaybePromis
 export type Handle = (event: RequestEvent, resolve: ResolveEvent) => MaybePromise<Response>;
 export type MaybePromise<T> = T | Promise<T>;
 export type Middleware = (event: RequestEvent, resolve: ResolveEvent) => MaybePromise<Response>;
-export interface RequestEvent<V extends AllowedValidatorTypes = AllowedValidatorTypes> {
+export interface RequestEvent<ReqT extends AllowedValidatorTypes = AllowedValidatorTypes, ResT = unknown> {
   context: { env: Env.Bindings, ctx: Context } | null,
   cookies: Cookies;
   headers: Omit<Headers, 'toJSON' | 'count' | 'getAll'>;
   html: typeof html;
-  json: typeof json;
+  json: <T extends ResT>(data: T, init?: ResponseInit) => Response;
   locals: Api.Locals;
   params: Params;
   redirect: typeof redirect;
@@ -49,9 +49,10 @@ export interface RequestEvent<V extends AllowedValidatorTypes = AllowedValidator
   setHeaders: (headers: { [key: string]: any; }) => void;
   text: typeof text;
   url: Omit<URL, 'createObjectURL' | 'revokeObjectURL' | 'canParse'>;
-  valid: V;
+  valid: ReqT;
 }
 export type ResolveEvent = (event: RequestEvent) => MaybePromise<Response>;
+export type RouteHandler<ReqT, ResT> = (event: RequestEvent<ReqT, ResT>) => MaybePromise<Response | ResT>;
 
 export interface Schemas {
   get?: AtLeastOne<AllowedValidatorTypes, 'form' | 'json' | 'params' | 'query'>;
