@@ -246,16 +246,47 @@ export class Xink extends Router {
         const store = this.register(derived_path)
 
         const handlers = route_info.handlers
+        const special_handlers = new Set(['HOOKS', 'OPENAPI'])
+
+        const hooks = handlers.HOOKS || null
+        const openapi = handlers.OPENAPI || null
+
+        if (hooks && typeof hooks === 'object') store['HOOKS'] = hooks
+
+        const openapi_schema = {}
+
+        if (openapi && typeof openapi === 'object') {
+          const { tags: global_tags } = openapi
+          
+          for (const method in openapi) {
+            const operation = openapi[method]
+
+            if (typeof operation === 'object' && operation !== null) {
+              const operation_copy = { ...operation }
+
+              if (global_tags && Array.isArray(global_tags) && global_tags.length > 0) {
+                if (Array.isArray(operation_copy.tags)) {
+                  /* Merge local and global tags. */
+                  operation_copy.tags = [...new Set([...operation_copy.tags, ...global_tags])]
+                } else {
+                  operation_copy.tags = global_tags
+                }
+              }
+
+              openapi_schema[method] = operation_copy
+            }
+          }
+
+          if (Object.keys(openapi_schema).length > 0)
+            this.#openapi.paths[derived_path] = openapi_schema
+        }
 
         /* Register HTTP handlers. */
         for (const method in handlers) {
-          if (method === 'OPENAPI' && typeof handlers[method] === 'object') {
-            this.#openapi.paths[derived_path] = handlers[method]
-            continue
-          }
+          if (special_handlers.has(method)) continue // ignore HOOKS and OPENAPI
 
           /* Ensure HTTP handlers are functions. */
-          if (typeof handlers[method] !== 'function' && method !== 'HOOKS')
+          if (typeof handlers[method] !== 'function')
             throw new Error(`Handler ${method} for route ${route_info.path} is not a function.`)
 
           if (!ALLOWED_HANDLERS.has(method)) {
