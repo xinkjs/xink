@@ -33,6 +33,9 @@ jobs:
       - name: Setup .npmrc file
         run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
 
+      - name: Configure Git Credentials
+        run: git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
+
       - name: Publish to npm
         run: bun run release # This runs 'bun run build && changeset publish'
         env:
@@ -46,6 +49,8 @@ jobs:
           # This script assumes 'changeset publish' creates tags.
           # We find tags pointing to the current commit and create releases.
           echo "Creating releases for tags pointing to HEAD..."
+          git fetch --tags
+
           tags_at_head=$(git tag --points-at HEAD)
           if [ -z "$tags_at_head" ]; then
             echo "No tags found at HEAD to create releases for."
