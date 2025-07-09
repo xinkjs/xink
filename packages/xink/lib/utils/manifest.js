@@ -20,6 +20,7 @@ export const createManifestVirtualModule = async (config) => {
   const paramMatcherEntries = {} // Stores { matcherType: '_mod1.match' }
   let middlewareHandlerRef = 'null' // Stores '_mod2.handle' or 'null'
   let errorHandlerRef = 'null' // Stores '_mod3.handleError' or 'null'
+  let notFoundHandlerRef = 'null'
 
   const addImport = (filePath) => {
     // Ensure absolute path for Vite to resolve correctly
@@ -55,8 +56,9 @@ export const createManifestVirtualModule = async (config) => {
   try {
     for (const filePath of readFiles('src', { exact: true, filename: 'error', extensions: ['js', 'ts'] })) {
       const importName = addImport(filePath)
-      // Assume the file exports 'handleError'
+
       errorHandlerRef = `${importName}.handleError`
+      notFoundHandlerRef = `${importName}.handleNotFound`
       break
     }
   } catch (err) { /* ignore if dir doesn't exist */ }
@@ -102,7 +104,8 @@ export const createManifestVirtualModule = async (config) => {
       ${Object.entries(paramMatcherEntries).map(([key, ref]) => `${JSON.stringify(key)}: ${ref}`).join(',\n      ')}
     },
     middleware: ${middlewareHandlerRef},
-    error: ${errorHandlerRef}
+    error: ${errorHandlerRef},
+    notfound: ${notFoundHandlerRef}
   }`
 
   const moduleCode = `

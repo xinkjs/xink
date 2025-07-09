@@ -32,6 +32,7 @@ export type Cookies = {
   getAll(options?: ParseOptions): Array<{ name: string, value: string }>;
   set(name: string, value: string, options?: SerializeOptions): void;
 }
+export type NotFoundHandler = (event?: RequestEvent) => MaybePromise<Response | void>;
 export type ErrorHandler = (error: unknown, event?: RequestEvent) => MaybePromise<Response | void>;
 export type Handle = (event: RequestEvent, resolve: ResolveEvent) => MaybePromise<Response>;
 export type MaybePromise<T> = T | Promise<T>;
