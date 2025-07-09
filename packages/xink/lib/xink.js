@@ -1,4 +1,4 @@
-/** @import { Context, Cookie, ErrorHandler, Middleware, RequestEvent } from "../types.js" */
+/** @import { Context, Cookie, ErrorHandler, Middleware, NotFoundHandler, RequestEvent } from "../types.js" */
 
 import { Router } from "@xinkjs/xin"
 import { json, text, html, redirect } from './runtime/helpers.js'
@@ -12,6 +12,8 @@ export class Xink extends Router {
   #base_path
   /** @type {ErrorHandler} */
   #error_handler
+  /** @type {NotFoundHandler} */
+  #not_found_handler
   /** @type {Middleware} */
   #middleware = (event, resolve) => resolve(event)
   /** @type {object} */
@@ -30,6 +32,7 @@ export class Xink extends Router {
     super()
     this.#base_path
     this.#error_handler
+    this.#not_found_handler
     this.#middleware
     this.#openapi
   }
@@ -138,7 +141,7 @@ export class Xink extends Router {
     }
 
     try {
-      const response = await handle(event, (event) =>
+      let response = await handle(event, (event) =>
         resolve(event).then((response) => {
           for (const key in headers) {
             const value = headers[key]
@@ -150,6 +153,14 @@ export class Xink extends Router {
           return response
         }) 
       )
+
+      /* Respond with custom Not Found handler. */
+      if (
+        this.#not_found_handler && 
+        response.status === 404 && 
+        response.headers.get('x-xink-default-404') // should only be set by xink 404 response in `resolve()`
+      )
+        response = this.#not_found_handler(event)
 
       /* ATTR: SvelteKit */
       /* Respond with 304 if etag matches. */
@@ -242,6 +253,7 @@ export class Xink extends Router {
 
       /* Register error handling. */
       if (this.#manifest.error) this.#error_handler = this.#manifest.error
+      if (this.#manifest.notfound) this.#not_found_handler = this.#manifest.notfound
 
       /* Register routes. */
       for (const route_info of this.#manifest.routes) {

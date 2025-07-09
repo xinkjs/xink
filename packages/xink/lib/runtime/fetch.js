@@ -271,7 +271,12 @@ export const resolve = async (event) => {
    * This check needs to stay here, so that any middleware
    * can potentially handle a requested endpoint before returning a 404.
    */
-  if (!event.store) return new Response('Not Found', { status: 404 })
+  if (!event.store) return new Response('Not Found', { 
+    status: 404,
+    headers: {
+      'x-xink-default-404': 'true'
+    } 
+  })
 
   const handler = event.store[event.request.method] ?? event.store['default']
 
