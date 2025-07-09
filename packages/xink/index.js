@@ -77,7 +77,6 @@ export function xink(xink_config = {}) {
   const middleware_dir = validated_config.middleware_dir
   const error_file_path = join('src', 'error')
   const user_tsconfig_paths = getTsconfigPaths(process.cwd())
-  console.log('paths', user_tsconfig_paths)
 
   let virtual_manifest_content = ''
   let is_build = false

@@ -19,7 +19,8 @@ export class Xink extends Router {
     paths: {},
     metadata: { 
       openapi: "3.1.0"
-    }
+    },
+    scalar: {}
   }
   #is_initialized = false
   #router = false
@@ -70,7 +71,7 @@ export class Xink extends Router {
 
     /* Handle OpenAPI docs request. */
     if (url.pathname === this.#openapi.path)
-      return html(openapi_template({ ...this.#openapi.metadata, paths: this.#openapi.paths }))
+      return html(openapi_template({ ...this.#openapi.metadata, paths: this.#openapi.paths }, this.#openapi.scalar))
 
     /* Handle OpenAPI schema request. */
     if (url.pathname === this.#openapi.path + '/schema')
@@ -210,7 +211,7 @@ export class Xink extends Router {
     }
   }
 
-  openapi({ path, data }) {
+  openapi({ path, data, scalar }) {
     this.#openapi.path = path
     if (data)
       /* Merge provided metadata with existing (paths are built during init). */
@@ -218,6 +219,8 @@ export class Xink extends Router {
         ...(this.#openapi.metadata),
         ...data,
       }
+
+    if (scalar) this.#openapi.scalar = scalar
   }
 
   /* Initialize the router. */
