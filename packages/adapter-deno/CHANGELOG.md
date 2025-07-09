@@ -1,5 +1,16 @@
 # @xinkjs/adapter-deno
 
+## 0.6.0
+
+### Patch Changes
+
+- Updated dependencies [a5f8b51]
+- Updated dependencies [0210d1b]
+- Updated dependencies [6efa6e1]
+- Updated dependencies [298e23d]
+- Updated dependencies [5e93aa2]
+  - @xinkjs/xink@0.19.0
+
 ## 0.5.0
 
 ### Patch Changes
