@@ -5,22 +5,21 @@ title: Event
 `event` is basically a context object for the request.
 
 ```ts
-interface RequestEvent<V extends AllowedValidatorTypes = AllowedValidatorTypes> {
+interface RequestEvent<ReqT extends AllowedValidatorTypes = AllowedValidatorTypes, ResT = any> {
+  context: { env: Env.Bindings, ctx: Context } | null,
   cookies: Cookies;
-  ctx: Context; // Cloudflare
-  env: Env.Bindings; // Cloudflare
   headers: Omit<Headers, 'toJSON' | 'count' | 'getAll'>;
-  html: (data: any, init?: ResponseInit | undefined): Response;
-  json: (data: any, init?: ResponseInit | undefined): Response;
-  locals: Api.Locals,
+  html: typeof html;
+  json: <T extends ResT>(data: T, init?: ResponseInit) => Response;
+  locals: Api.Locals;
   params: Params;
-  redirect: (status: number, location: string): never;
+  redirect: typeof redirect;
   request: Request;
   store: Store | null;
   setHeaders: (headers: { [key: string]: any; }) => void;
-  text: (data: string, init?: ResponseInit | undefined): Response;
+  text: typeof text;
   url: Omit<URL, 'createObjectURL' | 'revokeObjectURL' | 'canParse'>;
-  valid: V
+  valid: ReqT;
 }
 ```
 
