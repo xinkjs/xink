@@ -37,7 +37,7 @@ export type ErrorHandler = (error: unknown, event?: RequestEvent) => MaybePromis
 export type Handle = (event: RequestEvent, resolve: ResolveEvent) => MaybePromise<Response>;
 export type MaybePromise<T> = T | Promise<T>;
 export type Middleware = (event: RequestEvent, resolve: ResolveEvent) => MaybePromise<Response>;
-export interface RequestEvent<ReqT extends AllowedValidatorTypes = AllowedValidatorTypes, ResT = unknown> {
+export interface RequestEvent<ReqT extends AllowedValidatorTypes = AllowedValidatorTypes, ResT = any> {
   context: { env: Env.Bindings, ctx: Context } | null,
   cookies: Cookies;
   headers: Omit<Headers, 'toJSON' | 'count' | 'getAll'>;
