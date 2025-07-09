@@ -13,6 +13,43 @@ Any "string" values within `form`, `params`, and `query`, are automatically infe
 - "false" -> false (boolean)
 - "null" -> null (null)
 
+## Using Standard Schema
+
+`SCHEMAS` is a built-in `HOOKS` object. For each route handler and data type, you can define a schema to validate data. You can only use SCHEMAS when using a validation library that is [Standard Schema](https://standardschema.dev) compliant.
+
+```js
+/* src/routes/route.js */
+import * as v from 'valibot'
+
+const SCHEMAS = {
+  post: {
+    json: v.object({
+      hello: v.string(),
+      goodbye: v.number()
+    })
+  }
+}
+
+export const HOOKS = {
+  SCHEMAS
+}
+
+/**
+ * Assuming the following json is passed in:
+ * {
+ *    hello: 'world',
+ *    goodbye: 42,
+ *    cya: 'later'
+ * }
+ */
+export const POST = async (event) => {
+  console.log(event.valid.json)
+  // { hello: 'world', goodbye: 42 } }
+
+  /* Do something and return a response. */
+}
+```
+
 ## Using Validators
 
 `VALIDATORS` is a built-in `HOOKS` object. For each route handler and data type, you can define a function that returns an object of validated data. 
@@ -56,20 +93,28 @@ Instead of using a validation library, you can also define a normal function wit
 
 > We clone the request during validation. This allows you to access the original request body within route handlers, if desired.
 
-## Using Standard Schema
+## Types
 
-`SCHEMAS` is a built-in `HOOKS` object. For each route handler and data type, you can define a schema to validate data. You can only use SCHEMAS when using a validation library that is [Standard Schema](https://standardschema.dev) compliant.
+You can pass your Request types in two different ways: `RouteHandler` or `RequestEvent`. This gives you type checking and intellisense in your endpoint handlers.
 
 ```js
-/* src/routes/route.js */
 import * as v from 'valibot'
+import type { RequestEvent, RouteHandler } from '@xinkjs/xink'
+
+const post_json_schema = v.object({
+  hello: v.string(),
+  goodbye: v.number()
+})
+type PostReqTypes = {
+  json: v.InferInput<typeof post_json_schema>;
+}
+type PostResTypes = {
+  message: PostReqTypes['json']
+}
 
 const SCHEMAS = {
   post: {
-    json: v.object({
-      hello: v.string(),
-      goodbye: v.number()
-    })
+    json: v.parser(post_json_schema)
   }
 }
 
@@ -77,49 +122,16 @@ export const HOOKS = {
   SCHEMAS
 }
 
-/**
- * Assuming the following json is passed in:
- * {
- *    hello: 'world',
- *    goodbye: 42,
- *    cya: 'later'
- * }
- */
-export const POST = async (event) => {
-  console.log(event.valid.json)
-  // { hello: 'world', goodbye: 42 } }
+// VIA RouteHandler - best if you are using Request and Response types; modern API
+export const POST: RouteHandler<PostReqTypes, PostResTypes> = async (event) => {
+  // IDE autocomplete/types for "hello" and "goodbye" for event.valid.json.
+  const valid_json = event.valid.json
 
   /* Do something and return a response. */
 }
-```
 
-## Types
-
-Pass your types to `RequestEvent` to get checking and intellisense in your endpoint handlers.
-
-```js
-import * as v from 'valibot'
-import type { RequestEvent, Validators } from '@xinkjs/xink'
-
-const post_json_schema = v.object({
-  hello: v.string(),
-  goodbye: v.number()
-})
-type PostTypes = {
-  json: v.InferInput<typeof post_json_schema>;
-}
-
-const VALIDATORS: Validators = {
-  post: {
-    json: v.parser(post_json_schema)
-  }
-}
-
-export const HOOKS = {
-  VALIDATORS
-}
-
-export const POST = async (event: RequestEvent<PostTypes>) => {
+// VIA RequestEvent - only good for Request types; legacy API
+export const POST = async (event: RequestEvent<PostReqTypes>) => {
   // IDE autocomplete/types for "hello" and "goodbye" for event.valid.json.
   const valid_json = event.valid.json
 
