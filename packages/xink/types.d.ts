@@ -4,6 +4,7 @@ import type { Plugin } from 'vite'
 import type { Config } from './lib/types/internal'
 import type { XinkVNode, Fragment } from './lib/runtime/jsx'
 import * as CSS from 'csstype'
+import type { ApiReferenceConfiguration } from '@scalar/types'
 
 export interface BunServeOptions {}
 export interface DenoServeOptions {}
@@ -123,7 +124,8 @@ export class Xink extends Router {
         title?: string;
         version?: string;
       }
-    }
+    },
+    scalar?: Partial<ApiReferenceConfiguration>
   }): void;
   path(path: string): void;
 }

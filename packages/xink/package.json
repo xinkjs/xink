@@ -24,7 +24,8 @@
   "devDependencies": {
     "@types/bun": "latest",
     "vite": "^7.0.0",
-    "vitest": "^2.1.9"
+    "vitest": "^2.1.9",
+    "@scalar/types": "^0.2.7"
   },
   "dependencies": {
     "cookie": "^1.0.2",
