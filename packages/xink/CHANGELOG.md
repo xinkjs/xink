@@ -1,5 +1,18 @@
 # @xinkjs/xink
 
+## 0.19.0
+
+### Minor Changes
+
+- a5f8b51: Add RouterHandler type
+- 0210d1b: Allow route-level openapi tags.
+- 298e23d: Add scalar options to openapi method
+- 5e93aa2: Allow custom Not Found handler
+
+### Patch Changes
+
+- 6efa6e1: Change default response type to any
+
 ## 0.18.7
 
 ### Patch Changes
