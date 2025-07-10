@@ -1,5 +1,11 @@
 # @xinkjs/xink
 
+## 0.19.1
+
+### Patch Changes
+
+- 00f9010: fix dependency
+
 ## 0.19.0
 
 ### Minor Changes
