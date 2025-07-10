@@ -1,5 +1,11 @@
 # @xinkjs/xink
 
+## 0.19.2
+
+### Patch Changes
+
+- 9a282dc: Really fix xink dependency
+
 ## 0.19.1
 
 ### Patch Changes
