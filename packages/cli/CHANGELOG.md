@@ -1,5 +1,11 @@
 # xk
 
+## 0.2.7
+
+### Patch Changes
+
+- 4203bd2: bun enviroment for dev and preview
+
 ## 0.2.6
 
 ### Patch Changes
