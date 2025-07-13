@@ -1,5 +1,11 @@
 # xk
 
+## 0.2.6
+
+### Patch Changes
+
+- d8078a9: fix deno handling
+
 ## 0.2.5
 
 ### Patch Changes
