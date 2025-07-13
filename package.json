@@ -18,7 +18,7 @@
   },
   "scripts": {
     "docs": "bun run --filter docs dev",
-    "release": "bun run build && changeset publish",
+    "release": "bun run build && changeset publish --no-git-tag",
     "build": "bun run --filter \"./packages/*\" build",
     "prepare": "npx is-ci || husky"
   },
