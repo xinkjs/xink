@@ -60,18 +60,23 @@ export default api
 `
     )
 
+    const plugins = []
+    if (runtime === 'deno')
+        plugins.push('deno()')
+
+    plugins.push('xink({ adapter, })')
+
     /* Create Vite config. */
     writeFileSync(join(project_path, 'vite.config.js'),
         `import { xink } from '@xinkjs/xink'
 import { defineConfig } from 'vite'
 import adapter from '@xinkjs/adapter-${runtime}'
+${runtime === 'deno' ? `import deno from '@deno/vite-plugin'` : ''}
 
 export default defineConfig(function () {
     return {
         plugins: [
-            xink({ 
-                adapter,
-            })
+            ${plugins.join(',\n            ')}
         ]
     }
 })
@@ -141,21 +146,8 @@ export default defineConfig(function () {
     writeFileSync(join(project_path, package_file), package_contents.replace(/~TODO~/g, project_path.split("/").at(-1) || "package-name"))
 
     /* Create routes directory and example route. */
-    const route_contents = language === 'typescript' ?
-        `import { type RequestEvent } from '@xinkjs/xink'
-
-export const GET = ({ text }: RequestEvent) => {
-    return text('Welcome to xink!')
-}
-    ` : `${language === 'checkjs' ? 
-        `/**
- * 
- * @param {import('@xinkjs/xink').RequestEvent} event 
- * @returns {Response}
- */
-`
-    : ''}export const GET = ({ text }) => {
-    return text('Welcome to xink!')
+    const route_contents = `export const GET = () => {
+    return 'Welcome to xink!'
 }
 `
     mkdirSync(join(project_path, 'src/routes'), { recursive: true })

@@ -27,7 +27,7 @@ const deno = `{
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "start": "deno run --allow-net --allow-sys --allow-read=build build/server.js"
+    "start": "deno run --allow-env --allow-net --allow-sys --allow-read=. build/server.js"
   },
   "nodeModulesDir": "auto",
   "compilerOptions": {
