@@ -5,7 +5,7 @@ import { getRequest, setResponse } from './lib/utils/vite.js'
 import { createManifestVirtualModule } from './lib/utils/manifest.js'
 import { join, relative, resolve as path_resolve } from 'node:path'
 import { readFiles } from './lib/utils/main.js'
-import { existsSync, readFileSync } from 'node:fs'
+import { existsSync, readFileSync, statSync } from 'node:fs'
 import cleanJson from 'strip-json-comments'
 
 const virtual_manifest_id = 'virtual:xink-manifest'
@@ -233,7 +233,7 @@ export function xink(xink_config = {}) {
         define: {
           XINK_CHECK_ORIGIN: validated_config.check_origin,
         },
-        ssr: { noExternal: ['@xinkjs/xink'] }
+        //ssr: { noExternal: ['@xinkjs/xink'] }
       }
     },
     async configureServer(server) {
