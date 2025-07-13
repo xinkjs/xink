@@ -1,5 +1,11 @@
 # @xinkjs/xink
 
+## 0.19.3
+
+### Patch Changes
+
+- 1cc476c: fix import for build
+
 ## 0.19.2
 
 ### Patch Changes
