@@ -37,7 +37,6 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git config --global http.https://github.com/.extraheader "Authorization: bearer ${{ secrets.GITHUB_TOKEN }}"
 
       - name: Publish to npm
         run: bun run release # This runs 'bun run build && changeset publish'
@@ -51,9 +50,6 @@ jobs:
           bunx changeset tag
           # This command pushes all local tags to the remote, using the configured credentials
           git push origin --tags
-
-      - name: Unset Git Authorization Header
-        run: git config --global --unset http.https://github.com/.extraheader
 
       - name: Create GitHub Releases
         env:
