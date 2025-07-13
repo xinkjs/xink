@@ -3,9 +3,9 @@ const bun = `{
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "bun --bun vite",
     "build": "vite build",
-    "preview": "vite preview",
+    "preview": "bun --bun vite preview",
     "start": "bun run build/server.js"
   }
 }
