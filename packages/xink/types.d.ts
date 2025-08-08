@@ -1,4 +1,4 @@
-import type { Store, Params, Router } from '@xinkjs/xin'
+import type { Store, Params, Router } from '../xin/types.d.ts'
 import type { SerializeOptions, ParseOptions } from 'cookie'
 import type { Plugin } from 'vite'
 import type { Config } from './lib/types/internal'

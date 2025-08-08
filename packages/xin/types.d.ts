@@ -1,43 +1,46 @@
-export type Handler = (event?: any) => MaybePromise<Response>;
+import type { Router as URLRouter, Handler, Hook, Store } from "@xinkjs/xi"
+import type { SerializeOptions, ParseOptions } from 'cookie'
+
+export type Cookie = {
+  name: string;
+  value: string;
+  options: SerializeOptions;
+}
+export type Cookies = {
+  delete(name: string, options?: SerializeOptions): void;
+  get(name: string, options?: ParseOptions): string | undefined;
+  getAll(options?: ParseOptions): Array<{ name: string, value: string }>;
+  set(name: string, value: string, options?: SerializeOptions): void;
+}
+
+export interface RequestEvent extends BaseEvent {
+  request: Request;
+  url: Omit<URL, 'createObjectURL' | 'revokeObjectURL' | 'canParse'>;
+  platform: Record<string, any>;
+  params: Record<string, string | undefined>;
+}
+
+export type ErrorHandler = (error: unknown, event?: RequestEvent) => MaybePromise<Response | void>;
+export type NotFoundHandler = (event?: RequestEvent) => MaybePromise<Response | void>;
+export type Handle = (event: RequestEvent, resolve: ResolveEvent) => MaybePromise<Response>;
 export type MaybePromise<T> = T | Promise<T>;
-export type Matcher = (param: string) => boolean | null;
-export type MatcherFn = (param: string) => boolean;
-export type MatcherType = string | null;
-export type Node = {
-  segment: string;
-  store: Store | null;
-  static_children: Map<number, Node> | null;
-  parametric_children: Map<string, ParametricNode> | null;
-  wildcard_store: Store | null;
-}
-export type ParametricNode = {
-  matcher: Matcher;
-  matcher_type: MatcherType;
-  param_name: string;
-  store: Store | null;
-  static_child: Node | null;
-}
-export type Params = { [key: string]: string; }
-export type Route = { store: Store; params: Params; } | null;
-export type Store = { 
-  [key: string]: Handler | any;
- }
-export type StoreFactory = () => Store;
+export type ResolveEvent = (event: RequestEvent) => MaybePromise<Response>;
+export type Route = { store: Store; params: Record<string, string | undefined>; } | null;
+export type PlatformContext = Record<string, any>;
+export interface CloudflarePlatformContext {
+  env?: Record<string, any>;
+  ctx?: {
+    waitUntil?: (promise: Promise<any>) => void;
+    passThroughOnException?: () => void;
+  };
+};
 
-export class Router {
-  constructor(options?: { storeFactory?: StoreFactory })
+export declare class Router extends URLRouter<RequestEvent> {
+  fetch(request: Request, platform?: PlatformContext);
+  use(...middleware: Handle[]): void;
+  getMiddleware(): Handle[];
+  onError(handler: ErrorHandler): void;
+  onNotFound(handler: NotFoundHandler): void;
+};
 
-  getTree(): Node;
-  setMatcher(type: string, matcher: Matcher): void;
-  getMatcher(type: string): Matcher;
-  register(path: string): Store;
-  find(path: string): Route;
-  get(path: string, handler: Handler): void;
-  post(path: string, handler: Handler): void;
-  put(path: string, handler: Handler): void;
-  patch(path: string, handler: Handler): void;
-  delete(path: string, handler: Handler): void;
-  head(path: string, handler: Handler): void;
-  options(path: string, handler: Handler): void;
-  fallback(path: string, handler: Handler): void;
-}
+export { Handler, Hook, Store };

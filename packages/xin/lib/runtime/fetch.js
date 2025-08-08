@@ -182,53 +182,53 @@ export const isFormContentType = (request) => {
  * @param {string[]} types
  */
 export const negotiate = (accept, types) => {
-	/** @type {Array<{ type: string, subtype: string, q: number, i: number }>} */
-	const parts = []
+  /** @type {Array<{ type: string, subtype: string, q: number, i: number }>} */
+  const parts = []
 
-	accept.split(',').forEach((str, i) => {
-		const match = /([^/ \t]+)\/([^; \t]+)[ \t]*(?:;[ \t]*q=([0-9.]+))?/.exec(str);
+  accept.split(',').forEach((str, i) => {
+    const match = /([^/ \t]+)\/([^; \t]+)[ \t]*(?:;[ \t]*q=([0-9.]+))?/.exec(str);
 
-		/* No match equals invalid header — ignore. */
-		if (match) {
-			const [, type, subtype, q = '1'] = match;
-			parts.push({ type, subtype, q: +q, i });
-		}
-	})
+    /* No match equals invalid header — ignore. */
+    if (match) {
+      const [, type, subtype, q = '1'] = match;
+      parts.push({ type, subtype, q: +q, i });
+    }
+  })
 
-	parts.sort((a, b) => {
-		if (a.q !== b.q) {
-			return b.q - a.q
-		}
+  parts.sort((a, b) => {
+    if (a.q !== b.q) {
+      return b.q - a.q
+    }
 
-		if ((a.subtype === '*') !== (b.subtype === '*')) {
-			return a.subtype === '*' ? 1 : -1
-		}
+    if ((a.subtype === '*') !== (b.subtype === '*')) {
+      return a.subtype === '*' ? 1 : -1
+    }
 
-		if ((a.type === '*') !== (b.type === '*')) {
-			return a.type === '*' ? 1 : -1
-		}
+    if ((a.type === '*') !== (b.type === '*')) {
+      return a.type === '*' ? 1 : -1
+    }
 
-		return a.i - b.i
-	})
+    return a.i - b.i
+  })
 
-	let accepted
-	let min_priority = Infinity
+  let accepted
+  let min_priority = Infinity
 
-	for (const mimetype of types) {
-		const [type, subtype] = mimetype.split('/')
-		const priority = parts.findIndex(
-			(part) =>
-				(part.type === type || part.type === '*') &&
-				(part.subtype === subtype || part.subtype === '*')
-		)
+  for (const mimetype of types) {
+    const [type, subtype] = mimetype.split('/')
+    const priority = parts.findIndex(
+      (part) =>
+        (part.type === type || part.type === '*') &&
+        (part.subtype === subtype || part.subtype === '*')
+    )
 
-		if (priority !== -1 && priority < min_priority) {
-			accepted = mimetype
-			min_priority = priority
-		}
-	}
+    if (priority !== -1 && priority < min_priority) {
+      accepted = mimetype
+      min_priority = priority
+    }
+  }
 
-	return accepted
+  return accepted
 }
 
 /* ATTR: SvelteKit */
@@ -237,11 +237,11 @@ export const negotiate = (accept, types) => {
  * @param {string} location
  */
 export const redirectResponse = (status, location) => {
-	const response = new Response(undefined, {
-		status,
-		headers: { location }
-	})
-	return response
+  const response = new Response(undefined, {
+    status,
+    headers: { location }
+  })
+  return response
 }
 
 const processHandler = async (result) => {
@@ -274,7 +274,7 @@ export const resolve = async (event) => {
   if (!event.store) return new Response('Not Found', { 
     status: 404,
     headers: {
-      'x-xink-default-404': 'true'
+      'x-xin-default-404': 'true'
     } 
   })
 

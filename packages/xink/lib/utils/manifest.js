@@ -77,7 +77,7 @@ export const createManifestVirtualModule = async (config) => {
     let urlPath = dirs.length === 0 ? '/' : `/${dirs.join('/')}`
 
     // --- Convert path segments (same logic as original) ---
-    urlPath = urlPath.replace(/\[{1}\.{3}([\w.~-]+?)\]{1}/g, '*') // Rest
+    urlPath = urlPath.replace(/\[{1}\.{3}([\w.~-]+?)\]{1}/g, '*$1') // Rest
     urlPath = urlPath.replace(/\[{1}([\w.~-]+?=[a-zA-Z]+?)\]{1}/g, ':$1') // Matchers
     urlPath = urlPath.replace(/\[{2}([\w.~-]+?)\]{2}/g, ':$1?') // Optionals
     urlPath = urlPath.replace(/\[{1}/g, ':') // Dynamics start

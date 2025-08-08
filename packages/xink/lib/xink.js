@@ -1,4 +1,5 @@
 /** @import { Context, Cookie, ErrorHandler, Middleware, NotFoundHandler, RequestEvent } from "../types.js" */
+/** @import { Handler, Matcher, Node, Params, ParametricNode, Route, Router, Store } from './types/internal.js' */
 
 import { Router } from "@xinkjs/xin"
 import { json, text, html, redirect } from './runtime/helpers.js'
@@ -97,7 +98,7 @@ export class Xink extends Router {
       }
     }
 
-    const { store, params } = this.find(url.pathname) || {}
+    const { store, params } = this.findRoute(url.pathname)
     const handle = this.#middleware
     const errorHandler = this.#error_handler
     const { cookies, new_cookies } = getCookies(request, url)
@@ -244,8 +245,7 @@ export class Xink extends Router {
 
       /* Register params. */
       for (const [k, v] of Object.entries(this.#manifest.params)) {
-        const matcher = v ?? null
-        if (matcher) this.setMatcher(k, matcher)
+        this.addMatcher(k, v)
       }
 
       /* Register middleware. */
@@ -258,7 +258,7 @@ export class Xink extends Router {
       /* Register routes. */
       for (const route_info of this.#manifest.routes) {
         const derived_path = this.#base_path ? this.#base_path + (route_info.path === '/' ? '' : route_info.path) : route_info.path
-        const store = this.register(derived_path)
+        const store = this.addRoute(derived_path)
 
         const handlers = route_info.handlers
         const special_handlers = new Set(['HOOKS', 'OPENAPI'])
@@ -266,7 +266,7 @@ export class Xink extends Router {
         const hooks = handlers.HOOKS || null
         const openapi = handlers.OPENAPI || null
 
-        if (hooks && typeof hooks === 'object') store['HOOKS'] = hooks
+        if (hooks && typeof hooks === 'object') store.setHandler('HOOKS', hooks)
 
         const openapi_schema = {}
 
@@ -308,7 +308,7 @@ export class Xink extends Router {
             console.warn(`Unsupported handler method '${method}' found for route ${route_info.path}. Skipping.`)
             continue
           }
-          store[method] = handlers[method]
+          store.setHandler(method, handlers[method])
         }
       }
 
