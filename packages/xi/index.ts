@@ -18,10 +18,10 @@ const HOOK_METHODS = new Set([
 /**
  * Store for a route's handlers and hooks
  */
-class Store<Path extends string = string, TEvent extends BaseEvent = BaseEvent> {
-  /** @type {Map<HandlerMethod, Handler<Path, TEvent>>} Map of methods to handlers */
+export class Store<Path extends string = string, TEvent extends BaseEvent = BaseEvent> {
+  /** Map of methods to handlers */
   handlers: Map<HandlerMethod, Handler<Path, TEvent>> = new Map()
-  /** @type {Map<HookMethod, Hook<Path, TEvent>[]>} Map of methods to hooks */
+  /** Map of methods to hooks */
   hooks: Map<HookMethod, Hook<Path, TEvent>[]> = new Map()
 
   /**
@@ -101,7 +101,7 @@ class Store<Path extends string = string, TEvent extends BaseEvent = BaseEvent> 
    */
   get(handler: Handler<Path, TEvent>, ...hooks: Hook<Path, TEvent>[]): Store<Path, TEvent> {
     this.setHandler('GET', handler)
-    if (hooks) this.setHooks('GET', hooks)
+    if (hooks.length > 0) this.setHooks('GET', hooks)
     return this
   }
 
@@ -110,7 +110,7 @@ class Store<Path extends string = string, TEvent extends BaseEvent = BaseEvent> 
    */
   post(handler: Handler, ...hooks: Hook<Path, TEvent>[]): Store<Path, TEvent> {
     this.setHandler('POST', handler)
-    if (hooks) this.setHooks('POST', hooks)
+    if (hooks.length > 0) this.setHooks('POST', hooks)
     return this
   }
 
@@ -119,7 +119,7 @@ class Store<Path extends string = string, TEvent extends BaseEvent = BaseEvent> 
    */
   put(handler: Handler, ...hooks: Hook<Path, TEvent>[]): Store<Path, TEvent> {
     this.setHandler('PUT', handler)
-    if (hooks) this.setHooks('PUT', hooks)
+    if (hooks.length > 0) this.setHooks('PUT', hooks)
     return this
   }
 
@@ -128,7 +128,7 @@ class Store<Path extends string = string, TEvent extends BaseEvent = BaseEvent> 
    */
   patch(handler: Handler, ...hooks: Hook<Path, TEvent>[]): Store<Path, TEvent> {
     this.setHandler('PATCH', handler)
-    if (hooks) this.setHooks('PATCH', hooks)
+    if (hooks.length > 0) this.setHooks('PATCH', hooks)
     return this
   }
 
@@ -137,7 +137,7 @@ class Store<Path extends string = string, TEvent extends BaseEvent = BaseEvent> 
    */
   delete(handler: Handler, ...hooks: Hook<Path, TEvent>[]): Store<Path, TEvent> {
     this.setHandler('DELETE', handler)
-    if (hooks) this.setHooks('DELETE', hooks)
+    if (hooks.length > 0) this.setHooks('DELETE', hooks)
     return this
   }
 
@@ -146,7 +146,7 @@ class Store<Path extends string = string, TEvent extends BaseEvent = BaseEvent> 
    */
   head(handler: Handler, ...hooks: Hook<Path, TEvent>[]): Store<Path, TEvent> {
     this.setHandler('HEAD', handler)
-    if (hooks) this.setHooks('HEAD', hooks)
+    if (hooks.length > 0) this.setHooks('HEAD', hooks)
     return this
   }
 
@@ -155,7 +155,7 @@ class Store<Path extends string = string, TEvent extends BaseEvent = BaseEvent> 
    */
   options(handler: Handler, ...hooks: Hook<Path, TEvent>[]): Store<Path, TEvent> {
     this.setHandler('OPTIONS', handler)
-    if (hooks) this.setHooks('OPTIONS', hooks)
+    if (hooks.length > 0) this.setHooks('OPTIONS', hooks)
     return this
   }
 
@@ -165,7 +165,7 @@ class Store<Path extends string = string, TEvent extends BaseEvent = BaseEvent> 
    */
   fallback(handler: Handler, ...hooks: Hook<Path, TEvent>[]): Store<Path, TEvent> {
     this.setHandler('FALLBACK', handler)
-    if (hooks) this.setHooks('FALLBACK', hooks)
+    if (hooks.length > 0) this.setHooks('FALLBACK', hooks)
     return this
   }
 }
@@ -174,28 +174,28 @@ class Store<Path extends string = string, TEvent extends BaseEvent = BaseEvent> 
  * Node in the routing trie
  */
 class Node {
-  /** @type {Map<string, Node>} Static child routes */
+  /** Static child routes */
   static_children: Map<string, Node> = new Map()
   
-  /** @type {Node|null} Dynamic parameter child */
+  /** Dynamic parameter child */
   dynamic_child: Node | null = null
   
-  /** @type {string|null} Parameter name for dynamic routes */
+  /** Parameter name for dynamic routes */
   param_name: string | null = null
   
-  /** @type {Map<string, Node>} Mixed static-dynamic children */
+  /** Mixed static-dynamic children */
   mixed_children: Map<string, Node> = new Map()
 
-  /** @type {Map<string, Node>} Matcher children (:param=matcher) */
+  /** Matcher children (:param=matcher) */
   matcher_children: Map<string, Node> = new Map()
   
-  /** @type {Node|null} Wildcard child (*param) */
+  /** Wildcard child (*param) */
   wildcard_child: Node | null = null
   
-  /** @type {Store|null} Store for method handlers */
+  /** Store for method handlers */
   store: Store | null = null
   
-  /** @type {string|null} Original route pattern */
+  /** Original route pattern */
   pattern: string | null = null
 }
 
@@ -203,29 +203,42 @@ class Node {
  * Trie URL router 
  */
 export class Router<TEvent extends BaseEvent = BaseEvent> {
-  /** @type {Node} Root node of the routing trie */
+  /** Root node of the routing trie */
   root: Node = new Node()
   
-  /** @type {Map<string, Matcher>} Registry of matcher functions */
+  /** @type Registry of matcher functions */
   matchers: Map<string, Matcher> = new Map([
     ['word', wordMatcher],
     ['letter', letterMatcher],
     ['number', numberMatcher]
   ])
 
+  base_path: string = ''
+
   /**
-   * Add a matcher function
-   * 
-   * @param {string} name
-   * @param {Matcher} matcher
-   * @returns {void}
-   * @throws Error, If Matcher is not a function
+   * Set basepath for all registered routes
    */
-  matcher(name: string, matcher: Matcher): void {
-    if (typeof matcher !== 'function') {
-      throw new Error('Matcher must be a function')
-    }
-    this.matchers.set(name, matcher)
+  basepath(path: string) {
+    if (typeof path !== 'string')
+      throw new TypeError('Basepath must be a string.')
+    if (path.charAt(0) !== '/')
+      throw new Error('Basepath must start with a forward slash "/"')
+    if (path.length === 1)
+      throw new Error('Basepath cannot be "/"')
+
+    this.base_path = path
+  }
+
+  /**
+   * Find a route and return its info
+   */
+  find(path: string): StoreResult {
+    if (!path.startsWith('/'))
+      throw new Error('Path must start with /')
+
+    const segments = path.split('/').filter(Boolean)
+
+    return this.matchRoute(this.root, segments, 0, {})
   }
 
   /**
@@ -264,92 +277,19 @@ export class Router<TEvent extends BaseEvent = BaseEvent> {
   }
 
   /**
-   * Register a route and return its store
+   * Add a matcher function
    * 
-   * @param {string} path
-   * @returns {Store<Path, TEvent>}
-   * @throws Error, If path does not start with a '/'
+   * @throws Error, If Matcher is not a function
    */
-  route<Path extends string>(path: Path): Store<Path, TEvent> {
-    if (!path.startsWith('/'))
-      throw new Error('Path must start with /')
-
-    const segments = path.split('/').filter(Boolean)
-    let current_node = this.root
-
-    for (const segment of segments) {
-      const parsed = this.parseSegment(segment)
-       
-      switch (parsed.type) {
-        case 'static':
-          let static_node = current_node.static_children.get(segment)
-          if (!static_node) {
-            static_node = new Node()
-            current_node.static_children.set(segment, static_node)
-          }
-
-          current_node = static_node
-          break
-          
-        case 'dynamic':
-          if (!current_node.dynamic_child) {
-            current_node.dynamic_child = new Node()
-            current_node.param_name = parsed.param_name
-          }
-          current_node = current_node.dynamic_child
-          break
-        
-        case 'matcher':
-          if (!this.matchers.has(parsed.matcher_name)) {
-            throw new Error(`Unknown matcher: ${parsed.matcher_name}`)
-          }
-          
-          let matcher_node = current_node.matcher_children.get(parsed.pattern)
-          if (!matcher_node) {
-            matcher_node = new Node()
-            matcher_node.param_name = parsed.param_name
-            current_node.matcher_children.set(parsed.pattern, matcher_node)
-          }
-          current_node = matcher_node
-          break
-          
-        case 'mixed':
-          let mixed_node = current_node.mixed_children.get(parsed.pattern)
-          if (!mixed_node) {
-            mixed_node = new Node()
-            mixed_node.param_name = parsed.param_name
-            current_node.mixed_children.set(parsed.pattern, mixed_node)
-          }
-          current_node = mixed_node
-          break
-          
-        case 'wildcard':
-          if (!current_node.wildcard_child) {
-            current_node.wildcard_child = new Node()
-            current_node.param_name = parsed.param_name
-          }
-
-          current_node = current_node.wildcard_child
-          break
-      }
+  matcher(name: string, matcher: Matcher): void {
+    if (typeof matcher !== 'function') {
+      throw new Error('Matcher must be a function')
     }
-
-    if (!current_node.store)
-      current_node.store = new Store()
-    
-    current_node.pattern = path
-
-    // Ensure return type matches signature,
-    // despite only being Store
-    return current_node.store as unknown as Store<Path, TEvent>
+    this.matchers.set(name, matcher)
   }
 
   /**
    * Match a URL segment against a matcher pattern
-   * 
-   * @param {string} pattern
-   * @param {string} segment
-   * @returns {MatcherResult}}
    */
   matchMatcherSegment(pattern: string, segment: string): MatcherResult {
     const match = pattern.match(/^(.+?)=([a-zA-Z]+?)$/)
@@ -376,10 +316,6 @@ export class Router<TEvent extends BaseEvent = BaseEvent> {
 
   /**
    * Match a URL segment against a mixed pattern
-   * 
-   * @param {string} pattern - The mixed pattern
-   * @param {string} segment - The URL segment to match
-   * @returns {MixedResult}
    */
   matchMixedSegment(pattern: string, segment: string): MixedResult {
     const colon_index = pattern.indexOf(':')
@@ -397,12 +333,6 @@ export class Router<TEvent extends BaseEvent = BaseEvent> {
 
   /**
    * Recursively match route segments against the trie
-   * 
-   * @param {Node} node - Node to match against
-   * @param {string[]} segments - URL segments to match
-   * @param {number} index - Current segment index
-   * @param {Record<string, string>} params - Accumulated parameters
-   * @returns {StoreResult}
    */
   matchRoute(node: Node, segments: string[], index: number, params: Record<string, string>): StoreResult {
     // If we've processed all segments and a store exists, return
@@ -503,9 +433,6 @@ export class Router<TEvent extends BaseEvent = BaseEvent> {
 
   /**
    * Parse a route segment to determine its type and extract metadata
-   * 
-   * @param {string} segment - The route segment to parse
-   * @returns {ParsedSegment}
    */
   parseSegment(segment: string): ParsedSegment {
     if (segment.startsWith('*'))
@@ -540,17 +467,81 @@ export class Router<TEvent extends BaseEvent = BaseEvent> {
   }
 
   /**
-   * Find a route and return its info
-   * 
-   * @param {string} path
-   * @returns {StoreResult}
+   * Register a route and return its store
+   * @throws Error, If path does not start with a '/'
    */
-  find(path: string): StoreResult {
+  route<Path extends string>(path: Path): Store<Path, TEvent> {
     if (!path.startsWith('/'))
       throw new Error('Path must start with /')
 
-    const segments = path.split('/').filter(Boolean)
+    const derived_path = this.base_path ? this.base_path + (path === '/' ? '' : path) : path
 
-    return this.matchRoute(this.root, segments, 0, {})
+    const segments = derived_path.split('/').filter(Boolean)
+    let current_node = this.root
+
+    for (const segment of segments) {
+      const parsed = this.parseSegment(segment)
+       
+      switch (parsed.type) {
+        case 'static':
+          let static_node = current_node.static_children.get(segment)
+          if (!static_node) {
+            static_node = new Node()
+            current_node.static_children.set(segment, static_node)
+          }
+
+          current_node = static_node
+          break
+          
+        case 'dynamic':
+          if (!current_node.dynamic_child) {
+            current_node.dynamic_child = new Node()
+            current_node.param_name = parsed.param_name
+          }
+          current_node = current_node.dynamic_child
+          break
+        
+        case 'matcher':
+          if (!this.matchers.has(parsed.matcher_name)) {
+            throw new Error(`Unknown matcher: ${parsed.matcher_name}`)
+          }
+          
+          let matcher_node = current_node.matcher_children.get(parsed.pattern)
+          if (!matcher_node) {
+            matcher_node = new Node()
+            matcher_node.param_name = parsed.param_name
+            current_node.matcher_children.set(parsed.pattern, matcher_node)
+          }
+          current_node = matcher_node
+          break
+          
+        case 'mixed':
+          let mixed_node = current_node.mixed_children.get(parsed.pattern)
+          if (!mixed_node) {
+            mixed_node = new Node()
+            mixed_node.param_name = parsed.param_name
+            current_node.mixed_children.set(parsed.pattern, mixed_node)
+          }
+          current_node = mixed_node
+          break
+          
+        case 'wildcard':
+          if (!current_node.wildcard_child) {
+            current_node.wildcard_child = new Node()
+            current_node.param_name = parsed.param_name
+          }
+
+          current_node = current_node.wildcard_child
+          break
+      }
+    }
+
+    if (!current_node.store)
+      current_node.store = new Store()
+    
+    current_node.pattern = derived_path
+
+    // Ensure return type matches signature, despite only being Store
+    return current_node.store as unknown as Store<Path, TEvent>
   }
 }

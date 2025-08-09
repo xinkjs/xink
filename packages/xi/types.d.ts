@@ -91,12 +91,13 @@ export declare class Router<TEvent extends BaseEvent = BaseEvent> {
   root: Node;
   matchers: Map<string, Matcher>;
 
+  basepath(path: string): void;
+  getRoutes(): { pattern: string, methods: string[] }[];
   matcher(name: string, matcher: Matcher): void;
   matchMatcherSegment(pattern: string, segment: string): MatcherResult;
   matchMixedSegment(pattern: string, segment: string): MixedResult;
   matchRoute(node: Node, segments: string[], index: number, params: Record<string, string | undefined>): StoreResult;
   parseSegment(segment: string): ParsedSegment;
-  getRoutes(): { pattern: string, methods: string[] }[];
   route<Path extends string>(path: Path): Store<Path, TEvent>;
   find(path: string): StoreResult;
 }

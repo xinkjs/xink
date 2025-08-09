@@ -1,5 +1,6 @@
 import type { Router as URLRouter, Handler, Hook, Store } from "@xinkjs/xi"
 import type { SerializeOptions, ParseOptions } from 'cookie'
+import type { ApiReferenceConfiguration } from '@scalar/types'
 
 export type Cookie = {
   name: string;
@@ -12,12 +13,31 @@ export type Cookies = {
   getAll(options?: ParseOptions): Array<{ name: string, value: string }>;
   set(name: string, value: string, options?: SerializeOptions): void;
 }
+interface AllowedValidatorTypes {
+  form?: any;
+  json?: any;
+  params?: any;
+  query?: any;
+}
 
-export interface RequestEvent extends BaseEvent {
-  request: Request;
-  url: Omit<URL, 'createObjectURL' | 'revokeObjectURL' | 'canParse'>;
-  platform: Record<string, any>;
+/** The minimal constraint for a custom context object. */
+export type BaseEvent = object;
+
+export interface RequestEvent<ReqT extends AllowedValidatorTypes = AllowedValidatorTypes, ResT = any> extends BaseEvent {
+  cookies: Cookies;
+  headers: Omit<Headers, 'toJSON' | 'count' | 'getAll'>;
+  html: typeof html;
+  json: <T extends ResT>(data: T, init?: ResponseInit) => Response;
+  locals: Api.Locals;
   params: Record<string, string | undefined>;
+  platform: Record<string, any>;
+  redirect: typeof redirect;
+  request: Request;
+  setHeaders: (headers: Record<string, any>) => void;
+  store: Store | null;
+  text: typeof text;
+  url: Omit<URL, 'createObjectURL' | 'revokeObjectURL' | 'canParse'>;
+  valid: ReqT;
 }
 
 export type ErrorHandler = (error: unknown, event?: RequestEvent) => MaybePromise<Response | void>;
@@ -37,10 +57,27 @@ export interface CloudflarePlatformContext {
 
 export declare class Router extends URLRouter<RequestEvent> {
   fetch(request: Request, platform?: PlatformContext);
-  use(...middleware: Handle[]): void;
   getMiddleware(): Handle[];
   onError(handler: ErrorHandler): void;
   onNotFound(handler: NotFoundHandler): void;
+  openapi(metadata: { 
+    path: string; 
+    data?: {
+      openapi?: string;
+      info?: {
+        title?: string;
+        version?: string;
+      }
+    },
+    scalar?: Partial<ApiReferenceConfiguration>
+  }): void;
+  // route(); do not type - the xi version is passed through
+  use(...middleware: Handle[]): void;
 };
 
-export { Handler, Hook, Store };
+export function html(data: any, init?: ResponseInit | undefined): Response;
+export function json(data: any, init?: ResponseInit | undefined): Response;
+export function redirect(status: number, location: string): never;
+export function text(data: string, init?: ResponseInit | undefined): Response;
+
+export { Handler, Hook, Store, ApiReferenceConfiguration };

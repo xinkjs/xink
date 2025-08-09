@@ -1,8 +1,9 @@
-/** @import { ErrorHandler, Handle, NotFoundHandler, RequestEvent } from './types.js' */
+/** @import { ApiReferenceConfiguration, Cookie, ErrorHandler, Handle, NotFoundHandler, RequestEvent } from './types.js' */
+/** @import { Store } from '@xinkjs/xi*/
 
 import { Router as URLRouter } from "@xinkjs/xi"
 import { sequence } from "./lib/utils.js"
-import { addCookiesToHeaders, redirectResponse, resolve } from "./lib/runtime/fetch.js"
+import { addCookiesToHeaders, getCookies, redirectResponse, resolve } from "./lib/runtime/fetch.js"
 import { json, text, html, redirect } from './lib/runtime/helpers.js'
 import { Redirect } from './lib/runtime/shared.js'
 import { ALLOWED_HANDLERS } from './lib/constants.js'
@@ -18,6 +19,14 @@ export class Router extends URLRouter {
   errorHandler
   /** @type {Handle[]} Registry of middleware functions */
   middleware = []
+  #openapi = {
+    path: '',
+    paths: {},
+    metadata: { 
+      openapi: "3.1.0"
+    },
+    scalar: {}
+  }
 
   constructor() {
     super()
@@ -32,8 +41,7 @@ export class Router extends URLRouter {
    */
   fetch = async (request, platform) => { // must be an arrow function!!
     const url = new URL(request.url)
-    const { store, params } = super.find(url.pathname)
-    const event = { params, platform, request, store, url }
+    const { store, params } = this.find(url.pathname)
     const middleware = this.middleware
     const handle = sequence(...middleware)
     const errorHandler = this.errorHandler
@@ -42,6 +50,51 @@ export class Router extends URLRouter {
     let cookies_to_add ={}
     /** @type {Record<string, string>} */
     const headers = {}
+
+    /* Handle OpenAPI docs request. */
+    if (url.pathname === this.#openapi.path)
+      return html(openapi_template({ ...this.#openapi.metadata, paths: this.#openapi.paths }, this.#openapi.scalar))
+
+    /* Handle OpenAPI schema request. */
+    if (url.pathname === this.#openapi.path + '/schema')
+      return json({ ...this.#openapi.metadata, paths: this.#openapi.paths })
+
+    const { cookies, new_cookies } = getCookies(request, url)
+    
+    cookies_to_add = new_cookies
+
+    const event = { 
+      cookies,
+      headers: request.headers,
+      html,
+      json,
+      locals: {},
+      params,
+      redirect,
+      platform,
+      request,
+      store,
+      /* ATTR: SvelteKit */
+      setHeaders: (new_headers) => {
+        for (const key in new_headers) {
+          const lower = key.toLowerCase()
+          const value = new_headers[key]
+  
+          if (lower === 'set-cookie') {
+            throw new Error(
+              'Use `event.cookies.set(name, value, options)` instead of `event.setHeaders` to set cookies'
+            )
+          } else if (lower in headers) {
+            throw new Error(`"${key}" header is already set`)
+          } else {
+            headers[lower] = value
+          }
+        }
+      },
+      text,
+      url,
+      valid: {}
+    }
 
     try {
       let response = await handle(event, (event) =>
@@ -126,17 +179,6 @@ export class Router extends URLRouter {
   }
 
   /**
-   * Register middleware
-   * 
-   * Accepts a comma-separated list of middleware functions.
-   * 
-   * @param {...Handle} middleware
-   */
-  use(...middleware) {
-    this.middleware.push(...middleware)
-  }
-
-  /**
    * Gets all middleware
    * 
    * @returns {Handle[]}
@@ -159,5 +201,74 @@ export class Router extends URLRouter {
    */
   onNotFound(handler) {
     this.notFoundHandler = handler
+  }
+
+  /**
+   * @typedef {object} OpenApiMetadata
+   * @property {string} path
+   * @property {{ openapi?: string, info?: { title?: string, version?: string } }} [data]
+   * @property {Partial<ApiReferenceConfiguration>} [scalar]
+   */
+  /**
+   * Set openapi data and Scalar options
+   * 
+   * @param {OpenApiMetadata} metadata
+   */
+  openapi({ path, data, scalar }) {
+    this.#openapi.path = path
+    if (data)
+      /* Merge provided metadata with existing (paths are built during init). */
+      this.#openapi.metadata = {
+        ...(this.#openapi.metadata),
+        ...data,
+      }
+
+    if (scalar) this.#openapi.scalar = scalar
+  }
+
+  route(path, openapi) {
+    const store = super.route(path, openapi)
+    /** @type {Record<string, any>} */
+    const openapi_schema = {}
+    const derived_path = super.base_path ? super.base_path + (path === '/' ? '' : path) : path
+    
+    if (openapi && typeof openapi === 'object') {
+      const { tags: global_tags } = openapi
+      
+      for (const method in openapi) {
+        const operation = openapi[method]
+
+        if (typeof operation === 'object' && operation !== null) {
+          const operation_copy = { ...operation }
+
+          if (global_tags && Array.isArray(global_tags) && global_tags.length > 0) {
+            if (Array.isArray(operation_copy.tags)) {
+              /* Merge local and global tags. */
+              operation_copy.tags = [...new Set([...operation_copy.tags, ...global_tags])]
+            } else {
+              operation_copy.tags = global_tags
+            }
+          }
+
+          openapi_schema[method] = operation_copy
+        }
+      }
+
+      if (Object.keys(openapi_schema).length > 0)
+        this.#openapi.paths[derived_path] = openapi_schema
+    }
+
+    return store
+  }
+
+  /**
+   * Register middleware
+   * 
+   * Accepts a comma-separated list of middleware functions.
+   * 
+   * @param {...Handle} middleware
+   */
+  use(...middleware) {
+    this.middleware.push(...middleware)
   }
 }

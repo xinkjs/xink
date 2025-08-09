@@ -7,9 +7,12 @@
   "types": "types.d.ts",
   "exports": {
     ".": {
-      "import": "./index.js",
+      "import": "./lib/exports/index.js",
       "types": "./types.d.ts"
     }
+  },
+  "devDependencies": {
+    "@scalar/types": "^0.2.7"
   },
   "dependencies": {
     "cookie": "^1.0.2",

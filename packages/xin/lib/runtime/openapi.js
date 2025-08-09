@@ -1,4 +1,9 @@
-export const openapi_template = (spec, options) => `<!doctype html>
+export const openapi_template = (spec, options) => {
+  const config = {
+    content: spec,
+    ...options
+  }
+  return `<!doctype html>
 <html>
   <head>
     <title>Scalar API Reference</title>
@@ -9,15 +14,14 @@ export const openapi_template = (spec, options) => `<!doctype html>
   </head>
   <body>
     <div
-      id="api-reference"
-    >
-      ${JSON.stringify(spec)}
-    </div>
+      id="xin-api-scalar"
+    ></div>
 
     <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
     
     <script>
-      Scalar.createApiReference('#api-reference', ${JSON.stringify(options)})
+      Scalar.createApiReference('#xin-api-scalar', ${JSON.stringify(config)})
     </script>
   </body>
 </html>`
+}
