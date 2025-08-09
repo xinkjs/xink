@@ -71,7 +71,7 @@ export declare class Router extends URLRouter<RequestEvent> {
     },
     scalar?: Partial<ApiReferenceConfiguration>
   }): void;
-  // route(); do not type - the xi version is passed through
+  route<Path extends string>(path: Path, openapi?: Record<string, any>): Store<Path, TEvent>;
   use(...middleware: Handle[]): void;
 };
 

@@ -227,7 +227,7 @@ export class Router extends URLRouter {
   }
 
   route(path, openapi) {
-    const store = super.route(path, openapi)
+    const store = super.route(path)
     /** @type {Record<string, any>} */
     const openapi_schema = {}
     const derived_path = super.base_path ? super.base_path + (path === '/' ? '' : path) : path
