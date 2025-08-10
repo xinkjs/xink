@@ -15,7 +15,7 @@ type ParamNameFromSegment<Segment extends string> =
   never;
 
 // The main parser: maps over the segments and builds the params object
-type ParsePath<Path extends string> = {
+export type ParsePath<Path extends string> = {
   [Segment in PathSegments<Path>[number] as ParamNameFromSegment<Segment>]: string
 };
 
@@ -27,11 +27,13 @@ export type BaseEvent = object;
  * It's an intersection of the user-provided context (`TEvent`)
  * and the dynamically parsed route parameters.
  */
-type RequestContext<
+export type RequestContext<
   Path extends string,
-  TEvent extends BaseEvent
-> = Omit<TEvent, 'params'> & { // remove possible params key defined from higher-level router
+  TEvent extends BaseEvent,
+  TSchema
+> = Omit<TEvent, 'params' | 'valid'> & { // remove possible params and valid keys defined from higher-level router
   params: ParsePath<Path>;
+  valid: TSchema;
 };
 
 /** Utility type representing a value that may or may not be a Promise. */
@@ -39,66 +41,68 @@ export type MaybePromise<T> = T | Promise<T>;
 export type BasicRouteInfo = { pattern: string; methods: string[] }[]
 export type Handler<
   Path extends string = string, 
-  TEvent extends BaseEvent = BaseEvent
-> = (event: RequestContext<Path, TEvent>) => MaybePromise<Response | any>;
+  TEvent extends BaseEvent = BaseEvent,
+  TSchema = unknown
+> = (event: RequestContext<Path, TEvent, TSchema>) => MaybePromise<Response | any>;
 export type Hook<
   Path extends string = string, 
-  TEvent extends BaseEvent = BaseEvent
-> = (event: RequestContext<Path, TEvent> | any, next: () => Promise<void>) => MaybePromise<void | any>;
+  TEvent extends BaseEvent = BaseEvent,
+  TSchema = unknown
+> = (event: RequestContext<Path, TEvent, TSchema>, next?: () => Promise<void>) => MaybePromise<void | any>;
 export type HandlerMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'HEAD' | 'OPTIONS' | 'FALLBACK';
 export type HookMethod = HandlerMethod | 'ALL';
 export type Matcher = (param: string) => boolean;
+export type SchemaDefinition = {
+  form?: any;
+  json?: any;
+  params?: any;
+  query?: any;
+}
 
-export declare class Store<Path extends string = string, TEvent extends BaseEvent = BaseEvent> {
-  handlers: Map<HandlerMethod, Handler<Path, TEvent>>;
-  hooks: Map<HookMethod, Hook<Path, TEvent>[]>;
+export interface INode {
+  static_children: Map<string, INode>;
+  dynamic_child: INode | null;
+  param_name: string | null;
+  mixed_children: Map<string, INode>;
+  matcher_children: Map<string, INode>;
+  wildcard_child: INode | null;
+  store: IStore | null;
+  pattern: string | null;
+}
 
-  getHandler(method: string): Handler<Path, TEvent> | undefined;
-  setHandler(method: string, handler: Handler<Path, TEvent>): void;
-  getHooks(method: HookMethod): Hook<Path, TEvent>[] | undefined;
-  setHooks(method: string, hooks: Hook<Path, TEvent>[]): void;
+export interface IStore<Path extends string = string, TEvent extends BaseEvent = BaseEvent> {
+  getHandler(method: string): Handler<Path, TEvent, unknown> | undefined;
+  getHooks(method: HookMethod): Hook<Path, TEvent, unknown>[] | undefined;
   getMethods(): string[];
   hasMethod(method: string): boolean;
+  getSchemas(method: HandlerMethod): SchemaDefinition | undefined;
 
   /**
    * Sets route-level hooks.
    * @param hooks A comma-separated list of hook functions.
    */
-  hook(...hooks: Hook<Path, TEvent>[]): Store<Path, TEvent>;
+  hook<TSchema = unknown>(...hooks: Hook<Path, TEvent, TSchema>[]): IStore<Path, TEvent>;
 
-  get(handler: Handler<Path, TEvent>, ...hooks: Hook<Path, TEvent>[]): Store<Path, TEvent>;
-  post(handler: Handler<Path, TEvent>, ...hooks: Hook<Path, TEvent>[]): Store<Path, TEvent>;
-  put(handler: Handler<Path, TEvent>, ...hooks: Hook<Path, TEvent>[]): Store<Path, TEvent>;
-  patch(handler: Handler<Path, TEvent>, ...hooks: Hook<Path, TEvent>[]): Store<Path, TEvent>;
-  delete(handler: Handler<Path, TEvent>, ...hooks: Hook<Path, TEvent>[]): Store<Path, TEvent>;
-  head(handler: Handler<Path, TEvent>, ...hooks: Hook<Path, TEvent>[]): Store<Path, TEvent>;
-  options(handler: Handler<Path, TEvent>, ...hooks: Hook<Path, TEvent>[]): Store<Path, TEvent>;
-  fallback(handler: Handler<Path, TEvent>, ...hooks: Hook<Path, TEvent>[]): Store<Path, TEvent>;
+  get<TSchema = unknown>(schema: SchemaDefinition, handler: Handler<Path, TEvent, TSchema>, ...hooks: Hook<Path, TEvent, TSchema>[]): IStore<Path, TEvent>;
+  get<TSchema = unknown>(handler: Handler<Path, TEvent, TSchema>, ...hooks: Hook<Path, TEvent, TSchema>[]): IStore<Path, TEvent>;
+  post<TSchema = unknown>(handler: Handler<Path, TEvent, TSchema>, ...hooks: Hook<Path, TEvent, TSchema>[]): IStore<Path, TEvent>;
+  put<TSchema = unknown>(handler: Handler<Path, TEvent, TSchema>, ...hooks: Hook<Path, TEvent, TSchema>[]): IStore<Path, TEvent>;
+  patch<TSchema = unknown>(handler: Handler<Path, TEvent, TSchema>, ...hooks: Hook<Path, TEvent, TSchema>[]): IStore<Path, TEvent>;
+  delete<TSchema = unknown>(handler: Handler<Path, TEvent, TSchema>, ...hooks: Hook<Path, TEvent, TSchema>[]): IStore<Path, TEvent>;
+  head<TSchema = unknown>(handler: Handler<Path, TEvent, TSchema>, ...hooks: Hook<Path, TEvent, TSchema>[]): IStore<Path, TEvent>;
+  options<TSchema = unknown>(handler: Handler<Path, TEvent, TSchema>, ...hooks: Hook<Path, TEvent, TSchema>[]): IStore<Path, TEvent>;
+  fallback<TSchema = unknown>(handler: Handler<Path, TEvent, TSchema>, ...hooks: Hook<Path, TEvent, TSchema>[]): IStore<Path, TEvent>;
 }
 
-type Node = {
-  static_children: Map<string, Node>;
-  dynamic_child: Node | null;
-  param_name: string | null;
-  mixed_children: Map<string, Node>;
-  matcher_children: Map<string, Node>;
-  wildcard_child: Node | null;
-  store: Store | null;
-  pattern: string | null;
-}
-
-export declare class Router<TEvent extends BaseEvent = BaseEvent> {
-  root: Node;
-  matchers: Map<string, Matcher>;
-
+export interface IRouter<TEvent extends BaseEvent = BaseEvent> {
   basepath(path: string): void;
   getRoutes(): { pattern: string, methods: string[] }[];
   matcher(name: string, matcher: Matcher): void;
   matchMatcherSegment(pattern: string, segment: string): MatcherResult;
   matchMixedSegment(pattern: string, segment: string): MixedResult;
-  matchRoute(node: Node, segments: string[], index: number, params: Record<string, string | undefined>): StoreResult;
+  matchRoute(node: INode, segments: string[], index: number, params: Record<string, string | undefined>): StoreResult;
   parseSegment(segment: string): ParsedSegment;
-  route<Path extends string>(path: Path): Store<Path, TEvent>;
+  route<Path extends string>(path: Path): IStore<Path, TEvent>;
   find(path: string): StoreResult;
 }
 
@@ -160,4 +164,4 @@ interface MixedFailure {
 
 export type MixedResult = MixedSuccess | MixedFailure;
 
-export type StoreResult = { store: Store | null; params: Record<string, string | undefined> }
+export type StoreResult = { store: IStore | null; params: Record<string, string | undefined> }

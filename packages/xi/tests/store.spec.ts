@@ -1,6 +1,6 @@
 import { expect, test, vi } from 'vitest'
 import { Router } from '../index.js'
-import type { Handler, Store } from '../types.js'
+import type { Handler, Store } from '../index.js'
 
 const api = new Router()
 let store: Store | undefined

@@ -292,15 +292,15 @@ export const resolve = async (event) => {
     })
   }
 
-  let using_schema = false
-
   /**
+   * Standard Schema Validator
+   * 
    * @template {StandardSchemaV1} T
    * @param {T} schema 
    * @param {StandardSchemaV1.InferInput<T>} input 
    * @returns {Promise<StandardSchemaV1.InferOutput<T>>}
    */
-  const standardValidator = async (schema, input) => {
+  const validator = async (schema, input) => {
     let result = schema['~standard'].validate(input)
     if (result instanceof Promise) result = await result
 
@@ -318,25 +318,25 @@ export const resolve = async (event) => {
     return result.value
   }
 
-  const validation = async (validators) => {
+  const validation = async (schemas) => {
     const content_type = event.request.headers.get('Content-Type')
 
-    for (let i = 0; i < validators.length; i++) {
-      const validator_type = validators[i][0]
-      const validator = validators[i][1]
+    for (let i = 0; i < schemas.length; i++) {
+      const schema_type = schemas[i][0]
+      const schema = schemas[i][1]
 
-      if ((validator_type === 'json' || validator_type === 'form') && (!content_type || !content_type.includes(validator_type)))
-        throw new TypeError(`Expecting ${validator_type} content header, but received ${content_type}.`)
+      if ((schema_type === 'json' || schema_type === 'form') && (!content_type || !content_type.includes(schema_type)))
+        throw new TypeError(`Expecting ${schema_type} content header, but received ${content_type}.`)
 
-      if (validator_type === 'json') {
+      if (schema_type === 'json') {
         const clone = event.request.clone()
         const json_body = await clone.json()
 
-        event.valid.json = using_schema ? await standardValidator(validator, json_body) : validator(json_body)
+        event.valid.json = await validator(schema, json_body)
         continue
       }
       
-      if (validator_type === 'form') {
+      if (schema_type === 'form') {
         const clone = event.request.clone()
         const form_body = await clone.formData()
         const form_values = {}
@@ -348,19 +348,19 @@ export const resolve = async (event) => {
         /* Apply type inference. */
         const inferred_form_data = inferObjectValueTypes(form_values)
 
-        event.valid.form = using_schema ? await standardValidator(validator, inferred_form_data) : validator(inferred_form_data)
+        event.valid.form = await validator(schema, inferred_form_data)
         continue
       }
 
-      if (validator_type === 'params') {
+      if (schema_type === 'params') {
         /* Apply type inference. */
         const inferred_params = inferObjectValueTypes(event.params)
 
-        event.valid.params = using_schema ? await standardValidator(validator, inferred_params) : validator(inferred_params)
+        event.valid.params = await validator(schema, inferred_params)
         continue
       }
       
-      if (validator_type === 'query') {
+      if (schema_type === 'query') {
         const query = event.url.searchParams
         const query_obj = {}
 
@@ -371,27 +371,21 @@ export const resolve = async (event) => {
         /* Apply type inference. */
         const inferred_search_params = inferObjectValueTypes(query_obj)
 
-        event.valid.query = using_schema ? await standardValidator(validator, inferred_search_params) : validator(inferred_search_params)
+        event.valid.query = await validator(schema, inferred_search_params)
         continue
       }
     }
   }
 
-  const hooks = event.store.getHandler('HOOKS') ?? null
-  const method = event.request.method.toLowerCase()
+  const method = event.request.method
+  const hooks = event.store.getHooks(method) ?? null
+  const schemas = event.store.getSchemas(method)
+
+  if (schemas) await validation(Object.entries(schemas))
 
   if (hooks) {
-    if (hooks.VALIDATORS?.[method]) {
-      const validators = Object.entries(hooks.VALIDATORS[method])
-      await validation(validators)
-    } else if (hooks?.SCHEMAS?.[method]) {
-      using_schema = true
-      const schemas = Object.entries(hooks.SCHEMAS[method])
-      await validation(schemas)
-    }
-
     for (const [name, fn] of Object.entries(hooks)) {
-      if (SPECIAL_HOOKS.has(name) || typeof fn !== 'function')
+      if (typeof fn !== 'function')
         continue
 
       /* Include try/catch here, so we can log any thrown error. */
@@ -399,7 +393,7 @@ export const resolve = async (event) => {
         await fn(event)
       } catch (err) {
         console.log(err)
-        throw err // rethrow, for handling by try/catch in xink.js
+        throw err // rethrow, for handling by try/catch in index.js
       }
     }
   }

@@ -1,4 +1,4 @@
-import type { BaseEvent, BasicRouteInfo, Handler, HandlerMethod, Hook, HookMethod, Matcher, MatcherResult, MixedResult, ParsedSegment, StoreResult } from "./types"
+import type { INode, IStore, IRouter, BaseEvent, BasicRouteInfo, Handler, HandlerMethod, Hook, HookMethod, Matcher, MatcherResult, MixedResult, ParsedSegment, SchemaDefinition, StoreResult } from "./internal-types.js"
 
 /**
  * Equivalent character class - /^[a-zA-Z0-9_]$/
@@ -16,164 +16,9 @@ const HOOK_METHODS = new Set([
 ])
 
 /**
- * Store for a route's handlers and hooks
- */
-export class Store<Path extends string = string, TEvent extends BaseEvent = BaseEvent> {
-  /** Map of methods to handlers */
-  handlers: Map<HandlerMethod, Handler<Path, TEvent>> = new Map()
-  /** Map of methods to hooks */
-  hooks: Map<HookMethod, Hook<Path, TEvent>[]> = new Map()
-
-  /**
-   * Set handler for a method
-   */
-  setHandler(method: HandlerMethod, handler: Handler<Path, TEvent>): void {
-    if (HANDLER_METHODS.has(method)) {
-      this.handlers.set(method, handler)
-    } else {
-      const is_uppercase = method === method.toUpperCase()
-      if (is_uppercase)
-        throw Error(`Method ${method} not allowed.`)
-      else
-        throw Error(`Method ${method} is invalid; it should be UPPERCASE.`)
-    }
-  }
-
-  /**
-   * Get handler for a method
-   */
-  getHandler(method: HandlerMethod): Handler<Path, TEvent> | undefined {
-    return this.handlers.get(method)
-  }
-
-  /**
-   * Set hooks for a method
-   */
-  setHooks(method: HookMethod, hooks: Hook<Path, TEvent>[]) {
-    if (HOOK_METHODS.has(method)) {
-      this.hooks.set(method, hooks)
-    } else {
-      const is_uppercase = method === method.toUpperCase()
-      if (is_uppercase)
-        throw Error(`Method ${method} not allowed.`)
-      else
-        throw Error(`Method ${method} is invalid; it should be UPPERCASE.`)
-    }
-  }
-
-  /**
-   * Get hooks for a method
-   * 
-   * @throws Error if you do not pass in a method
-   */
-  getHooks(method: HookMethod): Hook<Path, TEvent>[]|undefined {   
-    return this.hooks.get(method) 
-  }
-
-  /**
-   * Get all registered methods
-   */
-  getMethods(): string[] {
-    return Array.from(this.handlers.keys())
-  }
-
-  /**
-   * Check if a method is registered
-   */
-  hasMethod(method: string): boolean {
-    return this.handlers.has(method.toUpperCase() as HandlerMethod)
-  }
-
-  /**
-   * Set hooks for all registered methods
-   * 
-   * Accepts a comma-separated list of hook functions.
-   */
-  hook(...hooks: Hook<Path, TEvent>[]): Store<Path, TEvent> {
-    if (hooks.length > 0)
-      this.setHooks('ALL', hooks)
-    
-    return this
-  }
-
-  /**
-   * Set a handler and hooks for the GET method
-   */
-  get(handler: Handler<Path, TEvent>, ...hooks: Hook<Path, TEvent>[]): Store<Path, TEvent> {
-    this.setHandler('GET', handler)
-    if (hooks.length > 0) this.setHooks('GET', hooks)
-    return this
-  }
-
-  /**
-   * Set a handler and hooks for the POST method
-   */
-  post(handler: Handler, ...hooks: Hook<Path, TEvent>[]): Store<Path, TEvent> {
-    this.setHandler('POST', handler)
-    if (hooks.length > 0) this.setHooks('POST', hooks)
-    return this
-  }
-
-  /**
-   * Set a handler and hooks for the PUT method
-   */
-  put(handler: Handler, ...hooks: Hook<Path, TEvent>[]): Store<Path, TEvent> {
-    this.setHandler('PUT', handler)
-    if (hooks.length > 0) this.setHooks('PUT', hooks)
-    return this
-  }
-
-  /**
-   * Set a handler and hooks for the PATCH method
-   */
-  patch(handler: Handler, ...hooks: Hook<Path, TEvent>[]): Store<Path, TEvent> {
-    this.setHandler('PATCH', handler)
-    if (hooks.length > 0) this.setHooks('PATCH', hooks)
-    return this
-  }
-
-  /**
-   * Set a handler and hooks for the DELETE method
-   */
-  delete(handler: Handler, ...hooks: Hook<Path, TEvent>[]): Store<Path, TEvent> {
-    this.setHandler('DELETE', handler)
-    if (hooks.length > 0) this.setHooks('DELETE', hooks)
-    return this
-  }
-
-  /**
-   * Set a handler and hooks for the HEAD method
-   */
-  head(handler: Handler, ...hooks: Hook<Path, TEvent>[]): Store<Path, TEvent> {
-    this.setHandler('HEAD', handler)
-    if (hooks.length > 0) this.setHooks('HEAD', hooks)
-    return this
-  }
-
-  /**
-   * Set a handler and hooks for the OPTIONS method
-   */
-  options(handler: Handler, ...hooks: Hook<Path, TEvent>[]): Store<Path, TEvent> {
-    this.setHandler('OPTIONS', handler)
-    if (hooks.length > 0) this.setHooks('OPTIONS', hooks)
-    return this
-  }
-
-  /**
-   * Set a handler and hooks for all allowed
-   * methods that are not already registered.
-   */
-  fallback(handler: Handler, ...hooks: Hook<Path, TEvent>[]): Store<Path, TEvent> {
-    this.setHandler('FALLBACK', handler)
-    if (hooks.length > 0) this.setHooks('FALLBACK', hooks)
-    return this
-  }
-}
-
-/**
  * Node in the routing trie
  */
-class Node {
+class Node implements INode {
   /** Static child routes */
   static_children: Map<string, Node> = new Map()
   
@@ -200,9 +45,244 @@ class Node {
 }
 
 /**
+ * Store for a route's handlers and hooks
+ */
+export class Store<Path extends string = string, TEvent extends BaseEvent = BaseEvent> implements IStore<Path, TEvent> {
+  /** Map of methods to handlers */
+  handlers: Map<HandlerMethod, Handler<Path, TEvent, unknown>> = new Map()
+  /** Map of methods to hooks */
+  hooks: Map<HookMethod, Hook<Path, TEvent, unknown>[]> = new Map()
+  schemas: Map<HandlerMethod, SchemaDefinition> = new Map()
+
+  /**
+   * Set handler for a method
+   */
+  setHandler<TSchema>(method: HandlerMethod, handler: Handler<Path, TEvent, TSchema>): void {
+    if (HANDLER_METHODS.has(method)) {
+      this.handlers.set(method, handler as any)
+    } else {
+      const is_uppercase = method === method.toUpperCase()
+      if (is_uppercase)
+        throw Error(`Method ${method} not allowed.`)
+      else
+        throw Error(`Method ${method} is invalid; it should be UPPERCASE.`)
+    }
+  }
+
+  /**
+   * Get handler for a method
+   */
+  getHandler(method: HandlerMethod): Handler<Path, TEvent, unknown> | undefined {
+    return this.handlers.get(method)
+  }
+
+  /**
+   * Set hooks for a method
+   */
+  setHooks<TSchema>(method: HookMethod, hooks: Hook<Path, TEvent, TSchema>[]) {
+    if (HOOK_METHODS.has(method)) {
+      this.hooks.set(method, hooks as any)
+    } else {
+      const is_uppercase = method === method.toUpperCase()
+      if (is_uppercase)
+        throw Error(`Method ${method} not allowed.`)
+      else
+        throw Error(`Method ${method} is invalid; it should be UPPERCASE.`)
+    }
+  }
+
+  /**
+   * Get hooks for a method
+   * 
+   * @throws Error if you do not pass in a method
+   */
+  getHooks(method: HookMethod): Hook<Path, TEvent, unknown>[]|undefined {   
+    return this.hooks.get(method) 
+  }
+
+  /**
+   * Get all registered methods
+   */
+  getMethods(): string[] {
+    return Array.from(this.handlers.keys())
+  }
+
+  /**
+   * Check if a method is registered
+   */
+  hasMethod(method: string): boolean {
+    return this.handlers.has(method.toUpperCase() as HandlerMethod)
+  }
+
+  getSchemas(method: HandlerMethod): SchemaDefinition | undefined {
+    return this.schemas.get(method)
+  }
+
+  /**
+   * Set hooks for all registered methods
+   * 
+   * Accepts a comma-separated list of hook functions.
+   */
+  hook<TSchema>(...hooks: Hook<Path, TEvent, TSchema>[]): Store<Path, TEvent> {
+    if (hooks.length > 0)
+      this.setHooks('ALL', hooks)
+    
+    return this
+  }
+
+  #method<TSchema = unknown>(
+    method: HandlerMethod,
+    handler: Handler<Path, TEvent, TSchema>,
+    hooks: Hook<Path, TEvent, TSchema>[],
+    schema?: SchemaDefinition
+  ) {
+    this.setHandler(method, handler)
+    if (hooks.length > 0) this.setHooks(method, hooks)
+    if (schema) this.schemas.set(method, schema)
+  }
+
+  #getArgs<TSchema = unknown>(
+    arg1: SchemaDefinition | Handler<Path, TEvent, TSchema>, // Arg1 can be schema or handler
+    arg2?: Handler<Path, TEvent, TSchema> | Hook<Path, TEvent, TSchema>, // Arg2 is handler or first hook
+    rest?: Hook<Path, TEvent, TSchema>[]
+  ) {
+    let handler: Handler<Path, TEvent, TSchema>
+    let hooks: Hook<Path, TEvent, TSchema>[] = []
+    let schema: SchemaDefinition | undefined
+
+    if (typeof arg1 === 'object' && arg1 !== null && typeof arg1 !== 'function') {
+      // schema was passed
+      schema = arg1 as SchemaDefinition
+      handler = arg2 as Handler<Path, TEvent, TSchema>
+      if (rest) hooks = rest
+    } else {
+      // schema was not passed
+      handler = arg1 as Handler<Path, TEvent, TSchema>
+      if (arg2) hooks.push(arg2 as Hook<Path, TEvent, TSchema>)
+      if (rest) hooks.push(...rest)
+    }
+
+    return { handler, hooks, schema }
+  }
+
+  /**
+   * Set a handler and hooks for the GET method
+   */
+  get<TSchema = unknown>(
+    arg1: SchemaDefinition | Handler<Path, TEvent, TSchema>, // Arg1 can be schema or handler
+    arg2?: Handler<Path, TEvent, TSchema> | Hook<Path, TEvent, TSchema>, // Arg2 is handler or first hook
+    ...rest: Hook<Path, TEvent, TSchema>[]
+  ): Store<Path, TEvent> {
+    const { handler, hooks, schema } = this.#getArgs(arg1, arg2, rest)
+
+    this.#method('GET', handler, hooks, schema)
+    return this
+  }
+
+  /**
+   * Set a handler and hooks for the POST method
+   */
+  post<TSchema = unknown>(
+    arg1: SchemaDefinition | Handler<Path, TEvent, TSchema>, // Arg1 can be schema or handler
+    arg2?: Handler<Path, TEvent, TSchema> | Hook<Path, TEvent, TSchema>, // Arg2 is handler or first hook
+    ...rest: Hook<Path, TEvent, TSchema>[]
+  ): Store<Path, TEvent> {
+    const { handler, hooks, schema } = this.#getArgs(arg1, arg2, rest)
+
+    this.#method('POST', handler, hooks, schema)
+    return this
+  }
+
+  /**
+   * Set a handler and hooks for the PUT method
+   */
+  put<TSchema = unknown>(
+    arg1: SchemaDefinition | Handler<Path, TEvent, TSchema>, // Arg1 can be schema or handler
+    arg2?: Handler<Path, TEvent, TSchema> | Hook<Path, TEvent, TSchema>, // Arg2 is handler or first hook
+    ...rest: Hook<Path, TEvent, TSchema>[]
+  ): Store<Path, TEvent> {
+    const { handler, hooks, schema } = this.#getArgs(arg1, arg2, rest)
+
+    this.#method('PUT', handler, hooks, schema)
+    return this
+  }
+
+  /**
+   * Set a handler and hooks for the PATCH method
+   */
+  patch<TSchema = unknown>(
+    arg1: SchemaDefinition | Handler<Path, TEvent, TSchema>, // Arg1 can be schema or handler
+    arg2?: Handler<Path, TEvent, TSchema> | Hook<Path, TEvent, TSchema>, // Arg2 is handler or first hook
+    ...rest: Hook<Path, TEvent, TSchema>[]
+  ): Store<Path, TEvent> {
+    const { handler, hooks, schema } = this.#getArgs(arg1, arg2, rest)
+
+    this.#method('PATCH', handler, hooks, schema)
+    return this
+  }
+
+  /**
+   * Set a handler and hooks for the DELETE method
+   */
+  delete<TSchema = unknown>(
+    arg1: SchemaDefinition | Handler<Path, TEvent, TSchema>, // Arg1 can be schema or handler
+    arg2?: Handler<Path, TEvent, TSchema> | Hook<Path, TEvent, TSchema>, // Arg2 is handler or first hook
+    ...rest: Hook<Path, TEvent, TSchema>[]
+  ): Store<Path, TEvent> {
+    const { handler, hooks, schema } = this.#getArgs(arg1, arg2, rest)
+
+    this.#method('DELETE', handler, hooks, schema)
+    return this
+  }
+
+  /**
+   * Set a handler and hooks for the HEAD method
+   */
+  head<TSchema = unknown>(
+    arg1: SchemaDefinition | Handler<Path, TEvent, TSchema>, // Arg1 can be schema or handler
+    arg2?: Handler<Path, TEvent, TSchema> | Hook<Path, TEvent, TSchema>, // Arg2 is handler or first hook
+    ...rest: Hook<Path, TEvent, TSchema>[]
+  ): Store<Path, TEvent> {
+    const { handler, hooks, schema } = this.#getArgs(arg1, arg2, rest)
+
+    this.#method('HEAD', handler, hooks, schema)
+    return this
+  }
+
+  /**
+   * Set a handler and hooks for the OPTIONS method
+   */
+  options<TSchema = unknown>(
+    arg1: SchemaDefinition | Handler<Path, TEvent, TSchema>, // Arg1 can be schema or handler
+    arg2?: Handler<Path, TEvent, TSchema> | Hook<Path, TEvent, TSchema>, // Arg2 is handler or first hook
+    ...rest: Hook<Path, TEvent, TSchema>[]
+  ): Store<Path, TEvent> {
+    const { handler, hooks, schema } = this.#getArgs(arg1, arg2, rest)
+
+    this.#method('OPTIONS', handler, hooks, schema)
+    return this
+  }
+
+  /**
+   * Set a handler and hooks for all allowed
+   * methods that are not already registered.
+   */
+  fallback<TSchema = unknown>(
+    arg1: SchemaDefinition | Handler<Path, TEvent, TSchema>, // Arg1 can be schema or handler
+    arg2?: Handler<Path, TEvent, TSchema> | Hook<Path, TEvent, TSchema>, // Arg2 is handler or first hook
+    ...rest: Hook<Path, TEvent, TSchema>[]
+  ): Store<Path, TEvent> {
+    const { handler, hooks, schema } = this.#getArgs(arg1, arg2, rest)
+
+    this.#method('FALLBACK', handler, hooks, schema)
+    return this
+  }
+}
+
+/**
  * Trie URL router 
  */
-export class Router<TEvent extends BaseEvent = BaseEvent> {
+export class Router<TEvent extends BaseEvent = BaseEvent> implements IRouter<TEvent>{
   /** Root node of the routing trie */
   root: Node = new Node()
   
@@ -334,7 +414,7 @@ export class Router<TEvent extends BaseEvent = BaseEvent> {
   /**
    * Recursively match route segments against the trie
    */
-  matchRoute(node: Node, segments: string[], index: number, params: Record<string, string>): StoreResult {
+  matchRoute(node: Node, segments: string[], index: number, params: Record<string, string | undefined>): StoreResult {
     // If we've processed all segments and a store exists, return
     if ((index >= segments.length) && node.store) {
       return {

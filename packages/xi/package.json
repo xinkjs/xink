@@ -3,16 +3,18 @@
   "version": "0.1.0",
   "description": "A javascript URL router",
   "type": "module",
-  "main": "index.ts",
-  "types": "types.d.ts",
+  "main": "./dist/index.js",
+  "types": "./index.d.ts",
   "exports": {
     ".": {
-      "import": "./index.ts",
-      "types": "./types.d.ts"
+      "import": "./dist/index.js",
+      "types": "./index.d.ts"
     }
   },
   "scripts": {
-    "test": "vitest"
+    "test": "vitest",
+    "build": "tsc",
+    "dev": "tsc --watch"
   },
   "contributors": [
     {
@@ -22,8 +24,8 @@
     }
   ],
   "files": [
-    "index.ts",
-    "types.d.ts"
+    "dist",
+    "index.d.ts"
   ],
   "keywords": [
     "xi",
