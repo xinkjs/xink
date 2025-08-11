@@ -30,9 +30,11 @@ export type BaseEvent = object;
 export type RequestContext<
   Path extends string,
   TEvent extends BaseEvent,
-  TSchema = unknown
+  TSchema = unknown,
+  ResSchema = unknown
 > = Omit<TEvent, 'params' | 'valid'> & { // remove possible params and valid keys defined from higher-level router
   params: ParsePath<Path>;
+  json: (data: ResSchema, init?: ResponseInit) => Response;
   valid: TSchema;
 };
 
@@ -42,13 +44,15 @@ export type BasicRouteInfo = { pattern: string; methods: string[] }[]
 export type Handler<
   Path extends string = string, 
   TEvent extends BaseEvent = BaseEvent,
-  TSchema = unknown
-> = (event: RequestContext<Path, TEvent, TSchema>) => MaybePromise<Response | any>;
+  TSchema = unknown,
+  ResSchema = unknown,
+> = (event: RequestContext<Path, TEvent, TSchema, ResSchema>) => MaybePromise<Response | any>;
 export type Hook<
   Path extends string = string, 
   TEvent extends BaseEvent = BaseEvent,
-  TSchema = unknown
-> = (event: RequestContext<Path, TEvent, TSchema>, next?: () => Promise<void>) => MaybePromise<void | any>;
+  TSchema = unknown,
+  ResSchema = unknown
+> = (event: RequestContext<Path, TEvent, TSchema, ResSchema>, next?: () => Promise<void>) => MaybePromise<void | any>;
 export type HandlerMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'HEAD' | 'OPTIONS' | 'FALLBACK';
 export type HookMethod = HandlerMethod | 'ALL';
 export type Matcher = (param: string) => boolean;
@@ -71,8 +75,8 @@ export interface INode {
 }
 
 export interface IStore<Path extends string = string, TEvent extends BaseEvent = BaseEvent> {
-  getHandler(method: string): Handler<Path, TEvent, unknown> | undefined;
-  getHooks(method: HookMethod): Hook<Path, TEvent, unknown>[] | undefined;
+  getHandler(method: string): Handler<Path, TEvent, unknown, unknown> | undefined;
+  getHooks(method: HookMethod): Hook<Path, TEvent, unknown, unknown>[] | undefined;
   getMethods(): string[];
   hasMethod(method: string): boolean;
   getSchemas(method: HandlerMethod): SchemaDefinition | undefined;
@@ -83,22 +87,22 @@ export interface IStore<Path extends string = string, TEvent extends BaseEvent =
    */
   hook<TSchema = unknown>(...hooks: Hook<Path, TEvent, TSchema>[]): IStore<Path, TEvent>;
 
-  get<TSchema = unknown>(schema: SchemaDefinition, handler: Handler<Path, TEvent, TSchema>, ...hooks: Hook<Path, TEvent, TSchema>[]): IStore<Path, TEvent>;
-  get<TSchema = unknown>(handler: Handler<Path, TEvent, TSchema>, ...hooks: Hook<Path, TEvent, TSchema>[]): IStore<Path, TEvent>;
-  post<TSchema = unknown>(schema: SchemaDefinition, handler: Handler<Path, TEvent, TSchema>, ...hooks: Hook<Path, TEvent, TSchema>[]): IStore<Path, TEvent>;
-  post<TSchema = unknown>(handler: Handler<Path, TEvent, TSchema>, ...hooks: Hook<Path, TEvent, TSchema>[]): IStore<Path, TEvent>;
-  put<TSchema = unknown>(schema: SchemaDefinition, handler: Handler<Path, TEvent, TSchema>, ...hooks: Hook<Path, TEvent, TSchema>[]): IStore<Path, TEvent>;
-  put<TSchema = unknown>(handler: Handler<Path, TEvent, TSchema>, ...hooks: Hook<Path, TEvent, TSchema>[]): IStore<Path, TEvent>;
-  patch<TSchema = unknown>(schema: SchemaDefinition, handler: Handler<Path, TEvent, TSchema>, ...hooks: Hook<Path, TEvent, TSchema>[]): IStore<Path, TEvent>;
-  patch<TSchema = unknown>(handler: Handler<Path, TEvent, TSchema>, ...hooks: Hook<Path, TEvent, TSchema>[]): IStore<Path, TEvent>;
-  delete<TSchema = unknown>(schema: SchemaDefinition, handler: Handler<Path, TEvent, TSchema>, ...hooks: Hook<Path, TEvent, TSchema>[]): IStore<Path, TEvent>;
-  delete<TSchema = unknown>(handler: Handler<Path, TEvent, TSchema>, ...hooks: Hook<Path, TEvent, TSchema>[]): IStore<Path, TEvent>;
-  head<TSchema = unknown>(schema: SchemaDefinition, handler: Handler<Path, TEvent, TSchema>, ...hooks: Hook<Path, TEvent, TSchema>[]): IStore<Path, TEvent>;
-  head<TSchema = unknown>(handler: Handler<Path, TEvent, TSchema>, ...hooks: Hook<Path, TEvent, TSchema>[]): IStore<Path, TEvent>;
-  options<TSchema = unknown>(schema: SchemaDefinition, handler: Handler<Path, TEvent, TSchema>, ...hooks: Hook<Path, TEvent, TSchema>[]): IStore<Path, TEvent>;
-  options<TSchema = unknown>(handler: Handler<Path, TEvent, TSchema>, ...hooks: Hook<Path, TEvent, TSchema>[]): IStore<Path, TEvent>;
-  fallback<TSchema = unknown>(schema: SchemaDefinition, handler: Handler<Path, TEvent, TSchema>, ...hooks: Hook<Path, TEvent, TSchema>[]): IStore<Path, TEvent>;
-  fallback<TSchema = unknown>(handler: Handler<Path, TEvent, TSchema>, ...hooks: Hook<Path, TEvent, TSchema>[]): IStore<Path, TEvent>;
+  get<TSchema = unknown, ResSchema = unknown>(schema: SchemaDefinition, handler: Handler<Path, TEvent, TSchema, ResSchema>, ...hooks: Hook<Path, TEvent, TSchema, ResSchema>[]): IStore<Path, TEvent>;
+  get<TSchema = unknown, ResSchema = unknown>(handler: Handler<Path, TEvent, TSchema, ResSchema>, ...hooks: Hook<Path, TEvent, TSchema, ResSchema>[]): IStore<Path, TEvent>;
+  post<TSchema = unknown, ResSchema = unknown>(schema: SchemaDefinition, handler: Handler<Path, TEvent, TSchema, ResSchema>, ...hooks: Hook<Path, TEvent, TSchema, ResSchema>[]): IStore<Path, TEvent>;
+  post<TSchema = unknown, ResSchema = unknown>(handler: Handler<Path, TEvent, TSchema, ResSchema>, ...hooks: Hook<Path, TEvent, TSchema, ResSchema>[]): IStore<Path, TEvent>;
+  put<TSchema = unknown, ResSchema = unknown>(schema: SchemaDefinition, handler: Handler<Path, TEvent, TSchema, ResSchema>, ...hooks: Hook<Path, TEvent, TSchema, ResSchema>[]): IStore<Path, TEvent>;
+  put<TSchema = unknown, ResSchema = unknown>(handler: Handler<Path, TEvent, TSchema, ResSchema>, ...hooks: Hook<Path, TEvent, TSchema, ResSchema>[]): IStore<Path, TEvent>;
+  patch<TSchema = unknown, ResSchema = unknown>(schema: SchemaDefinition, handler: Handler<Path, TEvent, TSchema, ResSchema>, ...hooks: Hook<Path, TEvent, TSchema, ResSchema>[]): IStore<Path, TEvent>;
+  patch<TSchema = unknown, ResSchema = unknown>(handler: Handler<Path, TEvent, TSchema, ResSchema>, ...hooks: Hook<Path, TEvent, TSchema, ResSchema>[]): IStore<Path, TEvent>;
+  delete<TSchema = unknown, ResSchema = unknown>(schema: SchemaDefinition, handler: Handler<Path, TEvent, TSchema, ResSchema>, ...hooks: Hook<Path, TEvent, TSchema, ResSchema>[]): IStore<Path, TEvent>;
+  delete<TSchema = unknown, ResSchema = unknown>(handler: Handler<Path, TEvent, TSchema, ResSchema>, ...hooks: Hook<Path, TEvent, TSchema, ResSchema>[]): IStore<Path, TEvent>;
+  head<TSchema = unknown, ResSchema = unknown>(schema: SchemaDefinition, handler: Handler<Path, TEvent, TSchema, ResSchema>, ...hooks: Hook<Path, TEvent, TSchema, ResSchema>[]): IStore<Path, TEvent>;
+  head<TSchema = unknown, ResSchema = unknown>(handler: Handler<Path, TEvent, TSchema, ResSchema>, ...hooks: Hook<Path, TEvent, TSchema, ResSchema>[]): IStore<Path, TEvent>;
+  options<TSchema = unknown, ResSchema = unknown>(schema: SchemaDefinition, handler: Handler<Path, TEvent, TSchema, ResSchema>, ...hooks: Hook<Path, TEvent, TSchema, ResSchema>[]): IStore<Path, TEvent>;
+  options<TSchema = unknown, ResSchema = unknown>(handler: Handler<Path, TEvent, TSchema, ResSchema>, ...hooks: Hook<Path, TEvent, TSchema, ResSchema>[]): IStore<Path, TEvent>;
+  fallback<TSchema = unknown, ResSchema = unknown>(schema: SchemaDefinition, handler: Handler<Path, TEvent, TSchema, ResSchema>, ...hooks: Hook<Path, TEvent, TSchema, ResSchema>[]): IStore<Path, TEvent>;
+  fallback<TSchema = unknown, ResSchema = unknown>(handler: Handler<Path, TEvent, TSchema, ResSchema>, ...hooks: Hook<Path, TEvent, TSchema, ResSchema>[]): IStore<Path, TEvent>;
 }
 
 export interface IRouter<TEvent extends BaseEvent = BaseEvent> {

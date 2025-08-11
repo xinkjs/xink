@@ -17,11 +17,11 @@ export type Cookies = {
 /** The minimal constraint for a custom context object. */
 export type BaseEvent = object;
 
-export interface RequestEvent extends BaseEvent {
+export interface RequestEvent<ReqT extends SchemaDefinition = SchemaDefinition, ResT = any> extends BaseEvent {
   cookies: Cookies;
   headers: Omit<Headers, 'toJSON' | 'count' | 'getAll'>;
   html: typeof html;
-  json: (data: any, init?: ResponseInit) => Response;
+  json: (data: ResT, init?: ResponseInit) => Response;
   locals: Api.Locals;
   params: Record<string, string | undefined>;
   platform: Record<string, any>;
@@ -31,7 +31,7 @@ export interface RequestEvent extends BaseEvent {
   store: Store | null;
   text: typeof text;
   url: Omit<URL, 'createObjectURL' | 'revokeObjectURL' | 'canParse'>;
-  valid?: Record<string, any | undefined>;
+  valid: ReqT;
 }
 
 export type ErrorHandler = (error: unknown, event?: RequestEvent) => MaybePromise<Response | void>;

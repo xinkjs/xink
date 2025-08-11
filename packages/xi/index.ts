@@ -49,15 +49,15 @@ class Node implements INode {
  */
 export class Store<Path extends string = string, TEvent extends BaseEvent = BaseEvent> implements IStore<Path, TEvent> {
   /** Map of methods to handlers */
-  handlers: Map<HandlerMethod, Handler<Path, TEvent, unknown>> = new Map()
+  handlers: Map<HandlerMethod, Handler<Path, TEvent, unknown, unknown>> = new Map()
   /** Map of methods to hooks */
-  hooks: Map<HookMethod, Hook<Path, TEvent, unknown>[]> = new Map()
+  hooks: Map<HookMethod, Hook<Path, TEvent, unknown, unknown>[]> = new Map()
   schemas: Map<HandlerMethod, SchemaDefinition> = new Map()
 
   /**
    * Set handler for a method
    */
-  setHandler<TSchema>(method: HandlerMethod, handler: Handler<Path, TEvent, TSchema>): void {
+  setHandler<TSchema, ResSchema>(method: HandlerMethod, handler: Handler<Path, TEvent, TSchema, ResSchema>): void {
     if (HANDLER_METHODS.has(method)) {
       this.handlers.set(method, handler as any)
     } else {
@@ -72,14 +72,14 @@ export class Store<Path extends string = string, TEvent extends BaseEvent = Base
   /**
    * Get handler for a method
    */
-  getHandler(method: HandlerMethod): Handler<Path, TEvent, unknown> | undefined {
+  getHandler(method: HandlerMethod): Handler<Path, TEvent, unknown, unknown> | undefined {
     return this.handlers.get(method)
   }
 
   /**
    * Set hooks for a method
    */
-  setHooks<TSchema>(method: HookMethod, hooks: Hook<Path, TEvent, TSchema>[]) {
+  setHooks<TSchema, ResSchema>(method: HookMethod, hooks: Hook<Path, TEvent, TSchema, ResSchema>[]) {
     if (HOOK_METHODS.has(method)) {
       this.hooks.set(method, hooks as any)
     } else {
@@ -96,7 +96,7 @@ export class Store<Path extends string = string, TEvent extends BaseEvent = Base
    * 
    * @throws Error if you do not pass in a method
    */
-  getHooks(method: HookMethod): Hook<Path, TEvent, unknown>[]|undefined {   
+  getHooks(method: HookMethod): Hook<Path, TEvent, unknown, unknown>[]|undefined {   
     return this.hooks.get(method) 
   }
 
@@ -123,17 +123,17 @@ export class Store<Path extends string = string, TEvent extends BaseEvent = Base
    * 
    * Accepts a comma-separated list of hook functions.
    */
-  hook<TSchema>(...hooks: Hook<Path, TEvent, TSchema>[]): Store<Path, TEvent> {
+  hook<TSchema, ResSchema>(...hooks: Hook<Path, TEvent, TSchema, ResSchema>[]): Store<Path, TEvent> {
     if (hooks.length > 0)
       this.setHooks('ALL', hooks)
     
     return this
   }
 
-  #method<TSchema = unknown>(
+  #method<TSchema = unknown, ResSchema = unknown>(
     method: HandlerMethod,
-    handler: Handler<Path, TEvent, TSchema>,
-    hooks: Hook<Path, TEvent, TSchema>[],
+    handler: Handler<Path, TEvent, TSchema, ResSchema>,
+    hooks: Hook<Path, TEvent, TSchema, ResSchema>[],
     schema?: SchemaDefinition
   ) {
     this.setHandler(method, handler)
@@ -141,24 +141,24 @@ export class Store<Path extends string = string, TEvent extends BaseEvent = Base
     if (schema) this.schemas.set(method, schema)
   }
 
-  #getArgs<TSchema = unknown>(
-    arg1: SchemaDefinition | Handler<Path, TEvent, TSchema>, // Arg1 can be schema or handler
-    arg2?: Handler<Path, TEvent, TSchema> | Hook<Path, TEvent, TSchema>, // Arg2 is handler or first hook
-    rest?: Hook<Path, TEvent, TSchema>[]
+  #getArgs<TSchema = unknown, ResSchema = unknown>(
+    arg1: SchemaDefinition | Handler<Path, TEvent, TSchema, ResSchema>, // Arg1 can be schema or handler
+    arg2?: Handler<Path, TEvent, TSchema, ResSchema> | Hook<Path, TEvent, TSchema, ResSchema>, // Arg2 is handler or first hook
+    rest?: Hook<Path, TEvent, TSchema, ResSchema>[]
   ) {
-    let handler: Handler<Path, TEvent, TSchema>
-    let hooks: Hook<Path, TEvent, TSchema>[] = []
+    let handler: Handler<Path, TEvent, TSchema, ResSchema>
+    let hooks: Hook<Path, TEvent, TSchema, ResSchema>[] = []
     let schema: SchemaDefinition | undefined
 
     if (typeof arg1 === 'object' && arg1 !== null && typeof arg1 !== 'function') {
       // schema was passed
       schema = arg1 as SchemaDefinition
-      handler = arg2 as Handler<Path, TEvent, TSchema>
+      handler = arg2 as Handler<Path, TEvent, TSchema, ResSchema>
       if (rest) hooks = rest
     } else {
       // schema was not passed
-      handler = arg1 as Handler<Path, TEvent, TSchema>
-      if (arg2) hooks.push(arg2 as Hook<Path, TEvent, TSchema>)
+      handler = arg1 as Handler<Path, TEvent, TSchema, ResSchema>
+      if (arg2) hooks.push(arg2 as Hook<Path, TEvent, TSchema, ResSchema>)
       if (rest) hooks.push(...rest)
     }
 
@@ -168,10 +168,10 @@ export class Store<Path extends string = string, TEvent extends BaseEvent = Base
   /**
    * Set a handler and hooks for the GET method
    */
-  get<TSchema = unknown>(
-    arg1: SchemaDefinition | Handler<Path, TEvent, TSchema>, // Arg1 can be schema or handler
-    arg2?: Handler<Path, TEvent, TSchema> | Hook<Path, TEvent, TSchema>, // Arg2 is handler or first hook
-    ...rest: Hook<Path, TEvent, TSchema>[]
+  get<TSchema = unknown, ResSchema = unknown>(
+    arg1: SchemaDefinition | Handler<Path, TEvent, TSchema, ResSchema>, // Arg1 can be schema or handler
+    arg2?: Handler<Path, TEvent, TSchema, ResSchema> | Hook<Path, TEvent, TSchema, ResSchema>, // Arg2 is handler or first hook
+    ...rest: Hook<Path, TEvent, TSchema, ResSchema>[]
   ): Store<Path, TEvent> {
     const { handler, hooks, schema } = this.#getArgs(arg1, arg2, rest)
 
@@ -182,10 +182,10 @@ export class Store<Path extends string = string, TEvent extends BaseEvent = Base
   /**
    * Set a handler and hooks for the POST method
    */
-  post<TSchema = unknown>(
-    arg1: SchemaDefinition | Handler<Path, TEvent, TSchema>, // Arg1 can be schema or handler
-    arg2?: Handler<Path, TEvent, TSchema> | Hook<Path, TEvent, TSchema>, // Arg2 is handler or first hook
-    ...rest: Hook<Path, TEvent, TSchema>[]
+  post<TSchema = unknown, ResSchema = unknown>(
+    arg1: SchemaDefinition | Handler<Path, TEvent, TSchema, ResSchema>, // Arg1 can be schema or handler
+    arg2?: Handler<Path, TEvent, TSchema, ResSchema> | Hook<Path, TEvent, TSchema, ResSchema>, // Arg2 is handler or first hook
+    ...rest: Hook<Path, TEvent, TSchema, ResSchema>[]
   ): Store<Path, TEvent> {
     const { handler, hooks, schema } = this.#getArgs(arg1, arg2, rest)
 
@@ -196,10 +196,10 @@ export class Store<Path extends string = string, TEvent extends BaseEvent = Base
   /**
    * Set a handler and hooks for the PUT method
    */
-  put<TSchema = unknown>(
-    arg1: SchemaDefinition | Handler<Path, TEvent, TSchema>, // Arg1 can be schema or handler
-    arg2?: Handler<Path, TEvent, TSchema> | Hook<Path, TEvent, TSchema>, // Arg2 is handler or first hook
-    ...rest: Hook<Path, TEvent, TSchema>[]
+  put<TSchema = unknown, ResSchema = unknown>(
+    arg1: SchemaDefinition | Handler<Path, TEvent, TSchema, ResSchema>, // Arg1 can be schema or handler
+    arg2?: Handler<Path, TEvent, TSchema, ResSchema> | Hook<Path, TEvent, TSchema, ResSchema>, // Arg2 is handler or first hook
+    ...rest: Hook<Path, TEvent, TSchema, ResSchema>[]
   ): Store<Path, TEvent> {
     const { handler, hooks, schema } = this.#getArgs(arg1, arg2, rest)
 
@@ -210,10 +210,10 @@ export class Store<Path extends string = string, TEvent extends BaseEvent = Base
   /**
    * Set a handler and hooks for the PATCH method
    */
-  patch<TSchema = unknown>(
-    arg1: SchemaDefinition | Handler<Path, TEvent, TSchema>, // Arg1 can be schema or handler
-    arg2?: Handler<Path, TEvent, TSchema> | Hook<Path, TEvent, TSchema>, // Arg2 is handler or first hook
-    ...rest: Hook<Path, TEvent, TSchema>[]
+  patch<TSchema = unknown, ResSchema = unknown>(
+    arg1: SchemaDefinition | Handler<Path, TEvent, TSchema, ResSchema>, // Arg1 can be schema or handler
+    arg2?: Handler<Path, TEvent, TSchema, ResSchema> | Hook<Path, TEvent, TSchema, ResSchema>, // Arg2 is handler or first hook
+    ...rest: Hook<Path, TEvent, TSchema, ResSchema>[]
   ): Store<Path, TEvent> {
     const { handler, hooks, schema } = this.#getArgs(arg1, arg2, rest)
 
@@ -224,10 +224,10 @@ export class Store<Path extends string = string, TEvent extends BaseEvent = Base
   /**
    * Set a handler and hooks for the DELETE method
    */
-  delete<TSchema = unknown>(
-    arg1: SchemaDefinition | Handler<Path, TEvent, TSchema>, // Arg1 can be schema or handler
-    arg2?: Handler<Path, TEvent, TSchema> | Hook<Path, TEvent, TSchema>, // Arg2 is handler or first hook
-    ...rest: Hook<Path, TEvent, TSchema>[]
+  delete<TSchema = unknown, ResSchema = unknown>(
+    arg1: SchemaDefinition | Handler<Path, TEvent, TSchema, ResSchema>, // Arg1 can be schema or handler
+    arg2?: Handler<Path, TEvent, TSchema, ResSchema> | Hook<Path, TEvent, TSchema, ResSchema>, // Arg2 is handler or first hook
+    ...rest: Hook<Path, TEvent, TSchema, ResSchema>[]
   ): Store<Path, TEvent> {
     const { handler, hooks, schema } = this.#getArgs(arg1, arg2, rest)
 
@@ -238,10 +238,10 @@ export class Store<Path extends string = string, TEvent extends BaseEvent = Base
   /**
    * Set a handler and hooks for the HEAD method
    */
-  head<TSchema = unknown>(
-    arg1: SchemaDefinition | Handler<Path, TEvent, TSchema>, // Arg1 can be schema or handler
-    arg2?: Handler<Path, TEvent, TSchema> | Hook<Path, TEvent, TSchema>, // Arg2 is handler or first hook
-    ...rest: Hook<Path, TEvent, TSchema>[]
+  head<TSchema = unknown, ResSchema = unknown>(
+    arg1: SchemaDefinition | Handler<Path, TEvent, TSchema, ResSchema>, // Arg1 can be schema or handler
+    arg2?: Handler<Path, TEvent, TSchema, ResSchema> | Hook<Path, TEvent, TSchema, ResSchema>, // Arg2 is handler or first hook
+    ...rest: Hook<Path, TEvent, TSchema, ResSchema>[]
   ): Store<Path, TEvent> {
     const { handler, hooks, schema } = this.#getArgs(arg1, arg2, rest)
 
@@ -252,10 +252,10 @@ export class Store<Path extends string = string, TEvent extends BaseEvent = Base
   /**
    * Set a handler and hooks for the OPTIONS method
    */
-  options<TSchema = unknown>(
-    arg1: SchemaDefinition | Handler<Path, TEvent, TSchema>, // Arg1 can be schema or handler
-    arg2?: Handler<Path, TEvent, TSchema> | Hook<Path, TEvent, TSchema>, // Arg2 is handler or first hook
-    ...rest: Hook<Path, TEvent, TSchema>[]
+  options<TSchema = unknown, ResSchema = unknown>(
+    arg1: SchemaDefinition | Handler<Path, TEvent, TSchema, ResSchema>, // Arg1 can be schema or handler
+    arg2?: Handler<Path, TEvent, TSchema, ResSchema> | Hook<Path, TEvent, TSchema, ResSchema>, // Arg2 is handler or first hook
+    ...rest: Hook<Path, TEvent, TSchema, ResSchema>[]
   ): Store<Path, TEvent> {
     const { handler, hooks, schema } = this.#getArgs(arg1, arg2, rest)
 
@@ -267,10 +267,10 @@ export class Store<Path extends string = string, TEvent extends BaseEvent = Base
    * Set a handler and hooks for all allowed
    * methods that are not already registered.
    */
-  fallback<TSchema = unknown>(
-    arg1: SchemaDefinition | Handler<Path, TEvent, TSchema>, // Arg1 can be schema or handler
-    arg2?: Handler<Path, TEvent, TSchema> | Hook<Path, TEvent, TSchema>, // Arg2 is handler or first hook
-    ...rest: Hook<Path, TEvent, TSchema>[]
+  fallback<TSchema = unknown, ResSchema = unknown>(
+    arg1: SchemaDefinition | Handler<Path, TEvent, TSchema, ResSchema>, // Arg1 can be schema or handler
+    arg2?: Handler<Path, TEvent, TSchema, ResSchema> | Hook<Path, TEvent, TSchema, ResSchema>, // Arg2 is handler or first hook
+    ...rest: Hook<Path, TEvent, TSchema, ResSchema>[]
   ): Store<Path, TEvent> {
     const { handler, hooks, schema } = this.#getArgs(arg1, arg2, rest)
 
