@@ -1,4 +1,4 @@
-import type { Router as URLRouter, Handler, Hook, SchemaDefinition, Store } from "@xinkjs/xi"
+import type { Router as URLRouter, Handler, Hook, SchemaDefinition, Store, ValidData } from "@xinkjs/xi"
 import type { SerializeOptions, ParseOptions } from 'cookie'
 import type { ApiReferenceConfiguration } from '@scalar/types'
 
@@ -31,6 +31,7 @@ export interface RequestEvent extends BaseEvent {
   store: Store | null;
   text: typeof text;
   url: Omit<URL, 'createObjectURL' | 'revokeObjectURL' | 'canParse'>;
+  valid?: Record<string, any | undefined>;
 }
 
 export type ErrorHandler = (error: unknown, event?: RequestEvent) => MaybePromise<Response | void>;
