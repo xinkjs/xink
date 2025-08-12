@@ -1,5 +1,3 @@
-import { Redirect } from './shared.js'
-
 export class StandardSchemaError extends Error {
   /**
    * 
@@ -53,6 +51,16 @@ export const json = (data, init) => {
 }
 
 /* ATTR: SvelteKit */
+export class Redirect {
+	/**
+	 * @param {300 | 301 | 302 | 303 | 304 | 305 | 306 | 307 | 308} status
+	 * @param {string} location
+	 */
+	constructor(status, location) {
+		this.status = status
+		this.location = location
+	}
+}
 /**
  * Redirect a request. When called during request handling, Xink will return a redirect response.
  * Make sure you're not catching the thrown redirect, which would prevent Xink from handling it.

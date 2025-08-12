@@ -3,7 +3,7 @@
 
 import { parse, serialize } from 'cookie'
 import { inferObjectValueTypes, isContentType } from './utils.js'
-import { DISALLOWED_METHODS, SPECIAL_HOOKS } from '../constants.js'
+import { DISALLOWED_METHODS } from '../constants.js'
 import { StandardSchemaError, json, text, html } from './helpers.js'
 import { isVNode, renderToString } from "./jsx.js"
 
