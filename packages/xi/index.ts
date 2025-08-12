@@ -1,4 +1,5 @@
 import type { INode, IStore, IRouter, BaseEvent, BasicRouteInfo, Handler, HandlerMethod, Hook, HookMethod, Matcher, MatcherResult, MixedResult, ParsedSegment, SchemaDefinition, StoreResult } from "./internal-types.js"
+import { HANDLER_METHODS, HOOK_METHODS } from './constants.js'
 
 /**
  * Equivalent character class - /^[a-zA-Z0-9_]$/
@@ -7,13 +8,6 @@ const wordMatcher: Matcher = (param) => /^\w+$/.test(param)
 
 const letterMatcher: Matcher = (param) => /^[a-z]+$/i.test(param)
 const numberMatcher: Matcher = (param) => /^\d+$/.test(param)
-
-const HANDLER_METHODS = new Set([
-  'GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS', 'FALLBACK'
-])
-const HOOK_METHODS = new Set([
-  ...HANDLER_METHODS, 'ALL'
-])
 
 /**
  * Node in the routing trie

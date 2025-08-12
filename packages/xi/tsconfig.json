@@ -19,7 +19,7 @@
     "moduleResolution": "bundler" // Or "node", bundler is good for modern tools.
   },
   // Tell the compiler which files to include in the build.
-  "include": ["./index.ts", "./internal-types.ts"],
+  "include": ["./index.ts", "./internal-types.ts", "./constants.ts"],
   // Tell the compiler which files to ignore.
   "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts", "./index.d.ts"]
 }
