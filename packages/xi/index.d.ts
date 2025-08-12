@@ -5,9 +5,11 @@ import type {
   MatcherResult,
   MixedResult,
   ParsedSegment,
-  StoreResult
+  StoreResult,
+  XiConfig as InternalXiConfig
 } from './internal-types'
 
+export type XiConfig = InternalXiConfig
 export type SchemaDefinition = InternalSchemaDefinition;
 export type RequestContext<Path extends string, TContext extends BaseEvent, TSchema = unknown, ResSchema = unknown> = InternalRequestContext<Path, TContext, TSchema, ResSchema>;
 export type Handler<Path extends string, TContext extends BaseEvent, TSchema = unknown, ResSchema = unknown> = InternalHandler<Path, TContext, TSchema, ResSchema>;
@@ -51,6 +53,7 @@ export declare class Router<TEvent extends BaseEvent = BaseEvent> {
   constructor()
 
   basepath(path: string): void;
+  getConfig(): XiConfig;
   getRoutes(): { pattern: string, methods: string[] }[];
   matcher(name: string, matcher: Matcher): void;
   matchMatcherSegment(pattern: string, segment: string): MatcherResult;

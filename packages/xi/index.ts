@@ -1,5 +1,6 @@
-import type { INode, IStore, IRouter, BaseEvent, BasicRouteInfo, Handler, HandlerMethod, Hook, HookMethod, Matcher, MatcherResult, MixedResult, ParsedSegment, SchemaDefinition, StoreResult } from "./internal-types.js"
+import type { INode, IStore, IRouter, BaseEvent, BasicRouteInfo, Handler, HandlerMethod, Hook, HookMethod, Matcher, MatcherResult, MixedResult, ParsedSegment, SchemaDefinition, StoreResult, XiConfig } from "./internal-types.js"
 import { HANDLER_METHODS, HOOK_METHODS } from './constants.js'
+import { validateConfig } from './config.js'
 
 /**
  * Equivalent character class - /^[a-zA-Z0-9_]$/
@@ -287,7 +288,13 @@ export class Router<TEvent extends BaseEvent = BaseEvent> implements IRouter<TEv
     ['number', numberMatcher]
   ])
 
-  base_path: string = ''
+  config: XiConfig = {
+    base_path: ''
+  }
+
+  constructor(options: Partial<XiConfig> = {}) {
+    this.config = validateConfig(options)
+  }
 
   /**
    * Set basepath for all registered routes
@@ -300,8 +307,13 @@ export class Router<TEvent extends BaseEvent = BaseEvent> implements IRouter<TEv
     if (path.length === 1)
       throw new Error('Basepath cannot be "/"')
 
-    this.base_path = path
+    this.config.base_path = path
   }
+
+  /**
+   * Get xi's config 
+   */
+  getConfig(): XiConfig { return this.config }
 
   /**
    * Find a route and return its info
@@ -548,7 +560,7 @@ export class Router<TEvent extends BaseEvent = BaseEvent> implements IRouter<TEv
     if (!path.startsWith('/'))
       throw new Error('Path must start with /')
 
-    const derived_path = this.base_path ? this.base_path + (path === '/' ? '' : path) : path
+    const derived_path = this.config.base_path ? this.config.base_path + (path === '/' ? '' : path) : path
 
     const segments = derived_path.split('/').filter(Boolean)
     let current_node = this.root

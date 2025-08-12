@@ -1,9 +1,10 @@
-/** @import { ApiReferenceConfiguration, Cookie, ErrorHandler, Handle, NotFoundHandler, RequestEvent } from './types.js' */
+/** @import { ApiReferenceConfiguration, XinConfig, Cookie, ErrorHandler, Handle, NotFoundHandler, RequestEvent } from './types.js' */
 /** @import { Store } from '@xinkjs/xi*/
 
 import { Router as URLRouter } from "@xinkjs/xi"
 import { sequence } from "./lib/runtime/utils.js"
-import { addCookiesToHeaders, getCookies, redirectResponse, resolve } from "./lib/runtime/fetch.js"
+import { validateConfig } from "./lib/config.js"
+import { addCookiesToHeaders, getCookies, isFormContentType, redirectResponse, resolve } from "./lib/runtime/fetch.js"
 import { json, text, html, redirect, Redirect } from './lib/runtime/helpers.js'
 import { openapi_template } from "./lib/runtime/openapi.js"
 
@@ -25,9 +26,13 @@ export class Router extends URLRouter {
     },
     scalar: {}
   }
+  /** @type {XinConfig} A xin configuration object */
+  #config
 
-  constructor() {
-    super()
+  /** @param {Partial<XinConfig>} [options] */
+  constructor(options = {}) {
+    super(options)
+    this.#config = validateConfig(options)
   }
 
   /**
@@ -56,6 +61,21 @@ export class Router extends URLRouter {
     /* Handle OpenAPI schema request. */
     if (url.pathname === this.#openapi.path + '/schema')
       return json({ ...this.#openapi.metadata, paths: this.#openapi.paths })
+
+    /* CSRF Content Type and Origin Check. */
+    if (this.#config.check_origin) {
+      const forbidden = 
+        (request.method === 'POST' || request.method === 'DELETE' || request.method === 'PUT' || request.method === 'PATCH') &&  
+        request.headers.get('origin') !== url.origin &&  
+        isFormContentType(request)
+
+      if (forbidden) {
+        if (request.headers.get('accept') === 'application/json') {
+          return json(`Cross-site ${request.method} form submissions are forbidden`, { status: 403 })
+        }
+        return text(`Cross-site ${request.method} form submissions are forbidden`, { status: 403 })
+      }
+    }
 
     const { cookies, new_cookies } = getCookies(request, url)
     
@@ -228,7 +248,8 @@ export class Router extends URLRouter {
     const store = super.route(path)
     /** @type {Record<string, any>} */
     const openapi_schema = {}
-    const derived_path = super.base_path ? super.base_path + (path === '/' ? '' : path) : path
+    const { base_path } = super.getConfig()
+    const derived_path = base_path ? base_path + (path === '/' ? '' : path) : path
     
     if (openapi && typeof openapi === 'object') {
       const { tags: global_tags } = openapi
