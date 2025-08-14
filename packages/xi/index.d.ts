@@ -50,7 +50,7 @@ export declare class Store<Path extends string = string, TEvent extends BaseEven
   fallback<TSchema = unknown, ResSchema = unknown>(handler: Handler<Path, TEvent, TSchema, ResSchema>, ...hooks: Hook<Path, TEvent, TSchema, ResSchema>[]): Store<Path, TEvent>;
 }
 
-export declare class Router<TEvent extends BaseEvent = BaseEvent> {
+export declare class Xi<TEvent extends BaseEvent = BaseEvent> {
   constructor()
 
   basepath(path: string): void;
@@ -62,6 +62,6 @@ export declare class Router<TEvent extends BaseEvent = BaseEvent> {
   matchRoute(node: Node, segments: string[], index: number, params: Record<string, string | undefined>): StoreResult;
   parseSegment(segment: string): ParsedSegment;
   route<Path extends string>(path: Path): Store<Path, TEvent>;
-  router(router: Router<TEvent>): void;
+  router(...router: Router<TEvent>[]): void;
   find(path: string): StoreResult;
 }

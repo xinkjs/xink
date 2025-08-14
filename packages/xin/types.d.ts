@@ -1,4 +1,4 @@
-import type { Router as URLRouter, Handler, Hook, SchemaDefinition, Store, ValidData, XiConfig } from "@xinkjs/xi"
+import type { Xi, Handler, Hook, SchemaDefinition, Store, ValidData, XiConfig } from "@xinkjs/xi"
 import type { SerializeOptions, ParseOptions } from 'cookie'
 import type { ApiReferenceConfiguration } from '@scalar/types'
 
@@ -53,7 +53,7 @@ export interface CloudflarePlatformContext {
   };
 };
 
-export declare class Router extends URLRouter<RequestEvent> {
+export declare class Xin extends Xi<RequestEvent> {
   constructor(options?: XinConfig)
 
   fetch(request: Request, platform?: PlatformContext);

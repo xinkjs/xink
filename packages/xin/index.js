@@ -1,7 +1,7 @@
 /** @import { ApiReferenceConfiguration, XinConfig, Cookie, ErrorHandler, Handle, NotFoundHandler, RequestEvent } from './types.js' */
 /** @import { Store } from '@xinkjs/xi*/
 
-import { Router as URLRouter } from "@xinkjs/xi"
+import { Xi } from "@xinkjs/xi"
 import { sequence } from "./lib/runtime/utils.js"
 import { validateConfig } from "./lib/config.js"
 import { addCookiesToHeaders, getCookies, isFormContentType, redirectResponse, resolve } from "./lib/runtime/fetch.js"
@@ -9,9 +9,9 @@ import { json, text, html, redirect, Redirect } from './lib/runtime/helpers.js'
 import { openapi_template } from "./lib/runtime/openapi.js"
 
 /**
- * @extends {URLRouter<RequestEvent>}
+ * @extends {Xi<RequestEvent>}
  */
-export class Router extends URLRouter {
+export class Xin extends Xi {
   /** @type {NotFoundHandler|undefined} */
   notFoundHandler
   /** @type {ErrorHandler|undefined} */

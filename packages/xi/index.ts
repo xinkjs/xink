@@ -284,7 +284,7 @@ export class Store<Path extends string = string, TEvent extends BaseEvent = Base
 /**
  * Trie URL router 
  */
-export class Router<TEvent extends BaseEvent = BaseEvent> implements IRouter<TEvent>{
+export class Xi<TEvent extends BaseEvent = BaseEvent> implements IRouter<TEvent>{
   /** Root node of the routing trie */
   root: Node<TEvent> = new Node<TEvent>()
   
@@ -641,11 +641,13 @@ export class Router<TEvent extends BaseEvent = BaseEvent> implements IRouter<TEv
   }
 
   /**
-   * Merge a router into this one.
+   * Merge one or more routers into this one.
+   * 
+   * Accepts a comma-separated list of routers.
    */
-  router(router: Router<TEvent>) {
+  router(...routers: Xi<TEvent>[]) {
     const { base_path } = this.getConfig()
-    this.#mergeNodes(this.root, router.root, base_path)
+    routers.forEach(router => this.#mergeNodes(this.root, router.root, base_path))
   }
 
   /**
