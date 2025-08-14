@@ -13,27 +13,27 @@ const numberMatcher: Matcher = (param) => /^\d+$/.test(param)
 /**
  * Node in the routing trie
  */
-class Node implements INode {
+class Node<TEvent extends BaseEvent = BaseEvent> implements INode<TEvent> {
   /** Static child routes */
-  static_children: Map<string, Node> = new Map()
+  static_children: Map<string, Node<TEvent>> = new Map()
   
   /** Dynamic parameter child */
-  dynamic_child: Node | null = null
+  dynamic_child: Node<TEvent> | null = null
   
   /** Parameter name for dynamic routes */
   param_name: string | null = null
   
   /** Mixed static-dynamic children */
-  mixed_children: Map<string, Node> = new Map()
+  mixed_children: Map<string, Node<TEvent>> = new Map()
 
   /** Matcher children (:param=matcher) */
-  matcher_children: Map<string, Node> = new Map()
+  matcher_children: Map<string, Node<TEvent>> = new Map()
   
   /** Wildcard child (*param) */
-  wildcard_child: Node | null = null
+  wildcard_child: Node<TEvent> | null = null
   
   /** Store for method handlers */
-  store: Store | null = null
+  store: Store<string, TEvent> | null = null
   
   /** Original route pattern */
   pattern: string | null = null
@@ -109,6 +109,10 @@ export class Store<Path extends string = string, TEvent extends BaseEvent = Base
     return this.handlers.has(method.toUpperCase() as HandlerMethod)
   }
 
+  setSchema(method: HandlerMethod, schema: SchemaDefinition) {
+    this.schemas.set(method, schema)
+  }
+
   getSchemas(method: HandlerMethod): SchemaDefinition | undefined {
     return this.schemas.get(method)
   }
@@ -133,7 +137,7 @@ export class Store<Path extends string = string, TEvent extends BaseEvent = Base
   ) {
     this.setHandler(method, handler)
     if (hooks.length > 0) this.setHooks(method, hooks)
-    if (schema) this.schemas.set(method, schema)
+    if (schema) this.setSchema(method, schema)
   }
 
   #getArgs<TSchema = unknown, ResSchema = unknown>(
@@ -279,7 +283,7 @@ export class Store<Path extends string = string, TEvent extends BaseEvent = Base
  */
 export class Router<TEvent extends BaseEvent = BaseEvent> implements IRouter<TEvent>{
   /** Root node of the routing trie */
-  root: Node = new Node()
+  root: Node<TEvent> = new Node<TEvent>()
   
   /** @type Registry of matcher functions */
   matchers: Map<string, Matcher> = new Map([
@@ -318,7 +322,7 @@ export class Router<TEvent extends BaseEvent = BaseEvent> implements IRouter<TEv
   /**
    * Find a route and return its info
    */
-  find(path: string): StoreResult {
+  find(path: string): StoreResult<TEvent> {
     if (!path.startsWith('/'))
       throw new Error('Path must start with /')
 
@@ -328,16 +332,17 @@ export class Router<TEvent extends BaseEvent = BaseEvent> implements IRouter<TEv
   }
 
   /**
-   * Return all registered routes with their methods
+   * Return all registered routes with their methods and store
    */
-  getRoutes(): BasicRouteInfo {
-    const routes: BasicRouteInfo = []
+  getRoutes(): BasicRouteInfo<TEvent> {
+    const routes: BasicRouteInfo<TEvent> = []
     
-    const traverse = (node: Node, path = '') => {
+    const traverse = (node: Node<TEvent>, path = '') => {
       if (node.store) {
         routes.push({ 
-          pattern: node.pattern || '', 
-          methods: node.store.getMethods() 
+          pattern: node.pattern || '',
+          methods: node.store.getMethods(),
+          store: node.store
         })
       }
       
@@ -420,7 +425,7 @@ export class Router<TEvent extends BaseEvent = BaseEvent> implements IRouter<TEv
   /**
    * Recursively match route segments against the trie
    */
-  matchRoute(node: Node, segments: string[], index: number, params: Record<string, string | undefined>): StoreResult {
+  matchRoute(node: Node<TEvent>, segments: string[], index: number, params: Record<string, string | undefined>): StoreResult<TEvent> {
     // If we've processed all segments and a store exists, return
     if ((index >= segments.length) && node.store) {
       return {
@@ -560,7 +565,8 @@ export class Router<TEvent extends BaseEvent = BaseEvent> implements IRouter<TEv
     if (!path.startsWith('/'))
       throw new Error('Path must start with /')
 
-    const derived_path = this.config.base_path ? this.config.base_path + (path === '/' ? '' : path) : path
+    const { base_path } = this.getConfig()
+    const derived_path = base_path ? base_path + (path === '/' ? '' : path) : path
 
     const segments = derived_path.split('/').filter(Boolean)
     let current_node = this.root
@@ -572,7 +578,7 @@ export class Router<TEvent extends BaseEvent = BaseEvent> implements IRouter<TEv
         case 'static':
           let static_node = current_node.static_children.get(segment)
           if (!static_node) {
-            static_node = new Node()
+            static_node = new Node<TEvent>()
             current_node.static_children.set(segment, static_node)
           }
 
@@ -581,7 +587,7 @@ export class Router<TEvent extends BaseEvent = BaseEvent> implements IRouter<TEv
           
         case 'dynamic':
           if (!current_node.dynamic_child) {
-            current_node.dynamic_child = new Node()
+            current_node.dynamic_child = new Node<TEvent>()
             current_node.param_name = parsed.param_name
           }
           current_node = current_node.dynamic_child
@@ -594,7 +600,7 @@ export class Router<TEvent extends BaseEvent = BaseEvent> implements IRouter<TEv
           
           let matcher_node = current_node.matcher_children.get(parsed.pattern)
           if (!matcher_node) {
-            matcher_node = new Node()
+            matcher_node = new Node<TEvent>()
             matcher_node.param_name = parsed.param_name
             current_node.matcher_children.set(parsed.pattern, matcher_node)
           }
@@ -604,7 +610,7 @@ export class Router<TEvent extends BaseEvent = BaseEvent> implements IRouter<TEv
         case 'mixed':
           let mixed_node = current_node.mixed_children.get(parsed.pattern)
           if (!mixed_node) {
-            mixed_node = new Node()
+            mixed_node = new Node<TEvent>()
             mixed_node.param_name = parsed.param_name
             current_node.mixed_children.set(parsed.pattern, mixed_node)
           }
@@ -613,7 +619,7 @@ export class Router<TEvent extends BaseEvent = BaseEvent> implements IRouter<TEv
           
         case 'wildcard':
           if (!current_node.wildcard_child) {
-            current_node.wildcard_child = new Node()
+            current_node.wildcard_child = new Node<TEvent>()
             current_node.param_name = parsed.param_name
           }
 
@@ -628,6 +634,121 @@ export class Router<TEvent extends BaseEvent = BaseEvent> implements IRouter<TEv
     current_node.pattern = derived_path
 
     // Ensure return type matches signature, despite only being Store
-    return current_node.store as unknown as Store<Path, TEvent>
+    return current_node.store
+  }
+
+  /**
+   * Merge a router into this one.
+   */
+  router(router: Router<TEvent>) {
+    const { base_path } = this.getConfig()
+    this.#mergeNodes(this.root, router.root, base_path)
+  }
+
+  /**
+   * Recursively merges nodes from a source trie into a destination trie.
+   * 
+   * @param destination_node The current node in the target router's trie.
+   * @param source_node The current node in the source router's trie.
+   * @param base_path The base_path of the target node.
+   */
+  #mergeNodes(destination_node: Node<TEvent>, source_node: Node<TEvent>, base_path?: string): void {
+    const path = base_path?.slice(1)
+    let target_node: Node<TEvent>
+
+    if (path) {
+      let maybe_node = destination_node.static_children.get(path)
+      if (maybe_node) {
+        // child with path already exists
+        target_node = maybe_node
+      } else {
+        // create child node and use that
+        const new_node = new Node<TEvent>()
+        destination_node.static_children.set(path, new_node)
+        target_node = new_node
+      }
+    } else {
+      // just use passed-in node
+      target_node = destination_node
+    }
+
+    // 1. Copy handler/store if it exists on the source node
+    //    If the dest node already has a store, this will overwrite it.
+    //    You might want a more sophisticated merge (e.g., merge handlers by method).
+    if (source_node.store) {
+      // If target_node already has a store, merge its handlers/hooks by method.
+      // Otherwise, just copy the source store.
+      if (!target_node.store) {
+        target_node.store = new Store<string, TEvent>(); // Create a new Store if it doesn't exist
+      }
+      // Iterate over methods in the source store and set them in the dest store.
+      // This ensures method-specific handlers/hooks/schemas are copied.
+      for (const [method, handler] of source_node.store.handlers.entries()) {
+        target_node.store.setHandler(method, handler);
+      }
+      for (const [method, hooks] of source_node.store.hooks.entries()) {
+        target_node.store.setHooks(method, hooks);
+      }
+      for (const [method, schema] of source_node.store.schemas.entries()) {
+        target_node.store.setSchema(method, schema);
+      }
+      // Handle the .hook() global hooks on the store if they are there.
+      const source_global_hooks = source_node.store.getHooks('ALL');
+      if (source_global_hooks && source_global_hooks.length > 0) {
+        target_node.store.setHooks('ALL', source_global_hooks); // Or merge existing ones
+      }
+    }
+
+    // 2. Recursively merge children (static, dynamic, matcher, mixed, wildcard)
+
+    // Merge Static Children
+    for (const [segment, sourceChildNode] of source_node.static_children.entries()) {
+      let destChildNode = target_node.static_children.get(segment);
+      if (!destChildNode) {
+        destChildNode = new Node(); // Create if doesn't exist
+        target_node.static_children.set(segment, destChildNode);
+      }
+      this.#mergeNodes(destChildNode, sourceChildNode);
+    }
+
+    // Merge Dynamic Child (only one per node)
+    if (source_node.dynamic_child) {
+      if (!target_node.dynamic_child) {
+        target_node.dynamic_child = new Node();
+        target_node.param_name = source_node.param_name; // Copy param name
+      }
+      this.#mergeNodes(target_node.dynamic_child, source_node.dynamic_child);
+    }
+
+    // Merge Matcher Children
+    for (const [pattern, sourceChildNode] of source_node.matcher_children.entries()) {
+      let destChildNode = target_node.matcher_children.get(pattern);
+      if (!destChildNode) {
+        destChildNode = new Node();
+        destChildNode.param_name = sourceChildNode.param_name;
+        target_node.matcher_children.set(pattern, destChildNode);
+      }
+      this.#mergeNodes(destChildNode, sourceChildNode);
+    }
+
+    // Merge Mixed Children
+    for (const [pattern, sourceChildNode] of source_node.mixed_children.entries()) {
+      let destChildNode = target_node.mixed_children.get(pattern);
+      if (!destChildNode) {
+        destChildNode = new Node();
+        destChildNode.param_name = sourceChildNode.param_name;
+        target_node.mixed_children.set(pattern, destChildNode);
+      }
+      this.#mergeNodes(destChildNode, sourceChildNode);
+    }
+
+    // Merge Wildcard Child (only one per node)
+    if (source_node.wildcard_child) {
+      if (!target_node.wildcard_child) {
+        target_node.wildcard_child = new Node();
+        target_node.param_name = source_node.param_name; // Copy param name if applicable
+      }
+      this.#mergeNodes(target_node.wildcard_child, source_node.wildcard_child);
+    }
   }
 }

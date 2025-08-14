@@ -74,7 +74,7 @@ export const validateConfig = (config) => {
     throw new Error('base_path must begin with a /')
 
   if (config.base_path && config.base_path.length === 1)
-      throw new Error('Basepath cannot be "/"')
+      throw new Error('base_path cannot be "/"')
 
   return mergeConfig(CONFIG, config)
 }

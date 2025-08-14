@@ -22,6 +22,7 @@ export declare class Store<Path extends string = string, TEvent extends BaseEven
   getHooks(method: HookMethod): Hook<Path, TEvent, unknown, unknown>[] | undefined;
   getMethods(): string[];
   hasMethod(method: string): boolean;
+  setSchema(method:HandlerMethod, schema: SchemaDefinition): void;
   getSchemas(method: HandlerMethod): SchemaDefinition | undefined;
 
   /**
@@ -61,5 +62,6 @@ export declare class Router<TEvent extends BaseEvent = BaseEvent> {
   matchRoute(node: Node, segments: string[], index: number, params: Record<string, string | undefined>): StoreResult;
   parseSegment(segment: string): ParsedSegment;
   route<Path extends string>(path: Path): Store<Path, TEvent>;
+  router(router: Router<TEvent>): void;
   find(path: string): StoreResult;
 }

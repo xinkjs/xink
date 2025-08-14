@@ -20,7 +20,7 @@ export type ParsePath<Path extends string> = {
 };
 
 export type XiConfig = {
-  base_path: string;
+  base_path?: string;
 }
 
 /** The minimal constraint for a custom context object. */
@@ -44,7 +44,7 @@ export type RequestContext<
 
 /** Utility type representing a value that may or may not be a Promise. */
 export type MaybePromise<T> = T | Promise<T>;
-export type BasicRouteInfo = { pattern: string; methods: string[] }[]
+export type BasicRouteInfo<TEvent extends BaseEvent> = { pattern: string; methods: string[], store: IStore<string, TEvent> }[]
 export type Handler<
   Path extends string = string, 
   TEvent extends BaseEvent = BaseEvent,
@@ -67,14 +67,14 @@ export interface SchemaDefinition {
   query?: Record<string, any>;
 }
 
-export interface INode {
-  static_children: Map<string, INode>;
-  dynamic_child: INode | null;
+export interface INode<TEvent extends BaseEvent> {
+  static_children: Map<string, INode<TEvent>>;
+  dynamic_child: INode<TEvent> | null;
   param_name: string | null;
-  mixed_children: Map<string, INode>;
-  matcher_children: Map<string, INode>;
-  wildcard_child: INode | null;
-  store: IStore | null;
+  mixed_children: Map<string, INode<TEvent>>;
+  matcher_children: Map<string, INode<TEvent>>;
+  wildcard_child: INode<TEvent> | null;
+  store: IStore<string, TEvent> | null;
   pattern: string | null;
 }
 
@@ -83,6 +83,7 @@ export interface IStore<Path extends string = string, TEvent extends BaseEvent =
   getHooks(method: HookMethod): Hook<Path, TEvent, unknown, unknown>[] | undefined;
   getMethods(): string[];
   hasMethod(method: string): boolean;
+  setSchema(method:HandlerMethod, schema: SchemaDefinition): void;
   getSchemas(method: HandlerMethod): SchemaDefinition | undefined;
 
   /**
@@ -116,10 +117,11 @@ export interface IRouter<TEvent extends BaseEvent = BaseEvent> {
   matcher(name: string, matcher: Matcher): void;
   matchMatcherSegment(pattern: string, segment: string): MatcherResult;
   matchMixedSegment(pattern: string, segment: string): MixedResult;
-  matchRoute(node: INode, segments: string[], index: number, params: Record<string, string | undefined>): StoreResult;
+  matchRoute(node: INode<TEvent>, segments: string[], index: number, params: Record<string, string | undefined>): StoreResult<TEvent>;
   parseSegment(segment: string): ParsedSegment;
   route<Path extends string>(path: Path): IStore<Path, TEvent>;
-  find(path: string): StoreResult;
+  router(router: IRouter<TEvent>): void;
+  find(path: string): StoreResult<TEvent>;
 }
 
 interface StaticSegment {
@@ -180,4 +182,4 @@ interface MixedFailure {
 
 export type MixedResult = MixedSuccess | MixedFailure;
 
-export type StoreResult = { store: IStore | null; params: Record<string, string | undefined> }
+export type StoreResult<TEvent extends BaseEvent> = { store: IStore<string, TEvent> | null; params: Record<string, string | undefined> }
