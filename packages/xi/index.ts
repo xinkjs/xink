@@ -91,8 +91,11 @@ export class Store<Path extends string = string, TEvent extends BaseEvent = Base
    * 
    * @throws Error if you do not pass in a method
    */
-  getHooks(method: HookMethod): Hook<Path, TEvent, unknown, unknown>[]|undefined {   
-    return this.hooks.get(method) 
+  getHooks(method: HookMethod): Hook<Path, TEvent, unknown, unknown>[]|undefined {
+    if (!method) throw new Error('getHooks requires a method to be passed in.')
+
+    // hooks that apply to ALL methods should be run first, so put them at the front
+    return [ ...(this.hooks.get('ALL') || []), ...(this.hooks.get(method) || []) ] 
   }
 
   /**
