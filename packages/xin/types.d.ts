@@ -53,6 +53,10 @@ export interface CloudflarePlatformContext {
   };
 };
 
+export declare class StandardSchemaError extends Error {
+  constructor(message: string, options: ErrorOptions) {}
+}
+
 export declare class Xin extends Xi<RequestEvent> {
   constructor(options?: Partial<XinConfig>)
 

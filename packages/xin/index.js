@@ -33,6 +33,14 @@ export class Xin extends Xi {
   constructor(options = {}) {
     super(options)
     this.#config = validateConfig(options)
+
+    /**
+     * Necessary for proper "this" binding,
+     * as higher-level implementations may need
+     * their own `fetch` to be an arrow function;
+     * which means Xin's fetch cannot be.
+     */
+    this.fetch = this.fetch.bind(this)
   }
 
   /**
@@ -42,7 +50,7 @@ export class Xin extends Xi {
    * @param {{ [key: string]: any }} [platform] A custom object for platform contexts
    * @returns {Promise<Response>}
    */
-  fetch = async (request, platform) => { // must be an arrow function!!
+  async fetch(request, platform) { // must not be an arrow function!!
     const url = new URL(request.url)
     const { store, params } = this.find(url.pathname)
     const middleware = this.middleware
