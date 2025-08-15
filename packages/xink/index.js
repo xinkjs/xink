@@ -233,7 +233,11 @@ export function xink(xink_config = {}) {
         define: {
           XINK_CHECK_ORIGIN: validated_config.check_origin,
         },
-        //ssr: { noExternal: ['@xinkjs/xink'] }
+        environments: {
+          ssr: {
+            resolve: { noExternal: ['@xinkjs/xink'] }
+          }
+        }
       }
     },
     async configureServer(server) {
