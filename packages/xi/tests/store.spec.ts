@@ -1,8 +1,9 @@
 import { expect, test, vi } from 'vitest'
-import { Router } from '../index.js'
-import type { Handler, Store } from '../index.js'
+import { Xi } from '../index.js'
+import type { Store } from '../index.d.ts'
+import type { Handler, HandlerMethod } from '../internal-types.ts'
 
-const api = new Router()
+const api = new Xi()
 let store: Store | undefined
 
 test('Register allowed methods', async () => {
@@ -34,7 +35,7 @@ test('!hasMethod', () => {
   expect(store?.hasMethod('FAKE')).toBe(false)
 })
 
-function setHandler(method: string, handler: Handler) {
+function setHandler(method: HandlerMethod, handler: Handler) {
   store?.setHandler(method, handler)
   return true
 }
@@ -50,6 +51,7 @@ test('setHandler', () => {
 test('Reject invalid methods', () => {
   const setHandlerSpy = vi.fn(setHandler)
 
+  // @ts-ignore
   expect(() => setHandlerSpy('post', () => new Response()))
     .toThrowError('Method post is invalid; it should be UPPERCASE.')
 })
@@ -57,6 +59,7 @@ test('Reject invalid methods', () => {
 test('Reject non-allowed methods', () => {
   const setHandlerSpy = vi.fn(setHandler)
 
+  // @ts-ignore
   expect(() => setHandlerSpy('FAKE', () => new Response()))
     .toThrowError('Method FAKE not allowed.')
 })
