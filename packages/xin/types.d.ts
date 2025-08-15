@@ -54,7 +54,7 @@ export interface CloudflarePlatformContext {
 };
 
 export declare class Xin extends Xi<RequestEvent> {
-  constructor(options?: XinConfig)
+  constructor(options?: Partial<XinConfig>)
 
   fetch(request: Request, platform?: PlatformContext);
   getMiddleware(): Handle[];

@@ -20,7 +20,7 @@ export type ParsePath<Path extends string> = {
 };
 
 export type XiConfig = {
-  base_path?: string;
+  base_path: string;
 }
 
 /** The minimal constraint for a custom context object. */
@@ -111,7 +111,6 @@ export interface IStore<Path extends string = string, TEvent extends BaseEvent =
 }
 
 export interface IRouter<TEvent extends BaseEvent = BaseEvent> {
-  basepath(path: string): void;
   getConfig(): XiConfig;
   getRoutes(): { pattern: string, methods: string[] }[];
   matcher(name: string, matcher: Matcher): void;

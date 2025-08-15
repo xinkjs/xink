@@ -295,26 +295,10 @@ export class Xi<TEvent extends BaseEvent = BaseEvent> implements IRouter<TEvent>
     ['number', numberMatcher]
   ])
 
-  config: XiConfig = {
-    base_path: ''
-  }
+  config: XiConfig
 
   constructor(options: Partial<XiConfig> = {}) {
     this.config = validateConfig(options)
-  }
-
-  /**
-   * Set basepath for all registered routes
-   */
-  basepath(path: string) {
-    if (typeof path !== 'string')
-      throw new TypeError('Basepath must be a string.')
-    if (path.charAt(0) !== '/')
-      throw new Error('Basepath must start with a forward slash "/"')
-    if (path.length === 1)
-      throw new Error('Basepath cannot be "/"')
-
-    this.config.base_path = path
   }
 
   /**

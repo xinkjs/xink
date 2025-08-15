@@ -53,7 +53,6 @@ export declare class Store<Path extends string = string, TEvent extends BaseEven
 export declare class Xi<TEvent extends BaseEvent = BaseEvent> {
   constructor()
 
-  basepath(path: string): void;
   getConfig(): XiConfig;
   getRoutes(): { pattern: string, methods: string[] }[];
   matcher(name: string, matcher: Matcher): void;
