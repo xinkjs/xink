@@ -108,7 +108,7 @@ export const create = new Command('create')
         const steps = [
             'Next Steps:',
             `  cd ${project_path.split('/').at(-1)}`,
-            `  ${runtime === 'bun' ? 'bun add -D vite @xinkjs/xink @xinkjs/adapter-bun' : runtime === 'deno' ? 'deno add -D npm:vite npm:@xinkjs/xink npm:@xinkjs/adapter-deno npm:@deno/vite-plugin' : 'npm add -D vite @xinkjs/xink @xinkjs/adapter-cloudflare'}`,
+            `  ${runtime === 'bun' ? 'bun add -D vite @xinkjs/xink @xinkjs/adapter-bun' : runtime === 'deno' ? 'deno add -D npm:vite npm:@xinkjs/xink npm:@xinkjs/adapter-deno npm:@deno/vite-plugin' : 'npm add -D vite @xinkjs/xink @xinkjs/adapter-cloudflare @cloudflare/vite-plugin'}`,
             `  ${runtime === 'bun' ? 'bun run dev' : runtime === 'deno' ? 'deno task dev' : 'npm run dev'}`
         ]
         p.log.info(steps.join('\n'))
