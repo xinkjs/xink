@@ -10,7 +10,7 @@ export class Xink extends Xin {
     super(options)
   }
 
-  fetch = async (request, platform = {}) => {
+  fetch = async (request, env, ctx) => {
     if (!this.#is_initialized) await this.#init()
     if (!this.#router) {
       console.error('[Xink] Router not available, returning 500.')
@@ -19,7 +19,7 @@ export class Xink extends Xin {
       })
     }
 
-    return await super.fetch(request, platform)
+    return await super.fetch(request, env, ctx)
   }
 
   /* Initialize the router. */
@@ -77,25 +77,25 @@ export class Xink extends Xin {
 
           switch (method) {
             case 'GET':
-              store.get(schemas.get, handlers[method])
+              store.get(schemas.get || {}, handlers[method])
               break;
             case 'POST':
-              store.post(schemas.post, handlers[method])
+              store.post(schemas.post || {}, handlers[method])
               break;
             case 'PUT':
-              store.put(schemas.put, handlers[method])
+              store.put(schemas.put || {}, handlers[method])
               break;
             case 'PATCH':
-              store.patch(schemas.patch, handlers[method])
+              store.patch(schemas.patch || {}, handlers[method])
               break;
             case 'DELETE':
-              store.delete(schemas.delete, handlers[method])
+              store.delete(schemas.delete || {}, handlers[method])
               break;
             case 'HEAD':
-              store.head(schemas.head, handlers[method])
+              store.head(schemas.head || {}, handlers[method])
               break;
             case 'OPTIONS':
-              store.options(schemas.options, handlers[method])
+              store.options(schemas.options || {}, handlers[method])
               break;
             case 'default':
               store.fallback(schemas.default || {}, handlers[method])

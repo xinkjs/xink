@@ -47,10 +47,11 @@ export class Xin extends Xi {
    * Request handler
    * 
    * @param {Request} request The original request
-   * @param {{ [key: string]: any }} [platform] A custom object for platform contexts
+   * @param {Record<string, any>} [env] A custom object for platform environment
+   * @param {Record<string, any>} [ctx] A custom object for platform context
    * @returns {Promise<Response>}
    */
-  async fetch(request, platform) { // must not be an arrow function!!
+  async fetch(request, env = {}, ctx = {}) { // must not be an arrow function!!
     const url = new URL(request.url)
     const { store, params } = this.find(url.pathname)
     const middleware = this.middleware
@@ -97,7 +98,7 @@ export class Xin extends Xi {
       locals: {},
       params,
       redirect,
-      platform,
+      platform: { env, ctx },
       request,
       store,
       /* ATTR: SvelteKit */

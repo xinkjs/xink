@@ -21,14 +21,14 @@ export type Cookies = {
 /** The minimal constraint for a custom context object. */
 export type BaseEvent = object;
 
-export interface RequestEvent<ReqT extends SchemaDefinition = SchemaDefinition, ResT = any> extends BaseEvent {
+export interface RequestEvent<ReqT extends SchemaDefinition = SchemaDefinition, ResT = any, Platform extends PlatformContext = PlatformContext> extends BaseEvent {
   cookies: Cookies;
   headers: Omit<Headers, 'toJSON' | 'count' | 'getAll'>;
   html: typeof html;
   json: (data: ResT, init?: ResponseInit) => Response;
   locals: Api.Locals;
   params: Record<string, string | undefined>;
-  platform: Record<string, any>;
+  platform: Platform;
   redirect: typeof redirect;
   request: Request;
   setHeaders: (headers: Record<string, any>) => void;
@@ -44,13 +44,17 @@ export type Handle = (event: RequestEvent, resolve: ResolveEvent) => MaybePromis
 export type MaybePromise<T> = T | Promise<T>;
 export type ResolveEvent = (event: RequestEvent) => MaybePromise<Response>;
 export type Route = { store: Store; params: Record<string, string | undefined>; } | null;
-export type PlatformContext = Record<string, any>;
-export interface CloudflarePlatformContext {
-  env?: Record<string, any>;
-  ctx?: {
-    waitUntil?: (promise: Promise<any>) => void;
-    passThroughOnException?: () => void;
-  };
+export interface PlatformContext {
+  env: Record<string, any>;
+  ctx: Record<string, any>;
+}
+export interface CloudflareContext {
+  waitUntil: (promise: Promise<unknown>) => void;
+  passThroughOnException: () => void;
+};
+export interface CloudflarePlatform<Env extends Record<string, any> = Record<string, any>> {
+  env: Env,
+  ctx: CloudflareContext
 };
 
 export declare class StandardSchemaError extends Error {
@@ -60,7 +64,7 @@ export declare class StandardSchemaError extends Error {
 export declare class Xin extends Xi<RequestEvent> {
   constructor(options?: Partial<XinConfig>)
 
-  fetch(request: Request, platform?: PlatformContext);
+  fetch(request: Request, env?: Record<string, any>, ctx?: Record<string, any>);
   getMiddleware(): Handle[];
   onError(handler: ErrorHandler): void;
   onNotFound(handler: NotFoundHandler): void;

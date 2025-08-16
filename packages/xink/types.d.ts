@@ -1,5 +1,6 @@
 import { 
-  type CloudflarePlatformContext,
+  type CloudflareContext,
+  type CloudflarePlatform,
   type Cookie,
   type Cookies,
   type ErrorHandler,
@@ -21,7 +22,7 @@ import type { XinkVNode, Fragment } from './lib/runtime/jsx'
 import * as CSS from 'csstype'
 import type { ApiReferenceConfiguration } from '@scalar/types'
 
-export type { CloudflarePlatformContext, Cookie, Cookies, PlatformContext, RequestEvent }
+export type { CloudflareContext, CloudflarePlatform, Cookie, Cookies, PlatformContext, RequestEvent }
 export { html, json, redirect, text, StandardSchemaError }
 
 export interface BunServeOptions {}
@@ -75,7 +76,7 @@ export function xink<TAdapterFunc extends (options?: any) => XinkAdapter>(
 export function sequence(...handlers: Handle[]): Handle;
 export class Xink extends Xin {
   constructor(options?: Partial<XinConfig>)
-  fetch(request: Request, context?: PlatformContext): Promise<Response>;
+  fetch(request: Request, env?: Record<string, any>, ctx?: Record<string, any>): Promise<Response>;
 }
 
 // Define recursive renderable type here or import it
