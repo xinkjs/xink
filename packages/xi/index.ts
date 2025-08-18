@@ -87,7 +87,7 @@ export class Store<Path extends string = string, TEvent extends BaseEvent = Base
   }
 
   /**
-   * Get hooks for a method
+   * Get hooks for a method, including any route hooks.
    * 
    * @throws Error if you do not pass in a method
    */
@@ -116,7 +116,7 @@ export class Store<Path extends string = string, TEvent extends BaseEvent = Base
     this.schemas.set(method, schema)
   }
 
-  getSchemas(method: HandlerMethod): SchemaDefinition | undefined {
+  getSchema(method: HandlerMethod): SchemaDefinition | undefined {
     return this.schemas.get(method)
   }
 
@@ -315,7 +315,7 @@ export class Xi<TEvent extends BaseEvent = BaseEvent> implements IRouter<TEvent>
 
     const segments = path.split('/').filter(Boolean)
 
-    return this.matchRoute(this.root, segments, 0, {})
+    return this.#matchRoute(this.root, segments, 0, {})
   }
 
   /**
@@ -369,7 +369,7 @@ export class Xi<TEvent extends BaseEvent = BaseEvent> implements IRouter<TEvent>
   /**
    * Match a URL segment against a matcher pattern
    */
-  matchMatcherSegment(pattern: string, segment: string): MatcherResult {
+  #matchMatcherSegment(pattern: string, segment: string): MatcherResult {
     const match = pattern.match(/^(.+?)=([a-zA-Z]+?)$/)
     if (!match)
       return { matches: false }
@@ -395,7 +395,7 @@ export class Xi<TEvent extends BaseEvent = BaseEvent> implements IRouter<TEvent>
   /**
    * Match a URL segment against a mixed pattern
    */
-  matchMixedSegment(pattern: string, segment: string): MixedResult {
+  #matchMixedSegment(pattern: string, segment: string): MixedResult {
     const colon_index = pattern.indexOf(':')
     const static_part = pattern.slice(0, colon_index)
     
@@ -412,7 +412,7 @@ export class Xi<TEvent extends BaseEvent = BaseEvent> implements IRouter<TEvent>
   /**
    * Recursively match route segments against the trie
    */
-  matchRoute(node: Node<TEvent>, segments: string[], index: number, params: Record<string, string | undefined>): StoreResult<TEvent> {
+  #matchRoute(node: Node<TEvent>, segments: string[], index: number, params: Record<string, string | undefined>): StoreResult<TEvent> {
     // If we've processed all segments and a store exists, return
     if ((index >= segments.length) && node.store) {
       return {
@@ -430,7 +430,7 @@ export class Xi<TEvent extends BaseEvent = BaseEvent> implements IRouter<TEvent>
     // Try static segment
     let static_child = node.static_children.get(segment)
     if (static_child) {
-      const result = this.matchRoute(
+      const result = this.#matchRoute(
         static_child,
         segments,
         next_index,
@@ -445,13 +445,13 @@ export class Xi<TEvent extends BaseEvent = BaseEvent> implements IRouter<TEvent>
       if (!matcher_node.param_name)
         continue
 
-      const matcher_result = this.matchMatcherSegment(pattern, segment)
+      const matcher_result = this.#matchMatcherSegment(pattern, segment)
 
       if (matcher_result.matches) {
         const new_params = { ...params }
         new_params[matcher_node.param_name] = matcher_result.param_value
         
-        const result = this.matchRoute(
+        const result = this.#matchRoute(
           matcher_node,
           segments,
           next_index,
@@ -466,13 +466,13 @@ export class Xi<TEvent extends BaseEvent = BaseEvent> implements IRouter<TEvent>
       if (!mixed_node.param_name)
         continue
 
-      const mixed_result = this.matchMixedSegment(mixed_pattern, segment)
+      const mixed_result = this.#matchMixedSegment(mixed_pattern, segment)
 
       if (mixed_result.matches) {
         const new_params = { ...params }
         new_params[mixed_node.param_name] = mixed_result.param_value
         
-        const result = this.matchRoute(
+        const result = this.#matchRoute(
           mixed_node,
           segments,
           next_index,
@@ -487,7 +487,7 @@ export class Xi<TEvent extends BaseEvent = BaseEvent> implements IRouter<TEvent>
       const new_params = { ...params }
       new_params[node.param_name] = segment
       
-      const result = this.matchRoute(
+      const result = this.#matchRoute(
         node.dynamic_child,
         segments,
         next_index,
@@ -512,7 +512,7 @@ export class Xi<TEvent extends BaseEvent = BaseEvent> implements IRouter<TEvent>
   /**
    * Parse a route segment to determine its type and extract metadata
    */
-  parseSegment(segment: string): ParsedSegment {
+  #parseSegment(segment: string): ParsedSegment {
     if (segment.startsWith('*'))
       return { type: 'wildcard', param_name: segment.slice(1) }
 
@@ -559,7 +559,7 @@ export class Xi<TEvent extends BaseEvent = BaseEvent> implements IRouter<TEvent>
     let current_node = this.root
 
     for (const segment of segments) {
-      const parsed = this.parseSegment(segment)
+      const parsed = this.#parseSegment(segment)
        
       switch (parsed.type) {
         case 'static':
