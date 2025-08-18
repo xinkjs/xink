@@ -379,7 +379,7 @@ export const resolve = async (event) => {
 
   const method = event.request.method
   const hooks = event.store.getHooks(method) ?? null
-  const schemas = event.store.getSchemas(method)
+  const schemas = event.store.getSchema(method)
 
   if (schemas) await validation(Object.entries(schemas))
 
