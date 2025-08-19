@@ -60,12 +60,7 @@ export type Hook<
 export type HandlerMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'HEAD' | 'OPTIONS' | 'FALLBACK';
 export type HookMethod = HandlerMethod | 'ALL';
 export type Matcher = (param: string) => boolean;
-export interface SchemaDefinition {
-  form?: Record<string, any>;
-  json?: Record<string, any>;
-  params?: Record<string, any>;
-  query?: Record<string, any>;
-}
+export type SchemaDefinition = Record<string, any> | (() => MaybePromise<unknown>);
 
 export interface INode<ReqEvent extends BaseEvent> {
   static_children: Map<string, INode<ReqEvent>>;
