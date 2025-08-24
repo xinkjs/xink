@@ -1,6 +1,7 @@
-import type { Xi, Handler, Hook, SchemaDefinition, Store, ValidData, XiConfig } from "@xinkjs/xi"
+import type { Xi, ValidData, XiConfig } from "@xinkjs/xi"
 import type { SerializeOptions, ParseOptions } from 'cookie'
 import type { ApiReferenceConfiguration } from '@scalar/types'
+import type { Handler, Hook, Store, SchemaDefinition, StoreResult, MaybePromise } from "./internal-types.ts"
 
 export interface XinConfig extends XiConfig {
   check_origin: boolean;
@@ -38,16 +39,39 @@ export interface RequestEvent<ReqT extends SchemaDefinition = SchemaDefinition, 
   valid: ReqT;
 }
 
-export type ErrorHandler = (error: unknown, event?: RequestEvent) => MaybePromise<Response | void>;
-export type NotFoundHandler = (event?: RequestEvent) => MaybePromise<Response | void>;
+export type ErrorHandler = (error: unknown, event?: RequestEvent) => MaybePromise<Response>;
+export type NotFoundHandler = (event?: RequestEvent) => MaybePromise<Response>;
 export type Handle = (event: RequestEvent, resolve: ResolveEvent) => MaybePromise<Response>;
-export type MaybePromise<T> = T | Promise<T>;
-export type ResolveEvent = (event: RequestEvent) => MaybePromise<Response>;
+
+export interface OpenApiMetadata {
+  openapi?: string; 
+  info?: { title?: string; version?: string};
+}
+// What is passed in via .openapi()
+export interface OpenApiOptions {
+  path: string;
+  metadata?: OpenApiMetadata;
+  scalar?: Partial<ApiReferenceConfiguration>;
+}
+// What gets stored in the Router
+export interface OpenApiConfig {
+  path: string;
+  paths: Record<string, any>;
+  metadata: OpenApiMetadata;
+  scalar: Partial<ApiReferenceConfiguration>;    
+}
+// OpenAPI spec
+export interface OpenApiData {
+  tags?: string[];
+  [key: string]: Record<string, any>;
+}
+export type ResolveEvent = (event: RequestEvent) => Promise<Response>;
 export type Route = { store: Store; params: Record<string, string | undefined>; } | null;
 export interface PlatformContext {
   env: Record<string, any>;
   ctx: Record<string, any>;
 }
+
 export interface CloudflareContext {
   waitUntil: (promise: Promise<unknown>) => void;
   passThroughOnException: () => void;
@@ -61,11 +85,12 @@ export declare class StandardSchemaError extends Error {
   constructor(message: string, options: ErrorOptions) {}
 }
 
-export declare class Xin extends Xi<RequestEvent> {
+export declare class Xin extends Xi {
   constructor(options?: Partial<XinConfig>)
 
   fetch(request: Request, env?: Record<string, any>, ctx?: Record<string, any>);
   getMiddleware(): Handle[];
+  matcher(name: string, matcher: Matcher): void;
   onError(handler: ErrorHandler): void;
   onNotFound(handler: NotFoundHandler): void;
   openapi(metadata: { 
@@ -80,15 +105,16 @@ export declare class Xin extends Xi<RequestEvent> {
     scalar?: Partial<ApiReferenceConfiguration>
   }): void;
   route<Path extends string>(path: Path, openapi?: Record<string, any>): Store<Path, RequestEvent>;
+  router(...router: Xin<ReqEvent>[]): void;
   use(...middleware: Handle[]): void;
 };
 
 export function html(data: any, init?: ResponseInit | undefined): Response;
 export function json(data: any, init?: ResponseInit | undefined): Response;
-export function redirect(status: number, location: string): never;
+export function redirect(status: 300 | 301 | 302 | 303 | 304 | 305 | 306 | 307 | 308, location: string): never;
 export function text(data: string, init?: ResponseInit | undefined): Response;
 
-export { Handler, Hook, SchemaDefinition, Store, ApiReferenceConfiguration };
+export { Handler, Hook, SchemaDefinition, ApiReferenceConfiguration };
 
 /** The Standard Schema interface. */
 export interface StandardSchemaV1<Input = unknown, Output = Input> {
