@@ -41,7 +41,6 @@ export class Node<TStore> {
  * Trie URL router 
  */
 export abstract class Xi<TStore extends BaseStore> {
-  protected _current_store: TStore | null = null
   protected abstract getStoreConstructor(): StoreConstructor<TStore>
 
   /** Root node of the routing trie */

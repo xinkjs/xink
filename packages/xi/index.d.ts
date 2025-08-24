@@ -27,7 +27,8 @@ export declare class Node<TStore> {
   pattern: string | null;
 }
 
-export declare class Xi<TStore> {
+export declare abstract class Xi<TStore> {
+  protected abstract getStoreConstructor(): StoreConstructor<TStore>
   constructor(options: Partial<XiConfig>)
   root: Node
 
