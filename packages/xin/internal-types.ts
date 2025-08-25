@@ -1,4 +1,4 @@
-import { Store as XiStore } from "@xinkjs/xi"
+import type { BaseStore } from "@xinkjs/xi"
 
 // A utility to split a path string into an array of segments at the type level
 type PathSegments<Path extends string> =
@@ -76,7 +76,7 @@ export type HookMethod = HandlerMethod | 'ALL';
 
 export type StoreResult = { store: Store | null; params: Record<string, string | undefined> }
 
-export declare class Store<Path extends string = string, ReqEvent extends BaseEvent = BaseEvent> extends XiStore {
+export declare class Store<Path extends string = string, ReqEvent extends BaseEvent = BaseEvent> implements BaseStore {
   setHooks<ReqSchema, ResSchema>(method: HookMethod, hooks: Hook<Path, ReqEvent, ReqSchema, ResSchema>[]): void;
   getHooks(method: HookMethod): Hook<Path, ReqEvent, unknown, unknown>[] | undefined;
   setSchema(method: HandlerMethod, schema: SchemaDefinition): void;

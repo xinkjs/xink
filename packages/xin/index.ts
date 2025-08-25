@@ -247,10 +247,7 @@ class Store<Path extends string = string, TEvent extends BaseEvent = BaseEvent> 
   }
 }
 
-/**
- * @extends {Xin<RequestEvent>}
- */
-export class Xin<TEvent extends BaseEvent = BaseEvent> extends Xi<Store> {
+export class Xin extends Xi<Store> {
   protected getStoreConstructor(): StoreConstructor<Store> {
     return Store
   }
@@ -568,7 +565,7 @@ export class Xin<TEvent extends BaseEvent = BaseEvent> extends Xi<Store> {
    * 
    * Accepts a comma-separated list of routers.
    */
-  router(...routers: Xin<TEvent>[]) {
+  router(...routers: Xin[]) {
     const { base_path } = this.getConfig()
     routers.forEach(router => this.#mergeNodes(this.root, router.root, base_path))
   }
