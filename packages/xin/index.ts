@@ -8,7 +8,7 @@ import type { Cookie, ErrorHandler, Handle, Hook, NotFoundHandler, OpenApiConfig
 import type { BasicRouteInfo, Handler, HandlerMethod, HookMethod, SchemaDefinition } from "./internal-types.js"
 import { HANDLER_METHODS, HOOK_METHODS } from "./lib/constants.js"
 
-class Store<Path extends string = string, ReqSchema extends SchemaDefinition = SchemaDefinition, ResSchema = unknown> implements BaseStore {
+export class Store<Path extends string = string, ReqSchema extends SchemaDefinition = SchemaDefinition, ResSchema = unknown> implements BaseStore {
   /** Map of methods to handlers */
   handlers: Map<HandlerMethod, Handler<ReqSchema, ResSchema, Path>> = new Map()
   /** Map of methods to hooks */

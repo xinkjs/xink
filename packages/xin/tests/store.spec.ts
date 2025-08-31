@@ -1,9 +1,9 @@
 import { expect, test, vi } from 'vitest'
-import { Xi } from '../index.js'
-import type { Store } from '../index.d.ts'
-import type { Handler, HandlerMethod } from '../internal-types.ts'
+import { Xin } from '../../xin/index.js'
+import type { Store } from '../../xin/index.js'
+import type { Handler, HandlerMethod } from '../../xin/internal-types.ts'
 
-const api = new Xi()
+const api = new Xin()
 let store: Store | undefined
 
 test('Register allowed methods', async () => {
