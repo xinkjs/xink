@@ -2,12 +2,15 @@
   "name": "@xinkjs/xin",
   "version": "0.4.1",
   "description": "A javascript API router",
-  "main": "index.js",
+  "main": "./dist/index.js",
   "type": "module",
   "types": "types.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
   "exports": {
     ".": {
-      "import": "./lib/exports/index.js",
+      "import": "./dist/lib/exports/index.js",
       "types": "./types.d.ts"
     },
     "./jsx-runtime": {
@@ -34,7 +37,7 @@
     }
   ],
   "files": [
-    "index.js",
+    "dist",
     "types.d.ts"
   ],
   "keywords": [

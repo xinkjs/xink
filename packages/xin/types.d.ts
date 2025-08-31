@@ -1,7 +1,7 @@
 import type { Xi, ValidData, XiConfig } from "@xinkjs/xi"
 import type { SerializeOptions, ParseOptions } from 'cookie'
 import type { ApiReferenceConfiguration } from '@scalar/types'
-import type { Handler, Hook, Store, SchemaDefinition, StoreResult, MaybePromise } from "./internal-types.ts"
+import type { Handler, Hook, Store, SchemaDefinition, StoreResult, MaybePromise, ParsePath } from "./internal-types.ts"
 
 export interface XinConfig extends XiConfig {
   check_origin: boolean;
@@ -22,13 +22,13 @@ export type Cookies = {
 /** The minimal constraint for a custom context object. */
 export type BaseEvent = object;
 
-export interface RequestEvent<ReqT extends SchemaDefinition = SchemaDefinition, ResT = any, Platform extends PlatformContext = PlatformContext> extends BaseEvent {
+export interface RequestEvent<ReqSchema extends SchemaDefinition = SchemaDefinition, ResSchema = unknown, Path extends string = string> extends BaseEvent {
   cookies: Cookies;
   headers: Omit<Headers, 'toJSON' | 'count' | 'getAll'>;
   html: typeof html;
-  json: (data: ResT, init?: ResponseInit) => Response;
+  json: (data: ResSchema, init?: ResponseInit) => Response;
   locals: Api.Locals;
-  params: Record<string, string | undefined>;
+  params: ParsePath<Path>;
   platform: Platform;
   redirect: typeof redirect;
   request: Request;
@@ -36,7 +36,7 @@ export interface RequestEvent<ReqT extends SchemaDefinition = SchemaDefinition, 
   store: Store | null;
   text: typeof text;
   url: Omit<URL, 'createObjectURL' | 'revokeObjectURL' | 'canParse'>;
-  valid: ReqT;
+  valid: ReqSchema;
 }
 
 export type ErrorHandler = (error: unknown, event?: RequestEvent) => MaybePromise<Response>;
@@ -65,7 +65,7 @@ export interface OpenApiData {
   tags?: string[];
   [key: string]: Record<string, any>;
 }
-export type ResolveEvent = (event: RequestEvent) => Promise<Response>;
+export type ResolveEvent = (event: RequestEvent) => MaybePromise<Response>;
 export type Route = { store: Store; params: Record<string, string | undefined>; } | null;
 export interface PlatformContext {
   env: Record<string, any>;

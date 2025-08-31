@@ -1,4 +1,4 @@
-export const openapi_template = (spec, options) => {
+export const openapi_template = (spec: any, options: any) => {
   const config = {
     content: spec,
     ...options

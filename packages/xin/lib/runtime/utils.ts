@@ -1,24 +1,15 @@
-/** @import { Handle, MaybePromise, RequestEvent } from '../../types.js' */
+import type { MaybePromise } from "../../internal-types.js";
+import type { Handle, RequestEvent } from "../../types.js";
 
 /* ATTR: SvelteKit */
-/**
- * 
- * @param {...Handle} handlers The chain of `handle` functions
- * @returns {Handle}
- */
-export function sequence(...handlers) {
+export function sequence(...handlers: Handle[]): Handle {
  const length = handlers.length;
  if (!length) return (event, resolve) => resolve(event);
 
  return (event, resolve) => {
    return apply_handle(0, event);
 
-   /**
-    * @param {number} i
-    * @param {RequestEvent} event
-    * @returns {MaybePromise<Response>}
-    */
-   function apply_handle(i, event) {
+   function apply_handle(i: number, event: RequestEvent): MaybePromise<Response> {
      const handle = handlers[i];
 
      return handle(
@@ -34,13 +25,7 @@ export function sequence(...handlers) {
 }
 
 /* ATTR: SvelteKit */
-/**
- * 
- * @param {Request} request 
- * @param  {string[]} types 
- * @returns 
- */
-export const isContentType = (request, ...types) => {
+export const isContentType = (request: Request, ...types: string[]) => {
   const type = request.headers.get('content-type')?.split(';', 1)[0].trim() ?? ''
 	return types.includes(type.toLowerCase())
 }
@@ -51,8 +36,8 @@ export const isContentType = (request, ...types) => {
  * @param {Record<string, string | File | any>} input_obj Object with potentially mixed value types.
  * @returns {Record<string, string | number | boolean | null | File | any>} Object with inferred types for strings.
  */
-export function inferObjectValueTypes(input_obj) {
-  const inferred_obj = {}
+export function inferObjectValueTypes(input_obj: Record<string, string | File | any>): Record<string, string | number | boolean | null | File | any> {
+  const inferred_obj: { [key: string]: any } = {}
   for (const key in input_obj) {
     const value = input_obj[key]
 

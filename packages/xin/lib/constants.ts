@@ -3,7 +3,8 @@ export const DISALLOWED_METHODS = new Set([
 ])
 
 export const CONFIG = {
-  check_origin: true 
+  base_path: '',
+  check_origin: true
 }
 
 export const HANDLER_METHODS = new Set([

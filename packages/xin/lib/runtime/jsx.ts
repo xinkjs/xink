@@ -10,7 +10,7 @@ class XinVNode {
   props
   key
 
-  constructor(tag, props, key) {
+  constructor(tag: string | symbol | Function, props: object, key?: string) {
     this.tag = tag
     this.props = props
     this.key = key
@@ -23,12 +23,12 @@ export const Fragment = Symbol.for('xin.jsx.fragment')
 /**
  * JSX transformer function (for single elements/components).
  * 
- * @param {string | symbol | function} tag HTML tag name or Fragment
+ * @param {string | symbol | Function} tag HTML tag name or Fragment
  * @param {object} props Props object (children are under props.children)
  * @param {string | undefined} key Optional key
  * @returns {XinVNode}
  */
-export function jsx(tag, props, key) {
+export function jsx(tag: string | symbol | Function, props: object, key: string | undefined): XinVNode {
   return new XinVNode(tag, props, key)
 }
 
@@ -45,7 +45,7 @@ export function jsx(tag, props, key) {
  * @param {object} thisArg - The 'this' context
  * @returns {XinVNode}
  */
-export function jsxDEV(tag, props, key, isStaticChildren, sourceDebugInfo, thisArg) {
+export function jsxDEV(tag: string | symbol | Function, props: object, key: string | undefined, isStaticChildren: boolean, sourceDebugInfo: object, thisArg: object): XinVNode {
   // Minimal implementation: Ignore dev-specific args and call the production jsx
   // You could add console.warn or checks using sourceDebugInfo here if desired
   return jsx(tag, props, key)
@@ -60,14 +60,14 @@ export function jsxDEV(tag, props, key, isStaticChildren, sourceDebugInfo, thisA
  * @param {string | undefined} key Optional key
  * @returns {XinVNode}
  */
-export function jsxs(tag, props, key) {
+export function jsxs(tag: string | symbol | Function, props: object, key: string | undefined): XinVNode {
     // In a more complex runtime, jsxs might optimize children array creation.
     // For basic rendering, it can be the same as jsx.
     return new XinVNode(tag, props, key)
 }
 
 /* Helper to check if something is one of our VNodes. */
-export function isVNode(value) {
+export function isVNode(value: XinVNode | Record<string, any>) {
   return value instanceof XinVNode || (typeof value === 'object' && value !== null && value.type === VNODE_TYPE)
 }
 
@@ -78,11 +78,13 @@ const escape_map = {
   '>': '&gt;',
   '"': '&quot;',
   "'": '&#39;',
-}
+} as const
 const escape_regex = /[&<>"']/g
 
-function escapeHtml(str) {
-  return String(str).replace(escape_regex, (char) => escape_map[char])
+type EscapeMapKeys = keyof typeof escape_map
+
+function escapeHtml(str: string | number): string {
+  return String(str).replace(escape_regex, (char: string) => escape_map[char as EscapeMapKeys])
 }
 
 const VOID_ELEMENTS = new Set([
@@ -96,7 +98,7 @@ const VOID_ELEMENTS = new Set([
  * @param {any} node The node/value to render.
  * @returns {Promise<string>} The rendered HTML string.
  */
-export const renderToString = async (node) => {
+export const renderToString = async (node: any): Promise<string> => {
   if (node === null || node === undefined || typeof node === 'boolean')
     return ''
 

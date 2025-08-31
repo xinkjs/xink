@@ -1,19 +1,13 @@
-/** @import { Cookie, Cookies, ResolveEvent, StandardSchemaV1 } from '../../types.js' */
-/** @import { CookieParseOptions, CookieSerializeOptions } from 'cookie' */
-
-import { parse, serialize } from 'cookie'
+import { parse, serialize, type ParseOptions, type SerializeOptions } from 'cookie'
 import { inferObjectValueTypes, isContentType } from './utils.js'
 import { DISALLOWED_METHODS } from '../constants.js'
 import { StandardSchemaError, json, text, html } from './helpers.js'
 import { isVNode, renderToString } from "./jsx.js"
+import type { Cookie, Cookies, ResolveEvent, StandardSchemaV1 } from '../../types.js'
+import type { HandlerMethod, HookMethod, MaybePromise } from '../../internal-types.js'
 
 /* ATTR: SvelteKit */
-/**
- * 
- * @param {Headers} headers 
- * @param {Cookie[]} cookies 
- */
-export const addCookiesToHeaders = (headers, cookies) => {
+export const addCookiesToHeaders = (headers: Headers, cookies: Cookie[]) => {
   for (const new_cookie of cookies) {
     const { name, value, options } = new_cookie
 
@@ -22,12 +16,7 @@ export const addCookiesToHeaders = (headers, cookies) => {
 }
 
 /* ATTR: SvelteKit */
-/**
- * 
- * @param {Request} request 
- * @param {URL} url
- */
-export const getCookies = (request, url) => {
+export const getCookies = (request: Request, url: URL) => {
   const header = request.headers.get('cookie') ?? ''
   const localhost = new Set(['localhost', '127.0.0.1', '::1'])
   const is_local = localhost.has(url.hostname)
@@ -37,36 +26,20 @@ export const getCookies = (request, url) => {
     path: '/',
     sameSite: 'lax',
     secure: is_local && url.protocol === 'http:' ? false : true
-  }
+  } as const
 
-  /** @type {Record<string, Cookie>} */
-  const new_cookies = {}
-
-  /**
-   * @type {Cookies}
-   */
-  const cookies = {
-    /**
-     * 
-     * @param {string} name 
-     * @param {CookieSerializeOptions} options 
-     */
-    delete(name, options) {
+  const new_cookies: Record<string, Cookie> = {}
+  const cookies: Cookies = {
+    delete(name: string, options?: SerializeOptions) {
       cookies.set(name, '', { ...options, maxAge: 0 })
     },
-
-    /**
-     * 
-     * @param {string} name 
-     * @param {CookieParseOptions} [options] 
-     */
-    get(name, options) {
+    get(name: string, options?: ParseOptions) {
       const c = new_cookies[name]
 
       if (
         c &&
-        domainMatches(url.hostname, c.options.domain) &&
-        pathMatches(url.pathname, c.options.path)
+        domainMatches(url.hostname, c.options.domain || '') &&
+        pathMatches(url.pathname, c.options.path || '')
       ) {
         return c.value
       }
@@ -77,34 +50,22 @@ export const getCookies = (request, url) => {
 
       return cookie
     },
-
-    /**
-     * 
-     * @param {CookieParseOptions} [options]
-     */
-    getAll(options) {
+    getAll(options?: ParseOptions) {
       const decoder = options?.decode || decodeURIComponent
       const cookies = parse(header, { decode: decoder })
 
       for (const c of Object.values(new_cookies)) {
         if (
-          domainMatches(url.hostname, c.options.domain) &&
-          pathMatches(url.pathname, c.options.path)
+          domainMatches(url.hostname, c.options.domain || '') &&
+          pathMatches(url.pathname, c.options.path || '')
         ) {
           cookies[c.name] = c.value
         }
       }
 
-      return Object.entries(cookies).map(([name, value]) => ({ name, value }))
+      return Object.entries(cookies).map(([name, value]) => ({ name, value: value || '' }))
     },
-
-    /**
-     * 
-     * @param {string} name 
-     * @param {string} value 
-     * @param {CookieSerializeOptions} options 
-     */
-    set(name, value, options) {
+    set(name: string, value: string, options: SerializeOptions) {
       setInternal(name, value, { ...defaults, ...options })
     }
   }
@@ -114,7 +75,7 @@ export const getCookies = (request, url) => {
    * @param {string} hostname 
    * @param {string} matcher 
    */
-  function domainMatches(hostname, matcher) {
+  function domainMatches(hostname: string, matcher: string) {
     if (!matcher) return true
 
     /**
@@ -134,7 +95,7 @@ export const getCookies = (request, url) => {
    * @param {string} path 
    * @param {string} matcher 
    */
-  function pathMatches(path, matcher) {
+  function pathMatches(path: string, matcher: string) {
     /**
      * Normalize the matcher path by removing any trailing slash.
      */
@@ -147,7 +108,7 @@ export const getCookies = (request, url) => {
     return path.startsWith(normalized + '/')
   }
 
-  function setInternal(name, value, options) {
+  function setInternal(name: string, value: string, options: SerializeOptions) {
     const path = options.path;
 
     // if (!options.domain || options.domain === url.hostname) {
@@ -165,7 +126,7 @@ export const getCookies = (request, url) => {
  * @param {Request} request 
  * @returns 
  */
-export const isFormContentType = (request) => {
+export const isFormContentType = (request: Request) => {
   return isContentType(
     request,
     'application/x-www-form-urlencoded',
@@ -181,9 +142,9 @@ export const isFormContentType = (request) => {
  * @param {string} accept
  * @param {string[]} types
  */
-export const negotiate = (accept, types) => {
+export const negotiate = (accept: string, types: string[]) => {
   /** @type {Array<{ type: string, subtype: string, q: number, i: number }>} */
-  const parts = []
+  const parts: Array<{ type: string; subtype: string; q: number; i: number }> = []
 
   accept.split(',').forEach((str, i) => {
     const match = /([^/ \t]+)\/([^; \t]+)[ \t]*(?:;[ \t]*q=([0-9.]+))?/.exec(str);
@@ -236,7 +197,7 @@ export const negotiate = (accept, types) => {
  * @param {number} status
  * @param {string} location
  */
-export const redirectResponse = (status, location) => {
+export const redirectResponse = (status: number, location: string) => {
   const response = new Response(undefined, {
     status,
     headers: { location }
@@ -244,7 +205,7 @@ export const redirectResponse = (status, location) => {
   return response
 }
 
-const processHandler = async (result) => {
+const processHandler = async (result: Response) => {
   if (isVNode(result)) {
     // Handle JSX VNode result
     return html(await renderToString(result))
@@ -266,7 +227,7 @@ const processHandler = async (result) => {
  * 
  * @type {ResolveEvent}
  */
-export const resolve = async (event) => {
+export const resolve: ResolveEvent = async (event) => {
   /**
    * This check needs to stay here, so that any middleware
    * can potentially handle a requested endpoint before returning a 404.
@@ -278,7 +239,7 @@ export const resolve = async (event) => {
     } 
   })
 
-  const handler = event.store.getHandler(event.request.method) ?? event.store.getHandler('default')
+  const handler = event.store.getHandler(event.request.method as HandlerMethod) ?? event.store.getHandler('FALLBACK')
 
   if (!handler) {
     const methods = event.store.getMethods().filter((m) => !DISALLOWED_METHODS.has(m)).join(', ')
@@ -300,7 +261,7 @@ export const resolve = async (event) => {
    * @param {StandardSchemaV1.InferInput<T>} input 
    * @returns {Promise<StandardSchemaV1.InferOutput<T>>}
    */
-  const validator = async (schema, input) => {
+  const validator = async <T extends StandardSchemaV1>(schema: T, input: StandardSchemaV1.InferInput<T>): Promise<StandardSchemaV1.InferOutput<T>> => {
     let result = schema['~standard'].validate(input)
     if (result instanceof Promise) result = await result
 
@@ -318,7 +279,7 @@ export const resolve = async (event) => {
     return result.value
   }
 
-  const validation = async (schemas) => {
+  const validation = async (schemas: Record<string, any>[]) => {
     const content_type = event.request.headers.get('Content-Type')
 
     for (let i = 0; i < schemas.length; i++) {
@@ -339,7 +300,7 @@ export const resolve = async (event) => {
       if (schema_type === 'form') {
         const clone = event.request.clone()
         const form_body = await clone.formData()
-        const form_values = {}
+        const form_values: Record<string, any> = {}
 
         for (const p of form_body.entries()) {
           form_values[p[0]] = p[1]
@@ -362,7 +323,7 @@ export const resolve = async (event) => {
       
       if (schema_type === 'query') {
         const query = event.url.searchParams
-        const query_obj = {}
+        const query_obj: Record<string, any> = {}
 
         for (let [key, value] of query) {
           query_obj[key] = value
@@ -378,8 +339,8 @@ export const resolve = async (event) => {
   }
 
   const method = event.request.method
-  const hooks = event.store.getHooks(method) ?? null
-  const schemas = event.store.getSchema(method)
+  const hooks = event.store.getHooks(method as HookMethod) ?? null
+  const schemas = event.store.getSchema(method as HandlerMethod)
 
   if (schemas) await validation(Object.entries(schemas))
 
@@ -398,5 +359,5 @@ export const resolve = async (event) => {
     }
   }
 
-  return await processHandler(await handler(event))
+  return await processHandler(await handler(event) as Response)
 }

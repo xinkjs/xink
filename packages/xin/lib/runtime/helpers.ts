@@ -1,10 +1,5 @@
 export class StandardSchemaError extends Error {
-  /**
-   * 
-   * @param {string} [message] 
-   * @param {ErrorOptions} [options] 
-   */
-  constructor(message, options) {
+  constructor(message: string, options?: ErrorOptions) {
     super(message, options)
     /** @type {string} */
     this.name = 'StandardSchemaError'
@@ -19,7 +14,7 @@ const encoder = new TextEncoder()
  * @param {ResponseInit} [init] 
  * @returns {Response}
  */
-export const html = (data, init) => {
+export const html = (data: any, init?: ResponseInit): Response => {
   const headers = new Headers(init?.headers)
 
   if (!headers.has('content-length'))
@@ -37,7 +32,7 @@ export const html = (data, init) => {
  * @param {ResponseInit} [init] 
  * @returns {Response}
  */
-export const json = (data, init) => {
+export const json = (data: any, init?: ResponseInit): Response => {
   const body = JSON.stringify(data)
   const headers = new Headers(init?.headers)
 
@@ -52,11 +47,13 @@ export const json = (data, init) => {
 
 /* ATTR: SvelteKit */
 export class Redirect {
+  status
+  location
 	/**
 	 * @param {300 | 301 | 302 | 303 | 304 | 305 | 306 | 307 | 308} status
 	 * @param {string} location
 	 */
-	constructor(status, location) {
+	constructor(status: 300 | 301 | 302 | 303 | 304 | 305 | 306 | 307 | 308, location: string) {
 		this.status = status
 		this.location = location
 	}
@@ -70,7 +67,7 @@ export class Redirect {
  * @throws {Error} If the provided status is invalid.
  * @return {never}
  */
-export function redirect(status, location) {
+export function redirect(status: 300 | 301 | 302 | 303 | 304 | 305 | 306 | 307 | 308, location: string | URL): never {
 	if ((isNaN(status) || status < 300 || status > 308)) {
 		throw new Error('Invalid status code')
 	}
@@ -87,7 +84,7 @@ export function redirect(status, location) {
  * @param {ResponseInit} [init] 
  * @returns {Response}
  */
-export const text = (data, init) => {
+export const text = (data: string, init?: ResponseInit): Response => {
   const body = encoder.encode(data)
   const headers = new Headers(init?.headers)
 

@@ -1,15 +1,12 @@
 /** @import { XinConfig } from '../types.js' */
 
+import type { XinConfig } from '../types.js'
 import { CONFIG } from './constants.js'
 
 /**
  * Generic utility which merges two objects.
- * 
- * @param {any} current
- * @param {any} updates
- * @returns {any}
  */
-export const mergeObjects = (current, updates) => {
+export const mergeObjects = (current: any, updates: any): any => {
   if (!current || !updates)
     throw new Error("Both 'current' and 'updates' must be passed-in to merge()")
   if (typeof current !== 'object' || typeof updates !== 'object')
@@ -42,12 +39,8 @@ export const mergeObjects = (current, updates) => {
 
 /**
  * Merge a user config with the default config.
- * 
- * @param {XinConfig} default_config
- * @param {Partial<XinConfig>} config
- * @returns {XinConfig}
  */
-export const mergeConfig = (default_config, config) => {
+export const mergeConfig = (default_config: XinConfig, config: Partial<XinConfig>): XinConfig => {
   /**
    * We need to make a deep copy of `dconfig`,
    * otherwise we end up altering the original `CONFIG` because `dconfig` is a reference to it.
@@ -61,7 +54,7 @@ export const mergeConfig = (default_config, config) => {
  * @param {Partial<XinConfig>} config
  * @returns {XinConfig}
  */
-export const validateConfig = (config) => {
+export const validateConfig = (config: Partial<XinConfig>): XinConfig => {
   if (config === undefined || typeof config !== 'object') throw 'Config must be an object.'
 
   /* config empty? */
