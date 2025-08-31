@@ -55,10 +55,13 @@ export class Xink extends Xin {
         const store = this.route(derived_path, openapi)
 
         if (hooks && typeof hooks === 'object') {
-          for (const [name, value] in hooks) {
-            if (name !== 'SCHEMAS') // is not a developer hook
-              store.hook(value)
+          let valid_hooks = []
+          for (const [name, value] of Object.entries(hooks)) {
+            if (name !== 'SCHEMAS')
+              valid_hooks.push(value)
           }
+          if (valid_hooks.length > 0)
+            store.hook(...valid_hooks)
         }
 
         /* Register HTTP handlers. */
