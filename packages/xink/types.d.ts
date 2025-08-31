@@ -22,7 +22,7 @@ import type { XinkVNode, Fragment } from './lib/runtime/jsx'
 import * as CSS from 'csstype'
 import type { ApiReferenceConfiguration } from '@scalar/types'
 
-export type { CloudflareContext, CloudflarePlatform, Cookie, Cookies, PlatformContext, RequestEvent }
+export type { CloudflareContext, CloudflarePlatform, Cookie, Cookies, Handle, PlatformContext, RequestEvent }
 export { html, json, redirect, text, StandardSchemaError }
 
 export interface BunServeOptions {}
