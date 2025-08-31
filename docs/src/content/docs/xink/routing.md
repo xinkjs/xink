@@ -8,8 +8,8 @@ Create your routes in `src/routes`. xink is a directory-based router where endpo
 src/
 └── routes/
     ├── auth/
-    │   └── route.ts creates an /auth route
-    └── route.ts creates a / route
+    │   └── route.ts  //creates an /auth route
+    └── route.ts  //creates a / route
 ```
 
 ## HTTP exports
@@ -102,12 +102,10 @@ Essentially a wildcard, but must be at the end of a route.
 
 `/hello/[...rest]`
 
-Because of the way the xin URL router works, the rest segment's param is accessed with `'*'`.
-
 ```ts
 /* src/routes/hello/[...rest]/route.js */
 
 export const GET = ({ params }) => {
-  return `Hello ${params['*']}!` // not `params.rest`
+  return `Hello ${params.rest}!`
 }
 ```

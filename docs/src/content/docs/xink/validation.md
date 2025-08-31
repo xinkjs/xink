@@ -6,14 +6,14 @@ Validate incoming route data for types `form`, `json`, route `params`, or `query
 
 - Each of the above are available as an object within `event.valid`. 
 - Run before all other hooks; so, validated data is available in your developer-defined hooks.
-- You can validate using either validator functions or Standard Schema.
+- Requires a Standard Schema validation library.
 
 Any "string" values within `form`, `params`, and `query`, are automatically inferred to their intended type. For example:
 - "42" -> 42 (number)
 - "false" -> false (boolean)
 - "null" -> null (null)
 
-## Using Standard Schema
+## Standard Schema
 
 `SCHEMAS` is a built-in `HOOKS` object. For each route handler and data type, you can define a schema to validate data. You can only use SCHEMAS when using a validation library that is [Standard Schema](https://standardschema.dev) compliant.
 
@@ -50,49 +50,6 @@ export const POST = async (event) => {
 }
 ```
 
-## Using Validators
-
-`VALIDATORS` is a built-in `HOOKS` object. For each route handler and data type, you can define a function that returns an object of validated data. 
-
-In the Zod example below, only json data which matches your schema, will be available in `event.valid.json`; in this case, for POST requests.
-
-```js
-/* src/routes/route.js */
-import { z } from 'zod'
-
-const VALIDATORS = {
-  post: {
-    json: (z.object({
-      hello: z.string(),
-      goodbye: z.number()
-    })).parse // notice we pass a parse function, not just the schema.
-  }
-}
-
-export const HOOKS = {
-  VALIDATORS
-}
-
-/**
- * Assuming the following json is passed in:
- * {
- *    hello: 'world',
- *    goodbye: 42,
- *    cya: 'later'
- * }
- */
-export const POST = async (event) => {
-  console.log(event.valid.json)
-  // { hello: 'world', goodbye: 42 } }
-
-  /* Do something and return a response. */
-}
-```
-
-Instead of using a validation library, you can also define a normal function with your own validation logic, then return the validated data as an object.
-
-> We clone the request during validation. This allows you to access the original request body within route handlers, if desired.
-
 ## Types
 
 You can pass your Request types in two different ways: `RouteHandler` or `RequestEvent`. This gives you type checking and intellisense in your endpoint handlers.
@@ -109,7 +66,7 @@ type PostReqTypes = {
   json: v.InferInput<typeof post_json_schema>;
 }
 type PostResTypes = {
-  message: PostReqTypes['json']
+  message: PostReqTypes['json'];
 }
 
 const SCHEMAS = {

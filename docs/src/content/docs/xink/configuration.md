@@ -15,7 +15,6 @@ You can set the below options in the plugin's configuration.
 ```ts
 type XinkConfig = {
   adapter: (options?: ServeOptions) => XinkAdapter;
-  check_origin?: boolean;
   entrypoint?: string; 
   out_dir?: string;
   serve_options?: { [key: string]: any; }; // for Bun and Deno users (see next section)
@@ -98,9 +97,24 @@ If you'd like to set a basepath for your entire API, you can do so in your proje
 /* e.g. index.ts */
 import { Xink } from "@xinkjs/xink"
 
-const api = new Xink()
+const api = new Xink({
+  base_path: "/api"
+})
 
-api.path('/api')
+export default api
+```
+
+## Check Origin
+
+You can tell Xink to not check origins for POST requests. The default is `true`.
+
+```ts
+/* e.g. index.ts */
+import { Xink } from "@xinkjs/xink"
+
+const api = new Xink({
+  check_origin: false
+})
 
 export default api
 ```

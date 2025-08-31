@@ -39,7 +39,7 @@ api.openapi({
   path: "/reference", 
   data: { 
     info: {
-      title: "Xink API",
+      title: "My API",
       version: "0.0.0"
     }
   }
@@ -52,7 +52,7 @@ Define your `OPENAPI` export within each route file. You can use any OpenAPI spe
 
 ```js
 /* src/routes/route.ts */
-import * as v from 'valibot'
+import * as v from "valibot"
 import { toJsonSchema } from "@valibot/to-json-schema"
 
 const post_json_schema = v.object({
