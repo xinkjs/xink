@@ -13,9 +13,7 @@ Any "string" values within `form`, `params`, and `query`, are automatically infe
 - "false" -> false (boolean)
 - "null" -> null (null)
 
-## Standard Schema
-
-`SCHEMAS` is a built-in `HOOKS` object. For each route handler and data type, you can define a schema to validate data. You can only use SCHEMAS when using a validation library that is [Standard Schema](https://standardschema.dev) compliant.
+Pass your schema object as the first argument to your handler. Note that you need to define which data type each schema is for.
 
 ```js
 import * as v from "valibot"
@@ -74,6 +72,6 @@ api.route("/")
     // Intellisense for "hello" and "goodbye" for event.valid.json.
     const valid_json = event.valid.json
 
-    event.json({}) // Intellisense that you should be returning `hello` as a string and `goodbye` as a number.
+    event.json({}) // Intellisense of the data shape you should be returning.
   })
 ```

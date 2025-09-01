@@ -4,7 +4,7 @@ title: Error Handling
 
 ## Not Found
 
-Xin provides a default not found response, but you can custom it.
+Xin provides a default not found response, but you can customize it.
 
 ```ts
 import { Xin } from "@xinkjs/xin"

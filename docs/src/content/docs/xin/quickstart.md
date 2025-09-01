@@ -14,7 +14,8 @@ import { Xin } from "@xinkjs/xin"
 
 const api = new Xin()
 
-api.route("/") // chainable
+api.route("/")
+  // methods must be chained from .route() and then each other
   .get(() => new Response("Hello from Xin!"))
   .post(() => new Response("Hello from post /"))
 

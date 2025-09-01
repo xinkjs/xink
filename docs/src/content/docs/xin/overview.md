@@ -17,7 +17,7 @@ Features include support for:
 - Scalar-powered API docs
 - Typed client generation
 
-## Middleware vs Hooks
+## Middleware vs Hooks vs Handlers
 
 xin's philosophy is that middleware, hooks, and handlers are different.
 
@@ -26,9 +26,9 @@ Middleware:
 - can return a response
 
 Hooks:
-- only have access to a request
+- have access to a specific route's request
 - cannot return a response
 
 Handlers:
-- only have access to a request
-- can return a response
+- have access to a specific route's request
+- must return a response
