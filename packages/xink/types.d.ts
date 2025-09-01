@@ -9,11 +9,12 @@ import {
   type NotFoundHandler,
   type PlatformContext,
   type RequestEvent,
+  type RouteHandler,
   type SchemaDefinition,
   type Xin,
   type XinConfig,
   html, json, redirect, text, StandardSchemaError
-} from '../xin/types.d.ts'
+} from '@xinkjs/xin'
 
 import type { SerializeOptions, ParseOptions } from 'cookie'
 import type { Plugin } from 'vite'
@@ -22,7 +23,7 @@ import type { XinkVNode, Fragment } from './lib/runtime/jsx'
 import * as CSS from 'csstype'
 import type { ApiReferenceConfiguration } from '@scalar/types'
 
-export type { CloudflareContext, CloudflarePlatform, Cookie, Cookies, Handle, PlatformContext, RequestEvent }
+export type { CloudflareContext, CloudflarePlatform, Cookie, Cookies, Handle, PlatformContext, RequestEvent, RouteHandler }
 export { html, json, redirect, text, StandardSchemaError }
 
 export interface BunServeOptions {}

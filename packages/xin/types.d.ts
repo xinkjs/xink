@@ -1,7 +1,7 @@
 import type { Xi, ValidData, XiConfig } from "@xinkjs/xi"
 import type { SerializeOptions, ParseOptions } from 'cookie'
 import type { ApiReferenceConfiguration } from '@scalar/types'
-import type { Handler, Hook, Store, SchemaDefinition, StoreResult, MaybePromise, ParsePath } from "./internal-types.ts"
+import type { Handler, Hook, Store, SchemaDefinition, StoreResult, MaybePromise, ParsePath, ResponseT } from "./internal-types.ts"
 
 export interface XinConfig extends XiConfig {
   check_origin: boolean;
@@ -26,7 +26,7 @@ export interface RequestEvent<ReqSchema extends SchemaDefinition = SchemaDefinit
   cookies: Cookies;
   headers: Omit<Headers, 'toJSON' | 'count' | 'getAll'>;
   html: typeof html;
-  json: (data: ResSchema, init?: ResponseInit) => Response;
+  json: (data: ResSchema, init?: ResponseInit) => ResponseT<ResSchema>;
   locals: Api.Locals;
   params: ParsePath<Path>;
   platform: Platform;
@@ -39,6 +39,7 @@ export interface RequestEvent<ReqSchema extends SchemaDefinition = SchemaDefinit
   valid: ReqSchema;
 }
 
+export type RouteHandler<ReqSchema extends SchemaDefinition = SchemaDefinition, ResSchema = unknown> = (event: RequestEvent<ReqSchema, ResSchema>) => MaybePromise<unknown extends ResSchema ? Response : ResponseT<ResSchema>>;
 export type ErrorHandler = (error: unknown, event?: RequestEvent) => MaybePromise<Response>;
 export type NotFoundHandler = (event?: RequestEvent) => MaybePromise<Response>;
 export type Handle = (event: RequestEvent, resolve: ResolveEvent) => MaybePromise<Response>;

@@ -32,13 +32,8 @@ export type SchemaDefinition = {
   query?: Record<string, any>;
 }
 
-export type Response<T = unknown> = {
-  body?: T,
-  init?: { 
-    status?: number;
-    statusText?: string;
-    headers?: Record<string, any>;
-  }
+export type ResponseT<T> = Response & {
+  readonly __resSchema: T
 }
 
 export type BasicRouteInfo = { pattern: string; methods: string[], store: Store }[]
@@ -46,9 +41,9 @@ export type MaybePromise<T> = T | Promise<T>;
 
 export type Handler<
   ReqSchema extends SchemaDefinition = SchemaDefinition,
-  ResSchema extends unknown = unknown,
+  ResSchema = unknown,
   Path extends string = string, 
-> = (event: RequestEvent<ReqSchema, ResSchema, Path>) => MaybePromise<ResSchema extends unknown ? Response<any> : Response<ResSchema>>;
+> = (event: RequestEvent<ReqSchema, ResSchema, Path>) => MaybePromise<unknown extends ResSchema ? Response : ResponseT<ResSchema>>;
 export type Hook<
   ReqSchema extends SchemaDefinition = SchemaDefinition,
   ResSchema extends unknown = unknown,
@@ -74,8 +69,8 @@ export declare class Store<Path extends string = string, ReqSchema extends Schem
    */
   hook(...hooks: Hook<ReqSchema, ResSchema, Path>[]): Store<Path, ReqSchema, ResSchema>;
 
-  get<ReqSchema extends SchemaDefinition = SchemaDefinition, ResSchema = unknown>(schema: SchemaDefinition, handler: Handler<ReqSchema, ResSchema, Path>, ...hooks: Hook<ReqSchema, ResSchema, Path>[]): Store<Path, ReqSchema, ResSchema>;
-  get<ReqSchema extends SchemaDefinition = SchemaDefinition, ResSchema = unknown>(handler: Handler<ReqSchema, ResSchema, Path>, ...hooks: Hook<ReqSchema, ResSchema, Path>[]): Store<Path, ReqSchema, ResSchema>;
+  get<ReqSchema extends SchemaDefinition = SchemaDefinition, ResSchema extends unknown = unknown>(schema: SchemaDefinition, handler: Handler<ReqSchema, ResSchema, Path>, ...hooks: Hook<ReqSchema, ResSchema, Path>[]): Store<Path, ReqSchema, ResSchema>;
+  get<ReqSchema extends SchemaDefinition = SchemaDefinition, ResSchema extends unknown = unknown>(handler: Handler<ReqSchema, ResSchema, Path>, ...hooks: Hook<ReqSchema, ResSchema, Path>[]): Store<Path, ReqSchema, ResSchema>;
   post<ReqSchema extends SchemaDefinition = SchemaDefinition, ResSchema = unknown>(schema: SchemaDefinition, handler: Handler<ReqSchema, ResSchema, Path>, ...hooks: Hook<ReqSchema, ResSchema, Path>[]): Store<Path, ReqSchema, ResSchema>;
   post<ReqSchema extends SchemaDefinition = SchemaDefinition, ResSchema = unknown>(handler: Handler<ReqSchema, ResSchema, Path>, ...hooks: Hook<ReqSchema, ResSchema, Path>[]): Store<Path, ReqSchema, ResSchema>;
   put<ReqSchema extends SchemaDefinition = SchemaDefinition, ResSchema = unknown>(schema: SchemaDefinition, handler: Handler<ReqSchema, ResSchema, Path>, ...hooks: Hook<ReqSchema, ResSchema, Path>[]): Store<Path, ReqSchema, ResSchema>;
