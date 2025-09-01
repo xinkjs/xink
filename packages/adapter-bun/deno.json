@@ -1,0 +1,7 @@
+{
+  "name": "@xinkjs/adapter-bun",
+  "version": "0.7.0",
+  "exports": {
+    ".": "./index.js"
+  }
+}

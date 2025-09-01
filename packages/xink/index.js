@@ -77,9 +77,14 @@ export function xink(xink_config = {}) {
   const middleware_dir = validated_config.middleware_dir
   const error_file_path = join('src', 'error')
   const user_tsconfig_paths = getTsconfigPaths(process.cwd())
+  const adapter_name = validated_config.adapter().name
 
   let virtual_manifest_content = ''
   let is_build = false
+
+  const ADAPTERS_WITH_VITE_PLUGIN = new Set([
+    '@xinkjs/adapter-cloudflare', '@xinkjs/adapter-deno'
+  ])
 
   return {
     name: 'vite-plugin-xink',
@@ -230,10 +235,11 @@ export function xink(xink_config = {}) {
       }
 
       return {
-        define: {
-          XINK_CHECK_ORIGIN: validated_config.check_origin,
-        },
-        //ssr: { noExternal: ['@xinkjs/xink'] }
+        environments: {
+          ssr: {
+            resolve: { noExternal: ['@xinkjs/xink'] }
+          }
+        }
       }
     },
     async configureServer(server) {
@@ -247,42 +253,46 @@ export function xink(xink_config = {}) {
         throw error
       }
 
-      server.middlewares.use(async (req, res) => {
-        try {
+      if (!ADAPTERS_WITH_VITE_PLUGIN.has(adapter_name)) {
+        server.middlewares.use(async (req, res) => {
+          try {
+            /** @type {{ default: { fetch: (request: Request) => Promise<Response> }}} */
+            const api = await server.ssrLoadModule(entrypoint_path)
+            const base = `${
+              server.config.server.https ? 'https' : 'http'
+            }://${req.headers[':authority'] || req.headers.host}`
+            const request = await getRequest(base, req)
+            const response = await api.default.fetch(request)
+            setResponse(res, response)
+          } catch (error) {
+            console.error('[Xink] Error processing request:', error)
+            res.statusCode = 500
+            res.end('Internal Server Error')
+            server.ssrFixStacktrace(error)
+          }
+        })
+      }
+    },
+
+    async configurePreviewServer(server) {
+      if (!ADAPTERS_WITH_VITE_PLUGIN.has(adapter_name)) {
+        server.middlewares.use(async (req, res) => {
           /** @type {{ default: { fetch: (request: Request) => Promise<Response> }}} */
-          const api = await server.ssrLoadModule(entrypoint_path)
+          const api = await import(
+            /* @vite-ignore */ join(
+              cwd,
+              validated_config.out_dir,
+              `${entrypoint.split('.')[0]}.js`,
+            )
+          )
           const base = `${
             server.config.server.https ? 'https' : 'http'
           }://${req.headers[':authority'] || req.headers.host}`
           const request = await getRequest(base, req)
           const response = await api.default.fetch(request)
           setResponse(res, response)
-        } catch (error) {
-          console.error('[Xink] Error processing request:', error)
-          res.statusCode = 500
-          res.end('Internal Server Error')
-          server.ssrFixStacktrace(error)
-        }
-      })
-    },
-
-    async configurePreviewServer(server) {
-      server.middlewares.use(async (req, res) => {
-        /** @type {{ default: { fetch: (request: Request) => Promise<Response> }}} */
-        const api = await import(
-          /* @vite-ignore */ join(
-            cwd,
-            validated_config.out_dir,
-            `${entrypoint.split('.')[0]}.js`,
-          )
-        )
-        const base = `${
-          server.config.server.https ? 'https' : 'http'
-        }://${req.headers[':authority'] || req.headers.host}`
-        const request = await getRequest(base, req)
-        const response = await api.default.fetch(request)
-        setResponse(res, response)
-      })
+        })
+      }
     },
 
     async hotUpdate(context) {

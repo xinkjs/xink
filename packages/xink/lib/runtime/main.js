@@ -1,7 +1,9 @@
 /** @import { Handle, MaybePromise, RequestEvent } from '../../types.js' */
 
-/* ATTR: SvelteKit */
 /**
+ * Resolve middleware in sequence
+ * 
+ * Attribution: SvelteKit
  * 
  * @param {...Handle} handlers The chain of `handle` functions
  * @returns {Handle}

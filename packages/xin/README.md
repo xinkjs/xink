@@ -2,7 +2,7 @@
 
 An enhanced javascript URL router.
 
-Like it's forked predecessor, xin is a building block on which you can create other router features. Its main purpose is to register and match routes. We've enhanced it by adding helper functions to extend the `matcher` route functionality and set/get global middleware.
+xin's main purpose is to register and match routes. We've enhanced it by adding helper functions to extend the `matcher` route functionality.
 
 > xin (zen) is a shortened spelling of our API router [xink](https://github.com/xinkjs/xink) (zinc). It also resembles [a Chinese word](https://en.wikipedia.org/wiki/Xin_(heart-mind)) that's translated as "heart-mind". This is fitting, since xin is the heart of the xink router.
 

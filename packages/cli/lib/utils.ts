@@ -16,22 +16,29 @@ export const createXink = (project_path: string, runtime: string, language: stri
         writeFileSync(join(project_path, `${type}config.json`),
             `{
     "compilerOptions": {
+        "lib": ["ESNext"],
+        "target": "ESNext",
+        "module": "ESNext",
+        "moduleDetection": "force",
+        "jsx": "react-jsx",
+        "jsxImportSource": "@xinkjs/xink",
         "allowJs": true,
+        "moduleResolution": "bundler",
+        "allowImportingTsExtensions": true,
+        "verbatimModuleSyntax": true,
+        "noEmit": true,
+        "strict": true,
+        "skipLibCheck": true,
+        "noFallthroughCasesInSwitch": true,
+        "noUncheckedIndexedAccess": true,
+        "noUnusedLocals": false,
+        "noUnusedParameters": false,
+        "noPropertyAccessFromIndexSignature": false,
         "checkJs": true,
         "esModuleInterop": true,
         "forceConsistentCasingInFileNames": true,
         "isolatedModules": true,
-        "moduleResolution": "bundler",
-        "module": "esnext",
-        "noEmit": true,
-        "resolveJsonModule": true,
-        "skipLibCheck": true,
-        "sourceMap": true,
-        "strict": true,
-        "target": "esnext",
-        "verbatimModuleSyntax": true,
-        "jsx": "react-jsx",
-        "jsxImportSource": "@xinkjs/xink"
+        "resolveJsonModule": true
     },
     "include": [
         "vite.config.js",
@@ -63,15 +70,17 @@ export default api
     const plugins = []
     if (runtime === 'deno')
         plugins.push('deno()')
+    if (runtime === 'cloudflare')
+        plugins.push('cloudflare({ viteEnvironment: { name: "ssr" } })')
 
-    plugins.push('xink({ adapter, })')
+    plugins.push('xink({ adapter })')
 
     /* Create Vite config. */
     writeFileSync(join(project_path, 'vite.config.js'),
         `import { xink } from '@xinkjs/xink'
 import { defineConfig } from 'vite'
 import adapter from '@xinkjs/adapter-${runtime}'
-${runtime === 'deno' ? `import deno from '@deno/vite-plugin'` : ''}
+${runtime === 'deno' ? `import deno from '@deno/vite-plugin'` : runtime === 'cloudflare' ? `import { cloudflare } from '@cloudflare/vite-plugin'` : ''}
 
 export default defineConfig(function () {
     return {
@@ -91,10 +100,10 @@ export default defineConfig(function () {
  * https://developers.cloudflare.com/workers/wrangler/configuration/
  */
 {
-	"$schema": "node_modules/wrangler/config-schema.json",
 	"name": "~TODO~",
-	"main": "build/_worker.js",
+	"main": "./index.ts",
 	"compatibility_date": "2025-04-28",
+    "compatibility_flags": [ "nodejs_compat" ],
 	"observability": {
 		"enabled": true
 	}

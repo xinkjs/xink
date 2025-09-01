@@ -41,9 +41,6 @@ export const validateConfig = (config) => {
   if (config.out_dir && typeof config.out_dir !== 'string')
     throw new Error(`out_dir must be a string.`)
 
-  if (config.check_origin && typeof config.check_origin !== 'boolean')
-    throw new Error(`check_origin must be a boolean, but "${config.check_origin}" is a ${typeof config.check_origin}.`)
-
   if (config.entrypoint && !/\w+\.[js|ts]/.test(config.entrypoint))
     throw new Error(`entrypoint must be a filename that ends with .js or .ts, but found "${config.entrypoint}".`)
 

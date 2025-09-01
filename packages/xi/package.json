@@ -1,0 +1,46 @@
+{
+  "name": "@xinkjs/xi",
+  "version": "1.0.0",
+  "description": "A javascript URL router",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./index.d.ts"
+    }
+  },
+  "scripts": {
+    "test": "vitest",
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "contributors": [
+    {
+      "name": "Jason Creviston",
+      "email": "the@j4w8n.com",
+      "url": "https://github.com/j4w8n"
+    }
+  ],
+  "files": [
+    "dist",
+    "index.d.ts"
+  ],
+  "keywords": [
+    "xi",
+    "javascript",
+    "router",
+    "url"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xinkjs/xink.git",
+    "directory": "packages/xi"
+  },
+  "bugs": {
+    "url": "https://github.com/xinkjs/xink/issues"
+  },
+  "homepage": "https://github.com/xinkjs/xink/tree/main/packages/xi#readme",
+  "license": "MIT-0"
+}

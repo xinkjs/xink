@@ -7,7 +7,6 @@ import type { XinkConfig } from '../types.js'
 
 const full_config = await xink({ 
   runtime: 'bun',
-  check_origin: true,
   entrypoint: 'server.ts',
   middleware_dir: 'middleware',
   out_dir: 'dist',
@@ -25,10 +24,6 @@ test('Returns Vite Plugin, with all config items set', () => {
 
 test('Catches invalid runtime', async () => {
   await expect(testConfig({ runtime: 'hello' })).rejects.toThrowError('Config runtime "hello" is invalid. Only bun, cloudflare, and deno are supported.')
-})
-
-test('Catches invalid check_origin', async () => {
-  await expect(testConfig({ runtime: 'bun', check_origin: 'false' })).rejects.toThrowError('check_origin must be a boolean, but "false" is a string.')
 })
 
 test('Catches invalid entrypoint', async () => {
