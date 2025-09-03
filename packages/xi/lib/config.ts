@@ -1,4 +1,4 @@
-import { CONFIG } from '../constants'
+import { CONFIG } from './constants'
 import type { XiConfig } from '../types'
 
 /**
