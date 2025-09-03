@@ -21,6 +21,20 @@
     // Some stricter flags (disabled by default)
     "noUnusedLocals": false,
     "noUnusedParameters": false,
-    "noPropertyAccessFromIndexSignature": false
-  }
+    "noPropertyAccessFromIndexSignature": false,
+
+    "baseUrl": ".",
+    "paths": {
+      // This tells TypeScript where to find the definitions for internal packages
+      "@xinkjs/xi": ["./packages/xi"],
+      "@xinkjs/xin": ["./packages/xin"]
+    }
+  },
+  "files": [],
+  // This tells TypeScript about the projects in the monorepo and their dependencies.
+  // It enables `tsc -b` to build in the correct order.
+  "references": [
+    { "path": "./packages/xi" },
+    { "path": "./packages/xin" }
+  ]
 }
