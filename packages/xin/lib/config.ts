@@ -1,7 +1,5 @@
-/** @import { XinConfig } from '../types.js' */
-
-import type { XinConfig } from '../types.js'
-import { CONFIG } from './constants.js'
+import type { XinConfig } from '../types'
+import { CONFIG } from './constants'
 
 /**
  * Generic utility which merges two objects.

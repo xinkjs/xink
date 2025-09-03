@@ -4,22 +4,19 @@
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "./",
-    "declaration": false,
-
-    // --- Overriding Root Config ---
-    // Your root tsconfig likely has "noEmit": true for project-wide type checking.
-    // We MUST override that here to actually create the output files.
+    "declaration": true,
+    "declarationMap": true,
+    "emitDeclarationOnly": false,
     "noEmit": false,
-    "allowImportingTsExtensions": false,
 
     // --- Module Settings for Libraries ---
     // These ensure your output is compatible with modern JavaScript environments.
     "module": "ESNext",
     "target": "ESNext",
-    "moduleResolution": "bundler" // Or "node", bundler is good for modern tools.
+    "moduleResolution": "bundler"
   },
   // Tell the compiler which files to include in the build.
-  "include": ["./index.ts", "./internal-types.ts", "./constants.ts"],
+  "include": ["./"],
   // Tell the compiler which files to ignore.
-  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts", "./index.d.ts"]
+  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts", "types.ts"]
 }

@@ -2,24 +2,24 @@
   "name": "@xinkjs/xin",
   "version": "1.0.0",
   "description": "A javascript API router",
-  "main": "./dist/index.js",
+  "main": "./dist/lib/exports/index.js",
   "type": "module",
-  "types": "types.d.ts",
+  "types": "./dist/lib/exports/index.d.ts",
   "scripts": {
     "build": "tsc"
   },
   "exports": {
     ".": {
       "import": "./dist/lib/exports/index.js",
-      "types": "./types.d.ts"
+      "types": "./dist/lib/exports/index.d.ts"
     },
     "./jsx-runtime": {
       "import": "./dist/lib/runtime/jsx.js",
-      "types": "./types.d.ts"
+      "types": "./dist/lib/runtime/jsx.d.ts"
     },
     "./jsx-dev-runtime": {
       "import": "./dist/lib/runtime/jsx.js",
-      "types": "./types.d.ts"
+      "types": "./dist/lib/runtime/jsx.d.ts"
     }
   },
   "dependencies": {
@@ -27,7 +27,11 @@
     "set-cookie-parser": "^2.7.1",
     "strip-json-comments": "^5.0.2",
     "@xinkjs/xi": "1.0.0",
-    "@scalar/types": "^0.2.7"
+    "@scalar/types": "^0.2.7",
+    "@scalar/openapi-types": "^0.3.7"
+  },
+  "devDependencies": {
+    "csstype": "^3.1.3"
   },
   "contributors": [
     {
@@ -37,8 +41,7 @@
     }
   ],
   "files": [
-    "dist",
-    "types.d.ts"
+    "dist"
   ],
   "keywords": [
     "url",
