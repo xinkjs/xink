@@ -5,21 +5,21 @@ title: Event
 `event` is basically a context object for the request.
 
 ```ts
-interface RequestEvent<ReqT extends AllowedValidatorTypes = AllowedValidatorTypes, ResT = any> {
-  context: { env: Env.Bindings, ctx: Context } | null,
+interface RequestEvent<ReqSchema extends SchemaDefinition = SchemaDefinition, ResSchema = unknown, Path extends string = string> extends BaseEvent {
   cookies: Cookies;
   headers: Omit<Headers, 'toJSON' | 'count' | 'getAll'>;
   html: typeof html;
-  json: <T extends ResT>(data: T, init?: ResponseInit) => Response;
+  json: (data: ResSchema, init?: ResponseInit) => ResponseT<ResSchema>;
   locals: Api.Locals;
-  params: Params;
+  params: ParsePath<Path>;
+  platform: Record<string, any>;
   redirect: typeof redirect;
   request: Request;
+  setHeaders: (headers: Record<string, any>) => void;
   store: Store | null;
-  setHeaders: (headers: { [key: string]: any; }) => void;
   text: typeof text;
   url: Omit<URL, 'createObjectURL' | 'revokeObjectURL' | 'canParse'>;
-  valid: ReqT;
+  valid: ReqSchema;
 }
 ```
 

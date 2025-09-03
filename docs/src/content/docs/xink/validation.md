@@ -56,7 +56,7 @@ You can pass your Request types in two different ways: `RouteHandler` or `Reques
 
 ```js
 import * as v from 'valibot'
-import type { RequestEvent, RouteHandler } from '@xinkjs/xink'
+import type { RouteHandler } from '@xinkjs/xink'
 
 const post_json_schema = v.object({
   hello: v.string(),
@@ -79,16 +79,7 @@ export const HOOKS = {
   SCHEMAS
 }
 
-// VIA RouteHandler - best if you are using Request and Response types; modern API
 export const POST: RouteHandler<PostReqTypes, PostResTypes> = async (event) => {
-  // IDE autocomplete/types for "hello" and "goodbye" for event.valid.json.
-  const valid_json = event.valid.json
-
-  /* Do something and return a response. */
-}
-
-// VIA RequestEvent - only good for Request types; legacy API
-export const POST = async (event: RequestEvent<PostReqTypes>) => {
   // IDE autocomplete/types for "hello" and "goodbye" for event.valid.json.
   const valid_json = event.valid.json
 
