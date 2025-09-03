@@ -16,7 +16,7 @@
     "moduleResolution": "bundler"
   },
   // Tell the compiler which files to include in the build.
-  "include": ["./"],
+  "include": ["**/*.ts"],
   // Tell the compiler which files to ignore.
   "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"]
 }
