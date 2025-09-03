@@ -1,5 +1,19 @@
 # @xinkjs/xink
 
+## 1.0.2
+
+### Patch Changes
+
+- 962c771: fix types
+- ef6065b: fix types, exports, jsx, deps
+- 1c7dc21: bump versions
+- Updated dependencies [962c771]
+- Updated dependencies [ef6065b]
+- Updated dependencies [63313c2]
+- Updated dependencies [1c7dc21]
+- Updated dependencies [6298e24]
+  - @xinkjs/xin@1.0.2
+
 ## 0.19.3
 
 ### Patch Changes
