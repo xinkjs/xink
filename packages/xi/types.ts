@@ -1,20 +1,11 @@
+export declare class BaseStore {}
+export type StoreConstructor<T extends BaseStore> = new () => T;
 export type XiConfig = {
   base_path: string;
 }
 
-export declare class BaseStore {}
-export type StoreConstructor<T extends BaseStore> = new () => T;
-
 /** Utility type representing a value that may or may not be a Promise. */
 export type MaybePromise<T> = T | Promise<T>;
-export type Response<T = unknown> = {
-  body?: T,
-  init?: { 
-    status?: number;
-    statusText?: string;
-    headers?: Record<string, any>;
-  }
-}
 
 export type Matcher = (param: string) => boolean;
 

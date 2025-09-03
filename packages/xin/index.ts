@@ -1,11 +1,25 @@
 import { Xi, Node, type BaseStore, type StoreConstructor } from "@xinkjs/xi"
-import { sequence } from "./lib/runtime/utils.js"
-import { validateConfig } from "./lib/config.js"
-import { addCookiesToHeaders, getCookies, isFormContentType, redirectResponse, resolve } from "./lib/runtime/fetch.js"
-import { json, text, html, redirect, Redirect } from './lib/runtime/helpers.js'
-import { openapi_template } from "./lib/runtime/openapi.js"
-import type { Cookie, ErrorHandler, Handle, Hook, NotFoundHandler, OpenApiConfig, OpenApiData, OpenApiOptions, XinConfig } from "./types.js"
-import type { BasicRouteInfo, Handler, HandlerMethod, HookMethod, SchemaDefinition } from "./internal-types.js"
+import { sequence } from "./lib/runtime/utils"
+import { validateConfig } from "./lib/config"
+import { addCookiesToHeaders, getCookies, isFormContentType, redirectResponse, resolve } from "./lib/runtime/fetch"
+import { json, text, html, redirect, Redirect } from './lib/runtime/helpers'
+import { openapi_template } from "./lib/runtime/openapi"
+import type { 
+  BasicRouteInfo,
+  Cookie,
+  ErrorHandler,
+  Handle,
+  Handler,
+  HandlerMethod,
+  Hook,
+  HookMethod,
+  NotFoundHandler,
+  OpenApiConfig,
+  OpenApiData,
+  OpenApiOptions,
+  SchemaDefinition,
+  XinConfig
+} from "./types"
 import { HANDLER_METHODS, HOOK_METHODS } from "./lib/constants.js"
 
 export class Store<Path extends string = string, ReqSchema extends SchemaDefinition = SchemaDefinition, ResSchema = unknown> implements BaseStore {
@@ -136,6 +150,8 @@ export class Store<Path extends string = string, ReqSchema extends SchemaDefinit
   /**
    * Set a handler and hooks for the GET method
    */
+  get<ReqSchema extends SchemaDefinition = SchemaDefinition, ResSchema = unknown>(schema: SchemaDefinition, handler: Handler<ReqSchema, ResSchema, Path>, ...hooks: Hook<ReqSchema, ResSchema, Path>[]): Store<Path, ReqSchema, ResSchema>;
+  get<ReqSchema extends SchemaDefinition = SchemaDefinition, ResSchema = unknown>(handler: Handler<ReqSchema, ResSchema, Path>, ...hooks: Hook<ReqSchema, ResSchema, Path>[]): Store<Path, ReqSchema, ResSchema>;
   get(
     arg1: SchemaDefinition | Handler<ReqSchema, ResSchema, Path>, // Arg1 can be schema or handler
     arg2?: Handler<ReqSchema, ResSchema, Path> | Hook<ReqSchema, ResSchema, Path>, // Arg2 is handler or first hook
@@ -150,6 +166,8 @@ export class Store<Path extends string = string, ReqSchema extends SchemaDefinit
   /**
    * Set a handler and hooks for the POST method
    */
+  post<ReqSchema extends SchemaDefinition = SchemaDefinition, ResSchema = unknown>(schema: SchemaDefinition, handler: Handler<ReqSchema, ResSchema, Path>, ...hooks: Hook<ReqSchema, ResSchema, Path>[]): Store<Path, ReqSchema, ResSchema>;
+  post<ReqSchema extends SchemaDefinition = SchemaDefinition, ResSchema = unknown>(handler: Handler<ReqSchema, ResSchema, Path>, ...hooks: Hook<ReqSchema, ResSchema, Path>[]): Store<Path, ReqSchema, ResSchema>;
   post(
     arg1: SchemaDefinition | Handler<ReqSchema, ResSchema, Path>, // Arg1 can be schema or handler
     arg2?: Handler<ReqSchema, ResSchema, Path> | Hook<ReqSchema, ResSchema, Path>, // Arg2 is handler or first hook
@@ -164,6 +182,8 @@ export class Store<Path extends string = string, ReqSchema extends SchemaDefinit
   /**
    * Set a handler and hooks for the PUT method
    */
+  put<ReqSchema extends SchemaDefinition = SchemaDefinition, ResSchema = unknown>(schema: SchemaDefinition, handler: Handler<ReqSchema, ResSchema, Path>, ...hooks: Hook<ReqSchema, ResSchema, Path>[]): Store<Path, ReqSchema, ResSchema>;
+  put<ReqSchema extends SchemaDefinition = SchemaDefinition, ResSchema = unknown>(handler: Handler<ReqSchema, ResSchema, Path>, ...hooks: Hook<ReqSchema, ResSchema, Path>[]): Store<Path, ReqSchema, ResSchema>;
   put(
     arg1: SchemaDefinition | Handler<ReqSchema, ResSchema, Path>, // Arg1 can be schema or handler
     arg2?: Handler<ReqSchema, ResSchema, Path> | Hook<ReqSchema, ResSchema, Path>, // Arg2 is handler or first hook
@@ -178,6 +198,8 @@ export class Store<Path extends string = string, ReqSchema extends SchemaDefinit
   /**
    * Set a handler and hooks for the PATCH method
    */
+  patch<ReqSchema extends SchemaDefinition = SchemaDefinition, ResSchema = unknown>(schema: SchemaDefinition, handler: Handler<ReqSchema, ResSchema, Path>, ...hooks: Hook<ReqSchema, ResSchema, Path>[]): Store<Path, ReqSchema, ResSchema>;
+  patch<ReqSchema extends SchemaDefinition = SchemaDefinition, ResSchema = unknown>(handler: Handler<ReqSchema, ResSchema, Path>, ...hooks: Hook<ReqSchema, ResSchema, Path>[]): Store<Path, ReqSchema, ResSchema>;
   patch(
     arg1: SchemaDefinition | Handler<ReqSchema, ResSchema, Path>, // Arg1 can be schema or handler
     arg2?: Handler<ReqSchema, ResSchema, Path> | Hook<ReqSchema, ResSchema, Path>, // Arg2 is handler or first hook
@@ -192,6 +214,8 @@ export class Store<Path extends string = string, ReqSchema extends SchemaDefinit
   /**
    * Set a handler and hooks for the DELETE method
    */
+  delete<ReqSchema extends SchemaDefinition = SchemaDefinition, ResSchema = unknown>(schema: SchemaDefinition, handler: Handler<ReqSchema, ResSchema, Path>, ...hooks: Hook<ReqSchema, ResSchema, Path>[]): Store<Path, ReqSchema, ResSchema>;
+  delete<ReqSchema extends SchemaDefinition = SchemaDefinition, ResSchema = unknown>(handler: Handler<ReqSchema, ResSchema, Path>, ...hooks: Hook<ReqSchema, ResSchema, Path>[]): Store<Path, ReqSchema, ResSchema>;
   delete(
     arg1: SchemaDefinition | Handler<ReqSchema, ResSchema, Path>, // Arg1 can be schema or handler
     arg2?: Handler<ReqSchema, ResSchema, Path> | Hook<ReqSchema, ResSchema, Path>, // Arg2 is handler or first hook
@@ -206,6 +230,8 @@ export class Store<Path extends string = string, ReqSchema extends SchemaDefinit
   /**
    * Set a handler and hooks for the HEAD method
    */
+  head<ReqSchema extends SchemaDefinition = SchemaDefinition, ResSchema = unknown>(schema: SchemaDefinition, handler: Handler<ReqSchema, ResSchema, Path>, ...hooks: Hook<ReqSchema, ResSchema, Path>[]): Store<Path, ReqSchema, ResSchema>;
+  head<ReqSchema extends SchemaDefinition = SchemaDefinition, ResSchema = unknown>(handler: Handler<ReqSchema, ResSchema, Path>, ...hooks: Hook<ReqSchema, ResSchema, Path>[]): Store<Path, ReqSchema, ResSchema>;
   head(
     arg1: SchemaDefinition | Handler<ReqSchema, ResSchema, Path>, // Arg1 can be schema or handler
     arg2?: Handler<ReqSchema, ResSchema, Path> | Hook<ReqSchema, ResSchema, Path>, // Arg2 is handler or first hook
@@ -220,6 +246,8 @@ export class Store<Path extends string = string, ReqSchema extends SchemaDefinit
   /**
    * Set a handler and hooks for the OPTIONS method
    */
+  options<ReqSchema extends SchemaDefinition = SchemaDefinition, ResSchema = unknown>(schema: SchemaDefinition, handler: Handler<ReqSchema, ResSchema, Path>, ...hooks: Hook<ReqSchema, ResSchema, Path>[]): Store<Path, ReqSchema, ResSchema>;
+  options<ReqSchema extends SchemaDefinition = SchemaDefinition, ResSchema = unknown>(handler: Handler<ReqSchema, ResSchema, Path>, ...hooks: Hook<ReqSchema, ResSchema, Path>[]): Store<Path, ReqSchema, ResSchema>;
   options(
     arg1: SchemaDefinition | Handler<ReqSchema, ResSchema, Path>, // Arg1 can be schema or handler
     arg2?: Handler<ReqSchema, ResSchema, Path> | Hook<ReqSchema, ResSchema, Path>, // Arg2 is handler or first hook
@@ -235,6 +263,8 @@ export class Store<Path extends string = string, ReqSchema extends SchemaDefinit
    * Set a handler and hooks for all allowed
    * methods that are not already registered.
    */
+  fallback<ReqSchema extends SchemaDefinition = SchemaDefinition, ResSchema = unknown>(schema: SchemaDefinition, handler: Handler<ReqSchema, ResSchema, Path>, ...hooks: Hook<ReqSchema, ResSchema, Path>[]): Store<Path, ReqSchema, ResSchema>;
+  fallback<ReqSchema extends SchemaDefinition = SchemaDefinition, ResSchema = unknown>(handler: Handler<ReqSchema, ResSchema, Path>, ...hooks: Hook<ReqSchema, ResSchema, Path>[]): Store<Path, ReqSchema, ResSchema>;
   fallback(
     arg1: SchemaDefinition | Handler<ReqSchema, ResSchema, Path>, // Arg1 can be schema or handler
     arg2?: Handler<ReqSchema, ResSchema, Path> | Hook<ReqSchema, ResSchema, Path>, // Arg2 is handler or first hook
@@ -505,7 +535,7 @@ export class Xin extends Xi<Store> {
     if (scalar) this.#openapi.scalar = scalar
   }
 
-  route(path: string, openapi?: OpenApiData) {
+  route<Path extends string>(path: Path, openapi?: OpenApiData): Store<Path> {
     const store = super.route(path)
     /** @type {Record<string, any>} */
     const openapi_schema: Record<string, any> = {}

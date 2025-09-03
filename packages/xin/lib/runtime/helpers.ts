@@ -1,3 +1,5 @@
+import type { ResponseT } from "../../types"
+
 export class StandardSchemaError extends Error {
   constructor(message: string, options?: ErrorOptions) {
     super(message, options)
@@ -26,13 +28,7 @@ export const html = (data: any, init?: ResponseInit): Response => {
   return new Response(data, { ...init, headers })
 }
 
-/**
- * 
- * @param {any} data 
- * @param {ResponseInit} [init] 
- * @returns {Response}
- */
-export const json = (data: any, init?: ResponseInit): Response => {
+export function json<T>(data: T, init?: ResponseInit): ResponseT<T> {
   const body = JSON.stringify(data)
   const headers = new Headers(init?.headers)
 
@@ -42,7 +38,7 @@ export const json = (data: any, init?: ResponseInit): Response => {
   if (!headers.has('content-type'))
     headers.set('content-type', 'application/json')
 
-  return new Response(body, { ...init, headers })
+  return new Response(body, { ...init, headers }) as ResponseT<T>
 }
 
 /* ATTR: SvelteKit */

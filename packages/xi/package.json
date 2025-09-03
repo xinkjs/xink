@@ -3,12 +3,12 @@
   "version": "1.0.0",
   "description": "A javascript URL router",
   "type": "module",
-  "main": "./dist/index.js",
-  "types": "./index.d.ts",
+  "main": "./dist/lib/exports/index.js",
+  "types": "./dist/lib/exports/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "types": "./index.d.ts"
+      "import": "./dist/lib/exports/index.js",
+      "types": "./dist/lib/exports/index.d.ts"
     }
   },
   "scripts": {
@@ -24,8 +24,7 @@
     }
   ],
   "files": [
-    "dist",
-    "index.d.ts"
+    "dist"
   ],
   "keywords": [
     "xi",

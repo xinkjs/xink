@@ -1,2 +1,11 @@
-export { html, json, redirect, text, StandardSchemaError } from '../runtime/helpers.js'
-export { Xin } from '../../index.js'
+export { html, json, redirect, text, StandardSchemaError } from '../runtime/helpers'
+export { Xin } from '../../index'
+
+export type { 
+  Handle,
+  Handler,
+  Hook,
+  RouteHandler
+} from '../../types'
+
+export type { ApiReferenceConfiguration } from '@scalar/types'

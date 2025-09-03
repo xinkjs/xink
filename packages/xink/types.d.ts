@@ -1,19 +1,10 @@
 import { 
-  type CloudflareContext,
-  type CloudflarePlatform,
-  type Cookie,
-  type Cookies,
-  type ErrorHandler,
   type Handle,
-  type MaybePromise,
-  type NotFoundHandler,
-  type PlatformContext,
-  type RequestEvent,
-  type SchemaDefinition,
+  type RouteHandler,
   type Xin,
   type XinConfig,
   html, json, redirect, text, StandardSchemaError
-} from '../xin/types.d.ts'
+} from '@xinkjs/xin'
 
 import type { SerializeOptions, ParseOptions } from 'cookie'
 import type { Plugin } from 'vite'
@@ -22,7 +13,7 @@ import type { XinkVNode, Fragment } from './lib/runtime/jsx'
 import * as CSS from 'csstype'
 import type { ApiReferenceConfiguration } from '@scalar/types'
 
-export type { CloudflareContext, CloudflarePlatform, Cookie, Cookies, Handle, PlatformContext, RequestEvent }
+export type { Handle, RouteHandler }
 export { html, json, redirect, text, StandardSchemaError }
 
 export interface BunServeOptions {}
@@ -36,6 +27,9 @@ interface AllowedValidatorTypes {
   params?: any;
   query?: any;
 }
+
+/** Utility type representing a value that may or may not be a Promise. */
+export type MaybePromise<T> = T | Promise<T>;
 
 export type Middleware = (event: RequestEvent, resolve: ResolveEvent) => MaybePromise<Response>;
 
@@ -81,13 +75,13 @@ export class Xink extends Xin {
 
 // Define recursive renderable type here or import it
 type XinkRenderableChild =
-    JSX.Element |
-    string |
-    number |
-    boolean |
-    null |
-    undefined |
-    Array<XinkRenderableChild>;
+  JSX.Element |
+  string |
+  number |
+  boolean |
+  null |
+  undefined |
+  Array<XinkRenderableChild>;
 
 interface XinkDefaultAttributes {
   children?: XinkRenderableChild | XinkRenderableChild[];
@@ -133,18 +127,22 @@ declare global {
       type: string;
     }
 
-    /**
-     * currentTarget - a reference to the element on which the event listener is registered.
-     *
-     * target - a reference to the element from which the event was originally dispatched.
-     * This might be a child element to the element on which the event listener is registered.
-     * If you thought this should be `EventTarget & T`, see https://github.com/DefinitelyTyped/DefinitelyTyped/issues/11508#issuecomment-256045682
-     */
-    interface SyntheticEvent<T = Element, E = Event> extends BaseSyntheticEvent<E, EventTarget & T, EventTarget> {}
+    interface SyntheticEvent {
+      nativeEvent: Event;
+      currentTarget: EventTarget;
+      target: EventTarget;
+      type: string;
+      timeStamp: number;
+      bubbles: boolean;
+      cancelable: boolean;
+      defaultPrevented: boolean;
+      isTrusted: boolean;
+      preventDefault(): void;
+      stopPropagation(): void;
+    }
 
-    type EventHandler<E extends SyntheticEvent<any>> = { bivarianceHack(event: E): void }["bivarianceHack"];
-    type ReactEventHandler<T = Element> = EventHandler<SyntheticEvent<T>>;
-    type ChangeEventHandler<T = Element> = EventHandler<ChangeEvent<T>>;
+    type EventHandler = (event: Event) => void;
+    type ChangeEventHandler = (event: Event) => void;
 
     type Booleanish = boolean | "true" | "false";
 
@@ -711,7 +709,7 @@ declare global {
       part?: string | undefined;
     }
 
-    interface AnchorHTMLAttributes<T> extends HTMLAttributes<T> {
+    interface AnchorHTMLAttributes extends HTMLAttributes {
       download?: any;
       href?: string | undefined;
       hrefLang?: string | undefined;
@@ -722,9 +720,9 @@ declare global {
       referrerPolicy?: HTMLAttributeReferrerPolicy | undefined;
     }
 
-    interface AudioHTMLAttributes<T> extends MediaHTMLAttributes<T> {}
+    interface AudioHTMLAttributes extends MediaHTMLAttributes {}
 
-    interface AreaHTMLAttributes<T> extends HTMLAttributes<T> {
+    interface AreaHTMLAttributes extends HTMLAttributes {
       alt?: string | undefined;
       coords?: string | undefined;
       download?: any;
@@ -736,16 +734,16 @@ declare global {
       target?: string | undefined;
     }
 
-    interface BaseHTMLAttributes<T> extends HTMLAttributes<T> {
+    interface BaseHTMLAttributes extends HTMLAttributes {
       href?: string | undefined;
       target?: string | undefined;
     }
 
-    interface BlockquoteHTMLAttributes<T> extends HTMLAttributes<T> {
+    interface BlockquoteHTMLAttributes extends HTMLAttributes {
       cite?: string | undefined;
     }
 
-    interface ButtonHTMLAttributes<T> extends HTMLAttributes<T> {
+    interface ButtonHTMLAttributes extends HTMLAttributes {
       disabled?: boolean | undefined;
       form?: string | undefined;
       formAction?:
@@ -761,54 +759,54 @@ declare global {
       value?: string | readonly string[] | number | undefined;
     }
 
-    interface CanvasHTMLAttributes<T> extends HTMLAttributes<T> {
+    interface CanvasHTMLAttributes extends HTMLAttributes {
       height?: number | string | undefined;
       width?: number | string | undefined;
     }
 
-    interface ColHTMLAttributes<T> extends HTMLAttributes<T> {
+    interface ColHTMLAttributes extends HTMLAttributes {
       span?: number | undefined;
       width?: number | string | undefined;
     }
 
-    interface ColgroupHTMLAttributes<T> extends HTMLAttributes<T> {
+    interface ColgroupHTMLAttributes extends HTMLAttributes {
       span?: number | undefined;
     }
 
-    interface DataHTMLAttributes<T> extends HTMLAttributes<T> {
+    interface DataHTMLAttributes extends HTMLAttributes {
       value?: string | readonly string[] | number | undefined;
     }
 
-    interface DetailsHTMLAttributes<T> extends HTMLAttributes<T> {
+    interface DetailsHTMLAttributes extends HTMLAttributes {
       open?: boolean | undefined;
       name?: string | undefined;
     }
 
-    interface DelHTMLAttributes<T> extends HTMLAttributes<T> {
+    interface DelHTMLAttributes extends HTMLAttributes {
       cite?: string | undefined;
       dateTime?: string | undefined;
     }
 
-    interface DialogHTMLAttributes<T> extends HTMLAttributes<T> {
-      onCancel?: ReactEventHandler<T> | undefined;
-      onClose?: ReactEventHandler<T> | undefined;
+    interface DialogHTMLAttributes extends HTMLAttributes {
+      onCancel?: EventHandler | undefined;
+      onClose?: EventHandler | undefined;
       open?: boolean | undefined;
     }
 
-    interface EmbedHTMLAttributes<T> extends HTMLAttributes<T> {
+    interface EmbedHTMLAttributes extends HTMLAttributes {
       height?: number | string | undefined;
       src?: string | undefined;
       type?: string | undefined;
       width?: number | string | undefined;
     }
 
-    interface FieldsetHTMLAttributes<T> extends HTMLAttributes<T> {
+    interface FieldsetHTMLAttributes extends HTMLAttributes {
       disabled?: boolean | undefined;
       form?: string | undefined;
       name?: string | undefined;
     }
 
-    interface FormHTMLAttributes<T> extends HTMLAttributes<T> {
+    interface FormHTMLAttributes extends HTMLAttributes {
       acceptCharset?: string | undefined;
       action?:
         | string
@@ -822,11 +820,11 @@ declare global {
       target?: string | undefined;
     }
 
-    interface HtmlHTMLAttributes<T> extends HTMLAttributes<T> {
+    interface HtmlHTMLAttributes extends HTMLAttributes {
       manifest?: string | undefined;
     }
 
-    interface IframeHTMLAttributes<T> extends HTMLAttributes<T> {
+    interface IframeHTMLAttributes extends HTMLAttributes {
       allow?: string | undefined;
       allowFullScreen?: boolean | undefined;
       allowTransparency?: boolean | undefined;
@@ -849,7 +847,7 @@ declare global {
       width?: number | string | undefined;
     }
 
-    interface ImgHTMLAttributes<T> extends HTMLAttributes<T> {
+    interface ImgHTMLAttributes extends HTMLAttributes {
       alt?: string | undefined;
       crossOrigin?: CrossOrigin;
       decoding?: "async" | "auto" | "sync" | undefined;
@@ -866,7 +864,7 @@ declare global {
       width?: number | string | undefined;
     }
 
-    interface InsHTMLAttributes<T> extends HTMLAttributes<T> {
+    interface InsHTMLAttributes extends HTMLAttributes {
       cite?: string | undefined;
       dateTime?: string | undefined;
     }
@@ -896,7 +894,7 @@ declare global {
       | "week"
       | (string & {});
 
-    interface InputHTMLAttributes<T> extends HTMLAttributes<T> {
+    interface InputHTMLAttributes extends HTMLAttributes {
       accept?: string | undefined;
       alt?: string | undefined;
       autoComplete?: HTMLInputAutoCompleteAttribute | undefined;
@@ -931,10 +929,10 @@ declare global {
       value?: string | readonly string[] | number | undefined;
       width?: number | string | undefined;
 
-      onChange?: ChangeEventHandler<T> | undefined;
+      onChange?: ChangeEventHandler | undefined;
     }
 
-    interface KeygenHTMLAttributes<T> extends HTMLAttributes<T> {
+    interface KeygenHTMLAttributes extends HTMLAttributes {
       challenge?: string | undefined;
       disabled?: boolean | undefined;
       form?: string | undefined;
@@ -943,16 +941,16 @@ declare global {
       name?: string | undefined;
     }
 
-    interface LabelHTMLAttributes<T> extends HTMLAttributes<T> {
+    interface LabelHTMLAttributes extends HTMLAttributes {
       form?: string | undefined;
       htmlFor?: string | undefined;
     }
 
-    interface LiHTMLAttributes<T> extends HTMLAttributes<T> {
+    interface LiHTMLAttributes extends HTMLAttributes {
       value?: string | readonly string[] | number | undefined;
     }
 
-    interface LinkHTMLAttributes<T> extends HTMLAttributes<T> {
+    interface LinkHTMLAttributes extends HTMLAttributes {
       as?: string | undefined;
       crossOrigin?: CrossOrigin;
       fetchPriority?: "high" | "low" | "auto";
@@ -971,15 +969,15 @@ declare global {
       precedence?: string | undefined;
     }
 
-    interface MapHTMLAttributes<T> extends HTMLAttributes<T> {
+    interface MapHTMLAttributes extends HTMLAttributes {
       name?: string | undefined;
     }
 
-    interface MenuHTMLAttributes<T> extends HTMLAttributes<T> {
+    interface MenuHTMLAttributes extends HTMLAttributes {
       type?: string | undefined;
     }
 
-    interface MediaHTMLAttributes<T> extends HTMLAttributes<T> {
+    interface MediaHTMLAttributes extends HTMLAttributes {
       autoPlay?: boolean | undefined;
       controls?: boolean | undefined;
       controlsList?: string | undefined;
@@ -994,7 +992,7 @@ declare global {
         | undefined;
     }
 
-    interface MetaHTMLAttributes<T> extends HTMLAttributes<T> {
+    interface MetaHTMLAttributes extends HTMLAttributes {
       charSet?: string | undefined;
       content?: string | undefined;
       httpEquiv?: string | undefined;
@@ -1002,7 +1000,7 @@ declare global {
       name?: string | undefined;
     }
 
-    interface MeterHTMLAttributes<T> extends HTMLAttributes<T> {
+    interface MeterHTMLAttributes extends HTMLAttributes {
       form?: string | undefined;
       high?: number | undefined;
       low?: number | undefined;
@@ -1012,11 +1010,11 @@ declare global {
       value?: string | readonly string[] | number | undefined;
     }
 
-    interface QuoteHTMLAttributes<T> extends HTMLAttributes<T> {
+    interface QuoteHTMLAttributes extends HTMLAttributes {
       cite?: string | undefined;
     }
 
-    interface ObjectHTMLAttributes<T> extends HTMLAttributes<T> {
+    interface ObjectHTMLAttributes extends HTMLAttributes {
       classID?: string | undefined;
       data?: string | undefined;
       form?: string | undefined;
@@ -1028,45 +1026,45 @@ declare global {
       wmode?: string | undefined;
     }
 
-    interface OlHTMLAttributes<T> extends HTMLAttributes<T> {
+    interface OlHTMLAttributes extends HTMLAttributes {
       reversed?: boolean | undefined;
       start?: number | undefined;
       type?: "1" | "a" | "A" | "i" | "I" | undefined;
     }
 
-    interface OptgroupHTMLAttributes<T> extends HTMLAttributes<T> {
+    interface OptgroupHTMLAttributes extends HTMLAttributes {
       disabled?: boolean | undefined;
       label?: string | undefined;
     }
 
-    interface OptionHTMLAttributes<T> extends HTMLAttributes<T> {
+    interface OptionHTMLAttributes extends HTMLAttributes {
       disabled?: boolean | undefined;
       label?: string | undefined;
       selected?: boolean | undefined;
       value?: string | readonly string[] | number | undefined;
     }
 
-    interface OutputHTMLAttributes<T> extends HTMLAttributes<T> {
+    interface OutputHTMLAttributes extends HTMLAttributes {
       form?: string | undefined;
       htmlFor?: string | undefined;
       name?: string | undefined;
     }
 
-    interface ParamHTMLAttributes<T> extends HTMLAttributes<T> {
+    interface ParamHTMLAttributes extends HTMLAttributes {
       name?: string | undefined;
       value?: string | readonly string[] | number | undefined;
     }
 
-    interface ProgressHTMLAttributes<T> extends HTMLAttributes<T> {
+    interface ProgressHTMLAttributes extends HTMLAttributes {
       max?: number | string | undefined;
       value?: string | readonly string[] | number | undefined;
     }
 
-    interface SlotHTMLAttributes<T> extends HTMLAttributes<T> {
+    interface SlotHTMLAttributes extends HTMLAttributes {
       name?: string | undefined;
     }
 
-    interface ScriptHTMLAttributes<T> extends HTMLAttributes<T> {
+    interface ScriptHTMLAttributes extends HTMLAttributes {
       async?: boolean | undefined;
       /** @deprecated */
       charSet?: string | undefined;
@@ -1079,7 +1077,7 @@ declare global {
       type?: string | undefined;
     }
 
-    interface SelectHTMLAttributes<T> extends HTMLAttributes<T> {
+    interface SelectHTMLAttributes extends HTMLAttributes {
       autoComplete?: string | undefined;
       disabled?: boolean | undefined;
       form?: string | undefined;
@@ -1088,10 +1086,10 @@ declare global {
       required?: boolean | undefined;
       size?: number | undefined;
       value?: string | readonly string[] | number | undefined;
-      onChange?: ChangeEventHandler<T> | undefined;
+      onChange?: ChangeEventHandler | undefined;
     }
 
-    interface SourceHTMLAttributes<T> extends HTMLAttributes<T> {
+    interface SourceHTMLAttributes extends HTMLAttributes {
       height?: number | string | undefined;
       media?: string | undefined;
       sizes?: string | undefined;
@@ -1101,7 +1099,7 @@ declare global {
       width?: number | string | undefined;
     }
 
-    interface StyleHTMLAttributes<T> extends HTMLAttributes<T> {
+    interface StyleHTMLAttributes extends HTMLAttributes {
       media?: string | undefined;
       scoped?: boolean | undefined;
       type?: string | undefined;
@@ -1111,7 +1109,7 @@ declare global {
       precedence?: string | undefined;
     }
 
-    interface TableHTMLAttributes<T> extends HTMLAttributes<T> {
+    interface TableHTMLAttributes extends HTMLAttributes {
       align?: "left" | "center" | "right" | undefined;
       bgcolor?: string | undefined;
       border?: number | undefined;
@@ -1123,7 +1121,7 @@ declare global {
       width?: number | string | undefined;
     }
 
-    interface TextareaHTMLAttributes<T> extends HTMLAttributes<T> {
+    interface TextareaHTMLAttributes extends HTMLAttributes {
       autoComplete?: string | undefined;
       cols?: number | undefined;
       dirName?: string | undefined;
@@ -1139,10 +1137,10 @@ declare global {
       value?: string | readonly string[] | number | undefined;
       wrap?: string | undefined;
 
-      onChange?: ChangeEventHandler<T> | undefined;
+      onChange?: ChangeEventHandler | undefined;
     }
 
-    interface TdHTMLAttributes<T> extends HTMLAttributes<T> {
+    interface TdHTMLAttributes extends HTMLAttributes {
       align?: "left" | "center" | "right" | "justify" | "char" | undefined;
       colSpan?: number | undefined;
       headers?: string | undefined;
@@ -1154,7 +1152,7 @@ declare global {
       valign?: "top" | "middle" | "bottom" | "baseline" | undefined;
     }
 
-    interface ThHTMLAttributes<T> extends HTMLAttributes<T> {
+    interface ThHTMLAttributes extends HTMLAttributes {
       align?: "left" | "center" | "right" | "justify" | "char" | undefined;
       colSpan?: number | undefined;
       headers?: string | undefined;
@@ -1163,11 +1161,11 @@ declare global {
       abbr?: string | undefined;
     }
 
-    interface TimeHTMLAttributes<T> extends HTMLAttributes<T> {
+    interface TimeHTMLAttributes extends HTMLAttributes {
       dateTime?: string | undefined;
     }
 
-    interface TrackHTMLAttributes<T> extends HTMLAttributes<T> {
+    interface TrackHTMLAttributes extends HTMLAttributes {
       default?: boolean | undefined;
       kind?: string | undefined;
       label?: string | undefined;
@@ -1175,7 +1173,7 @@ declare global {
       srcLang?: string | undefined;
     }
 
-    interface VideoHTMLAttributes<T> extends MediaHTMLAttributes<T> {
+    interface VideoHTMLAttributes extends MediaHTMLAttributes {
       height?: number | string | undefined;
       playsInline?: boolean | undefined;
       poster?: string | undefined;
@@ -1183,11 +1181,11 @@ declare global {
       disablePictureInPicture?: boolean | undefined;
       disableRemotePlayback?: boolean | undefined;
 
-      onResize?: ReactEventHandler<T> | undefined;
-      onResizeCapture?: ReactEventHandler<T> | undefined;
+      onResize?: EventHandler | undefined;
+      onResizeCapture?: EventHandler | undefined;
     }
 
-    interface WebViewHTMLAttributes<T> extends HTMLAttributes<T> {
+    interface WebViewHTMLAttributes extends HTMLAttributes {
       allowFullScreen?: boolean | undefined;
       allowpopups?: boolean | undefined;
       autosize?: boolean | undefined;

@@ -1,5 +1,5 @@
-import type { MatcherResult, MixedResult, ParsedSegment, XiConfig, Matcher, StoreConstructor, BaseStore } from "./internal-types.js"
-import { validateConfig } from './config.js'
+import type { MatcherResult, MixedResult, ParsedSegment, XiConfig, Matcher, StoreConstructor, BaseStore } from "./types"
+import { validateConfig } from './lib/config'
 
 /**
  * Equivalent character class - /^[a-zA-Z0-9_]$/
@@ -268,6 +268,7 @@ export abstract class Xi<TStore extends BaseStore> {
 
   /**
    * Register a route and return its store
+   * 
    * @throws Error, If path does not start with a '/'
    */
   route<Path extends string>(path: Path): TStore {
@@ -344,7 +345,6 @@ export abstract class Xi<TStore extends BaseStore> {
     
     current_node.pattern = derived_path
 
-    // Ensure return type matches signature, despite only being Store
     return current_node.store
   }
 }
