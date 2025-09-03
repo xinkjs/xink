@@ -24,11 +24,8 @@
     "noPropertyAccessFromIndexSignature": false,
 
     "baseUrl": ".",
-    "paths": {
-      // This tells TypeScript where to find the definitions for internal packages
-      "@xinkjs/xi": ["./packages/xi"],
-      "@xinkjs/xin": ["./packages/xin"]
-    }
+    // Add composite to enable project references
+    "composite": true
   },
   "files": [],
   // This tells TypeScript about the projects in the monorepo and their dependencies.
