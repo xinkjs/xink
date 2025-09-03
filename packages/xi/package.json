@@ -1,6 +1,6 @@
 {
   "name": "@xinkjs/xi",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A javascript URL router",
   "type": "module",
   "main": "./dist/lib/exports/index.js",
