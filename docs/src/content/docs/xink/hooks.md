@@ -12,6 +12,7 @@ You can define hooks for each route with the `HOOKS` export. They are run for an
 ```ts
 /* src/routes/route.ts */
 import logger from 'pino'
+import { RequestEvent } from '@xinkjs/xink'
 
 
 export const HOOKS = {
@@ -23,7 +24,7 @@ export const HOOKS = {
   }
 }
 
-export const GET = (event) => { 
+export const GET = (event: RequestEvent) => { 
   console.log(event.locals.state.some) // thing
   console.log(event.locals.poki) // <some json>
   return 'Hello GET'
