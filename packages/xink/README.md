@@ -1,7 +1,5 @@
 # @xinkjs/xink
 
-xink is a directory-based filesystem router for APIs - and a Vite plugin. Under the hood, it uses a trie URL router, which is fast and scalable. It supports the bun, cloudflare, and deno runtimes.
+An API framework, as a Vite plugin, with filesystem router DX. Pronounced "zinc". Docs at https://xinkjs.com/xink/overview
 
-We're currently in the beta phase of development and welcome contributions. Please see our contributing guide.
-
-Read the [docs](https://xinkjs.com)
+Adapters for Bun, Cloudflare, and Deno.

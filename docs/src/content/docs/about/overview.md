@@ -4,11 +4,11 @@ title: Overview
 
 ## What is xinkjs?
 
-A small ecosystem of components for various API-related purposes; each building on top of the previous one.
+A small ecosystem of components for various API framework purposes; each building on top of the previous one.
 
 - **xi** ("z"), a URL trie router.
-  - Has two jobs: register routes and retrieve their information.
-  - You need to build on top of it in order for it to be useful.
+  - Register routes and retrieve their information.
+  - Build your own API framework.
 - **xin** ("zen"), an API framework.
   - Defines and stores route information
   - Handles requests and responses; which includes executing any middleware, hooks, and handlers.
