@@ -17,17 +17,10 @@ import { Xi, type BaseStore, type StoreConstructor } from "@xinkjs/xi"
 class Store implements BaseStore {
   /* Define your store variables and methods. */
 
-  // example usage
+  // example variable
   handlers = new Map()
 
-  // Since xi's `route` method returns your store
-  // after registering a route, this is a great
-  // place to define methods like `get()` so you
-  // can chain them off of `route()`; but you don't
-  // have to.
-  get(handler) {
-    this.handlers.set('GET', handler)
-  }
+  // possible class methods to support features
 }
 
 export class Router extends Xi<Store> {
@@ -46,6 +39,8 @@ export class Router extends Xi<Store> {
 
     // handle request and return a response
   }
+
+  // other class methods to support features
 }
 ```
 
@@ -55,10 +50,7 @@ import { Router } from "cool-api-framework"
 
 const api = new Router()
 
-// xi's route method, for registering a path; returns a store.
-api.route("/")
-  // chainable if you define methods in your Store
-  .get(() => new Response("Hello world!"))
+// do cool api stuff
 
 // many platforms support a default export that has a `fetch` method.
 export default api

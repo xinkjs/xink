@@ -1,5 +1,5 @@
 # xk
 
-A CLI for xink projects.
+Create @xinkjs/xink API projects.
 
 `npx xk create my-api`

@@ -10,7 +10,7 @@ import { cloudflare } from '@cloudflare/vite-plugin'
 export default defineConfig(async function () {
   return {
     plugins: [
-      cloudflare(),
+      cloudflare({ viteEnvironment: { name: "ssr" } }),
       xink({ 
         adapter 
       })
