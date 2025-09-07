@@ -37,6 +37,32 @@ export default defineConfig(function () {
 })
 ```
 
+Our `xk` cli tool also configures Deno and Cloudflare's vite plugins, so that your dev server runs within their native environments.
+
+If you're setting up xink manually, for either Deno or Cloudflare, be sure to also install their respective Vite plugins.
+
+- @cloudflare/vite-plugin
+- @deno/vite-plugin
+
+```ts
+/* vite.config.js */
+import { xink } from '@xinkjs/xink'
+import { defineConfig } from 'vite'
+import { cloudflare } from '@cloudflare/vite-plugin'
+// or import deno from '@deno/vite-plugin'
+
+export default defineConfig(function () {
+  return {
+    plugins: [
+      cloudflare({ viteEnvironment: { name: "ssr" } }), // set the environment name for the cloudflare plugin
+      xink({ 
+        adapter 
+      })
+    ]
+  }
+})
+```
+
 ## `.serve()` options
 
 For Bun and Deno users, you can declare serve options in xink's plugin configuration. Any other runtimes will ignore these options. Be aware that they're only relevant for `build`, `preview` and `start`.
