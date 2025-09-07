@@ -1,4 +1,4 @@
-import * as CSS from "csstype"
+import type * as CSS from "csstype"
 
 // Simple identifier for our VNode objects
 const VNODE_TYPE = Symbol.for('xin.jsx.vnode')
