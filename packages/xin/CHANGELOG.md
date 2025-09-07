@@ -1,5 +1,11 @@
 # @xinkjs/xin
 
+## 1.0.4
+
+### Patch Changes
+
+- 2095389: fix import as type
+
 ## 1.0.3
 
 ### Patch Changes
