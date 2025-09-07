@@ -1,5 +1,11 @@
 # @xinkjs/xin
 
+## 1.0.3
+
+### Patch Changes
+
+- b93abd8: make csstype normal dependency
+
 ## 1.0.2
 
 ### Patch Changes
