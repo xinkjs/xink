@@ -14,7 +14,11 @@ src/
 
 ## HTTP exports
 
-Within your `route` endpoint files, you define handler functions that are named after the HTTP methods they will serve. You can also define a `default` handler.
+Within your `route` endpoint files, you define handler functions that are named after the HTTP methods they will serve.
+
+xink supports the `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, `HEAD`, and `OPTIONS` method.
+
+You can also define a `default` handler. This acts as a fallback, and runs for any valid HTTP method you haven't defined. If no other handler functions are defined, this effectively becomes an "all" handler.
 
 ```js
 /* src/routes/route.ts */
@@ -28,9 +32,7 @@ export default ({ request }) => {
   return { message: `Hello ${request.method}!` }
 ```
 
-> xink supports `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, `HEAD`, `OPTIONS`
-
-## Route Types
+## Route Segment Types
 
 Listed in order of match priority.
 
@@ -42,7 +44,7 @@ All route segments are statically defined.
 
 ### Specific
 
-At least one segment is a combination of static and dynamic types.
+A combination of static and dynamic types.
 
 `/hello/miss-[name]`
 
@@ -80,11 +82,11 @@ The above would be used in your route segment like so: `/src/routes/[fruit=fruit
 
 So, for the fruits example, if a request was made to `/apple`, it would match, but a request to `/banana` would not.
 
-> Unlike validators and schemas, matchers do not populate `event.valid`
+> Unlike schemas, matchers do not populate in `event.valid`
 
 ### Dynamic
 
-Route segments can be params, and are available in `event.params`.
+Route segments can be params.
 
 `/hello/[name]`
 
@@ -103,7 +105,7 @@ Essentially a wildcard, but must be at the end of a route.
 `/hello/[...rest]`
 
 ```ts
-/* src/routes/hello/[...rest]/route.js */
+/* src/routes/hello/[...rest]/route.ts */
 
 export const GET = ({ params }) => {
   return `Hello ${params.rest}!`
