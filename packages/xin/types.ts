@@ -132,7 +132,7 @@ export interface RequestEvent<ReqSchema extends SchemaDefinition = SchemaDefinit
   valid: ReqSchema;
 }
 
-export type RouteHandler<ReqSchema extends SchemaDefinition = SchemaDefinition, ResSchema = unknown> = (event: RequestEvent<ReqSchema, ResSchema>) => MaybePromise<unknown extends ResSchema ? Response : ResponseT<ResSchema>>;
+export type RouteHandler<ReqSchema extends SchemaDefinition = SchemaDefinition, ResSchema = unknown> = (event: RequestEvent<ReqSchema, ResSchema>) => MaybePromise<unknown extends ResSchema ? Response | XinVNode | string | number | Record<string, unknown> | null | undefined : ResponseT<ResSchema>>;
 export type ErrorHandler = (error: unknown, event?: RequestEvent) => MaybePromise<Response>;
 export type NotFoundHandler = (event?: RequestEvent) => MaybePromise<Response>;
 export type Handle = (event: RequestEvent, resolve: ResolveEvent) => MaybePromise<Response>;
