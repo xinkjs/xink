@@ -17,12 +17,25 @@ export default defineConfig({
 					]
 				},
 				{
-					label: 'xi',
+					label: 'xink',
 					items: [
-						{ label: 'Overview', slug: 'xi/overview' },
-						{ label: 'Quickstart', slug: 'xi/quickstart' },
-						{ label: 'Routes', slug: 'xi/routes' },
-						{ label: 'API', slug: 'xi/api' }
+						{ label: 'Overview', slug: 'xink/overview' },
+						{ label: 'Quickstart', slug: 'xink/quickstart' },
+						{ label: 'Routing', slug: 'xink/routing' },
+						{ label: 'Validation', slug: 'xink/validation' },
+						{ label: 'Middleware', slug: 'xink/middleware' },
+						{ label: 'Hooks', slug: 'xink/hooks' },
+						{ label: 'Event', slug: 'xink/event' },
+						{ label: 'JSX', slug: 'xink/jsx' },
+						{ label: 'Return Types', slug:'xink/return-types'},
+						{ label: 'Helpers', slug: 'xink/helpers' },
+						{ label: 'Errors', slug: 'xink/errors' },
+						{ label: 'OpenAPI', slug: 'xink/openapi' },
+						{ label: 'Typed Client', slug: 'xink/client' },
+						{ label: 'Others', slug: 'xink/others' },
+						{ label: 'Adapters', slug: 'xink/adapters' },
+						{ label: 'Production', slug: 'xink/production' },
+						{ label: 'API', slug: 'xink/api' }
 					]
 				},
 				{
@@ -32,9 +45,9 @@ export default defineConfig({
 						{ label: 'Quickstart', slug: 'xin/quickstart' },
 						{ label: 'Routes', slug: 'xin/routes' },
 						{ label: 'Validation', slug: 'xin/validation' },
-						{ label: 'Event', slug: 'xin/event' },
 						{ label: 'Middleware', slug: 'xin/middleware' },
 						{ label: 'Hooks', slug: 'xin/hooks' },
+						{ label: 'Event', slug: 'xin/event' },
 						{ label: 'JSX', slug: 'xin/jsx' },
 						{ label: 'Return Types', slug:'xin/return-types'},
 						{ label: 'Helpers', slug: 'xin/helpers' },
@@ -46,23 +59,12 @@ export default defineConfig({
 					]
 				},
 				{
-					label: 'xink',
+					label: 'xi',
 					items: [
-						{ label: 'Overview', slug: 'xink/overview' },
-						{ label: 'Quickstart', slug: 'xink/quickstart' },
-						{ label: 'Routing', slug: 'xink/routing' },
-						{ label: 'Validation', slug: 'xink/validation' },
-						{ label: 'Event', slug: 'xink/event' },
-						{ label: 'Middleware', slug: 'xink/middleware' },
-						{ label: 'Hooks', slug: 'xink/hooks' },
-						{ label: 'JSX', slug: 'xink/jsx' },
-						{ label: 'Return Types', slug:'xink/return-types'},
-						{ label: 'Helpers', slug: 'xink/helpers' },
-						{ label: 'Errors', slug: 'xink/errors' },
-						{ label: 'OpenAPI', slug: 'xink/openapi' },
-						{ label: 'Typed Client', slug: 'xink/client' },
-						{ label: 'Others', slug: 'xink/others' },
-						{ label: 'API', slug: 'xink/api' }
+						{ label: 'Overview', slug: 'xi/overview' },
+						{ label: 'Quickstart', slug: 'xi/quickstart' },
+						{ label: 'Routes', slug: 'xi/routes' },
+						{ label: 'API', slug: 'xi/api' }
 					]
 				}
 			],

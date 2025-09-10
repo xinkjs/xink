@@ -33,7 +33,7 @@ Returns an application/json response.
 ```js
 export const GET = () => {
   return {
-    "message": "Welcome to xink!"
+    message: "Welcome to xink!"
   }
 }
 ```
