@@ -1,5 +1,11 @@
 # @xinkjs/xin
 
+## 1.0.5
+
+### Patch Changes
+
+- c5e87b9: export RequestEvent
+
 ## 1.0.4
 
 ### Patch Changes

@@ -1,5 +1,13 @@
 # @xinkjs/xink
 
+## 1.0.3
+
+### Patch Changes
+
+- c5e87b9: export RequestEvent
+- Updated dependencies [c5e87b9]
+  - @xinkjs/xin@1.0.5
+
 ## 1.0.2
 
 ### Patch Changes
