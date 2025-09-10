@@ -1,5 +1,6 @@
 import { 
   type Handle,
+  type RequestEvent,
   type RouteHandler,
   type Xin,
   type XinConfig,
@@ -13,7 +14,7 @@ import type { XinkVNode, Fragment } from './lib/runtime/jsx'
 import * as CSS from 'csstype'
 import type { ApiReferenceConfiguration } from '@scalar/types'
 
-export type { Handle, RouteHandler }
+export type { Handle, RequestEvent, RouteHandler }
 export { html, json, redirect, text, StandardSchemaError }
 
 export interface BunServeOptions {}

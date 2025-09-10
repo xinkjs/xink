@@ -5,6 +5,7 @@ export type {
   Handle,
   Handler,
   Hook,
+  RequestEvent,
   RouteHandler
 } from '../../types'
 
