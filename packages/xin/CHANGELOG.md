@@ -1,5 +1,11 @@
 # @xinkjs/xin
 
+## 1.0.6
+
+### Patch Changes
+
+- 4d29b20: fix RouteHandler type
+
 ## 1.0.5
 
 ### Patch Changes
