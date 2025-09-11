@@ -173,7 +173,7 @@ Parameters:
   - `handler` (`Handler`): The function used to handle a `Request`.
     ```ts
     type MaybePromise<T> = T | Promise<T>;
-    type Handler= (event: RequestEvent) => MaybePromise<Response | any>;
+    type Handler = (event: RequestEvent) => MaybePromise<Response | XinVNode | string | number | Record<string, unknown> | null | undefined;
     ```
   - `...hooks`: A comma-separated list of hook functions to register for the method.
     ```ts
@@ -293,7 +293,7 @@ Parameters:
   - `handler` (`Handler`): The function used to handle a `Request`.
     ```ts
     type MaybePromise<T> = T | Promise<T>;
-    type Handler= (event: RequestEvent) => MaybePromise<Response | any>;
+    type Handler= (event: RequestEvent) => MaybePromise<Response | XinVNode | string | number | Record<string, unknown> | null | undefined>;
     ```
   - `...hooks`: A comma-separated list of hook functions to register for the method.
     ```ts

@@ -5,8 +5,7 @@ export type {
   Handle,
   Handler,
   Hook,
-  RequestEvent,
-  RouteHandler
+  RequestEvent
 } from '../../types'
 
 export type { ApiReferenceConfiguration } from '@scalar/types'
