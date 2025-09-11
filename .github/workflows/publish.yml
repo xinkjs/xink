@@ -60,13 +60,97 @@ jobs:
           echo "Creating releases for tags pointing to HEAD..."
           git fetch --tags
 
-          tags_at_head=$(git tag --points-at HEAD)
-          if [ -z "$tags_at_head" ]; then
+          TAGS_AT_HEAD=$(git tag --points-at HEAD)
+          if [ -z "$TAGS_AT_HEAD" ]; then
             echo "No tags found at HEAD to create releases for."
             exit 0
           fi
-          echo "Tags found at HEAD: $tags_at_head"
-          for tag in $tags_at_head; do
-            echo "Creating GitHub release for tag $tag"
-            gh release create "$tag" --notes "Automatic release for $tag" || echo "Failed to create release for $tag"
+          echo "Tags found at HEAD: $TAGS_AT_HEAD"
+          # Use `bun ls --json` to get package information, which includes `name` and `location`.
+          # This is the most reliable way to map package name to its directory.
+          # Example output: [{"name": "@xinkjs/xin", "location": "/home/runner/work/repo/repo/packages/xin"}, ...]
+          PACKAGE_INFO_JSON=$(bun ls --json)
+          echo "Discovered package info: $PACKAGE_INFO_JSON"
+
+          for TAG in $TAGS_AT_HEAD; do
+            echo "--- Processing tag: $TAG ---"
+            
+            PACKAGE_NAME=""
+            VERSION=""
+
+            # Try to parse scoped tag first: @scope/package@version
+            if [[ "$TAG" =~ ^(@[^/]+/[^@]+)@([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
+                PACKAGE_NAME="${BASH_REMATCH[1]}"
+                VERSION="${BASH_REMATCH[2]}"
+            # Then try to parse unscoped tag: package@version
+            elif [[ "$TAG" =~ ^([^@/]+)@([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
+                PACKAGE_NAME="${BASH_REMATCH[1]}"
+                VERSION="${BASH_REMATCH[2]}"
+            # Finally, handle simple vVERSION tags, although less common for changesets in monorepos for individual packages
+            elif [[ "$TAG" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
+                VERSION="${BASH_REMATCH[1]}"
+                # For 'vVERSION' tags, we need a way to deduce the package name.
+                # If this is for a root package, we might need a fixed name.
+                # If it's a package whose name changes to 'vVERSION', this is complex.
+                # For now, let's assume 'vVERSION' tags are not for individual packages in this monorepo context.
+                echo "::warning::Tag '$TAG' is in 'vVERSION' format. This script assumes 'package@version' or '@scope/package@version' for monorepo packages. Skipping."
+                continue
+            else
+                echo "::warning::Tag format '$TAG' not recognized for changelog extraction. Skipping release for this tag."
+                continue
+            fi
+
+            if [ -z "$PACKAGE_NAME" ] || [ -z "$VERSION" ]; then
+                echo "::error::Failed to extract package name or version from tag '$TAG'. Skipping."
+                continue
+            fi
+
+            echo "Extracted: Package Name = '$PACKAGE_NAME', Version = '$VERSION'"
+
+            # Find the package's directory using `jq` to parse the `bun ls --json` output
+            PACKAGE_DIR=$(echo "$PACKAGE_INFO_JSON" | jq -r ".[] | select(.name == \"$PACKAGE_NAME\") | .location")
+
+            if [ -z "$PACKAGE_DIR" ]; then
+                echo "::warning::Could not find directory for package '$PACKAGE_NAME'. Skipping release for tag $TAG."
+                continue
+            fi
+
+            # `bun ls --json` gives absolute paths, we need relative to the repo root
+            # Assume GITHUB_WORKSPACE is the repo root.
+            REPO_ROOT="${GITHUB_WORKSPACE:-.}" # Use current dir as fallback if GITHUB_WORKSPACE not set
+            PACKAGE_DIR_RELATIVE=$(echo "$PACKAGE_DIR" | sed "s|^$REPO_ROOT/||")
+            
+            echo "Found package directory: $PACKAGE_DIR_RELATIVE"
+
+            CHANGELOG_PATH="$PACKAGE_DIR_RELATIVE/CHANGELOG.md"
+
+            echo "Looking for changelog at: $CHANGELOG_PATH"
+
+            RELEASE_NOTES=""
+
+            if [ ! -f "$CHANGELOG_PATH" ]; then
+              echo "::warning::Changelog file not found at $CHANGELOG_PATH for tag $TAG. Using generic release notes."
+              RELEASE_NOTES="Automatic release for $TAG (changelog file not found at $CHANGELOG_PATH)"
+            else
+              # The heading would be `## package@version` or `## @scope/package@version`
+              HEADING_TO_MATCH="## ${PACKAGE_NAME}@${VERSION}"
+              echo "Matching heading: '$HEADING_TO_MATCH'"
+
+              RELEASE_NOTES=$(awk -v heading="$HEADING_TO_MATCH" '
+                  BEGIN {p=0}
+                  $0 ~ heading {p=1; next} # Start capturing after the matching heading
+                  /^## / {if (p) exit}   # Stop capturing if another ## heading is found
+                  p {print}               # Print lines while capturing
+              ' "$CHANGELOG_PATH" | sed 's/^[[:space:]]*//' | sed '/^\s*$/d') # Trim leading whitespace and remove empty lines
+
+              if [ -z "$RELEASE_NOTES" ]; then
+                  echo "::warning::Could not find specific changelog entry for '$HEADING_TO_MATCH' in '$CHANGELOG_PATH'. Using generic notes."
+                  RELEASE_NOTES="Automatic release for $TAG (changelog entry '$HEADING_TO_MATCH' not found)"
+              fi
+            fi
+
+            # Create GitHub Release for the current tag
+            echo "Creating GitHub release for tag $TAG with notes from $CHANGELOG_PATH."
+            gh release create "$TAG" --notes "$RELEASE_NOTES" --title "$TAG" || \
+              echo "::warning::Failed to create release for $TAG. It might already exist, or there was another error."
           done
