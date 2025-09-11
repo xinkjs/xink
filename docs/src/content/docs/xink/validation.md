@@ -52,11 +52,11 @@ export const POST = async (event) => {
 
 ## Types
 
-You can pass your Request types in two different ways: `RouteHandler` or `RequestEvent`. This gives you type checking and intellisense in your endpoint handlers.
+Pass your Request and Response types to get type checking and intellisense in your endpoint handlers.
 
 ```js
 import * as v from 'valibot'
-import type { RouteHandler } from '@xinkjs/xink'
+import type { Handler } from '@xinkjs/xink'
 
 const post_json_schema = v.object({
   hello: v.string(),
@@ -79,10 +79,13 @@ export const HOOKS = {
   SCHEMAS
 }
 
-export const POST: RouteHandler<PostReqTypes, PostResTypes> = async (event) => {
+export const POST: Handler<PostReqTypes, PostResTypes> = async (event) => {
   // IDE autocomplete/types for "hello" and "goodbye" for event.valid.json.
   const valid_json = event.valid.json
 
-  /* Do something and return a response. */
+  if (valid_json)
+    return event.json({ message: event.valid.json }) // type checking
+  else
+    return { message: 'Error' } // no type checking here, because we're not using event.json
 }
 ```
