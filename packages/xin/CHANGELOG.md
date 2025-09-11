@@ -1,5 +1,11 @@
 # @xinkjs/xin
 
+## 1.0.7
+
+### Patch Changes
+
+- 7e67e1d: Remove RouteHandler
+
 ## 1.0.6
 
 ### Patch Changes
