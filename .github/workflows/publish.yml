@@ -69,7 +69,7 @@ jobs:
           # Use `bun ls --json` to get package information, which includes `name` and `location`.
           # This is the most reliable way to map package name to its directory.
           # Example output: [{"name": "@xinkjs/xin", "location": "/home/runner/work/repo/repo/packages/xin"}, ...]
-          PACKAGE_INFO_JSON=$(bun ls --json)
+          PACKAGE_INFO_JSON=$(bun pm ls --json --workspace '*')
           echo "Discovered package info: $PACKAGE_INFO_JSON"
 
           for TAG in $TAGS_AT_HEAD; do
