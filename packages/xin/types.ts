@@ -52,7 +52,7 @@ export type Handler<
   ReqSchema extends SchemaDefinition = SchemaDefinition,
   ResSchema = unknown,
   Path = unknown, 
-> = (event: RequestEvent<ReqSchema, ResSchema, Path>) => MaybePromise<unknown extends ResSchema ? Response | XinVNode | string | number | Record<string, unknown> | null | undefined : ResponseT<ResSchema>>;
+> = (event: RequestEvent<ReqSchema, ResSchema, Path>) => MaybePromise<unknown extends ResSchema ? Response | XinVNode | string | number | Record<string, unknown> | null | undefined : ResponseT<ResSchema> | ResSchema>;
 export type Hook<
   ReqSchema extends SchemaDefinition = SchemaDefinition,
   ResSchema extends unknown = unknown,
