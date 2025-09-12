@@ -51,12 +51,12 @@ export type MaybePromise<T> = T | Promise<T>;
 export type Handler<
   ReqSchema extends SchemaDefinition = SchemaDefinition,
   ResSchema = unknown,
-  Path extends string = string, 
+  Path = unknown, 
 > = (event: RequestEvent<ReqSchema, ResSchema, Path>) => MaybePromise<unknown extends ResSchema ? Response | XinVNode | string | number | Record<string, unknown> | null | undefined : ResponseT<ResSchema>>;
 export type Hook<
   ReqSchema extends SchemaDefinition = SchemaDefinition,
   ResSchema extends unknown = unknown,
-  Path extends string = string, 
+  Path = unknown, 
 > = (event: RequestEvent<ReqSchema, ResSchema, Path>, next?: () => MaybePromise<void>) => MaybePromise<void>;
 export type HandlerMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'HEAD' | 'OPTIONS' | 'FALLBACK';
 export type HookMethod = HandlerMethod | 'ALL';
@@ -115,13 +115,13 @@ export type Cookies = {
 /** The minimal constraint for a custom context object. */
 export type BaseEvent = object;
 
-export interface RequestEvent<ReqSchema extends SchemaDefinition = SchemaDefinition, ResSchema = unknown, Path extends string = string> extends BaseEvent {
+export interface RequestEvent<ReqSchema extends SchemaDefinition = SchemaDefinition, ResSchema = unknown, Path = unknown> extends BaseEvent {
   cookies: Cookies;
   headers: Omit<Headers, 'toJSON' | 'count' | 'getAll'>;
   html: typeof html;
   json: (data: ResSchema, init?: ResponseInit) => ResponseT<ResSchema>;
   locals: Api.Locals;
-  params: ParsePath<Path>;
+  params: Path extends string ? ParsePath<Path> : Record<string, string | undefined>;
   platform: Record<string, any>;
   redirect: typeof redirect;
   request: Request;
