@@ -7,7 +7,7 @@ Getting started with xink is a one-liner. It creates a project in the directory 
 npx xk create myapi
 ```
 
-The above command seeds a hello world route at `/` with a `GET` handler, so go ahead a fire up the dev server.
+The above command seeds a hello world route at `/` with a `GET` handler, so go ahead and fire up the dev server.
 
 ```
 cd myapi

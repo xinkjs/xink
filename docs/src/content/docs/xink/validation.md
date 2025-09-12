@@ -66,12 +66,12 @@ type PostReqTypes = {
   json: v.InferInput<typeof post_json_schema>;
 }
 type PostResTypes = {
-  message: PostReqTypes['json'];
+  message: string | PostReqTypes['json']
 }
 
 const SCHEMAS = {
   post: {
-    json: v.parser(post_json_schema)
+    json: post_json_schema
   }
 }
 
@@ -86,6 +86,6 @@ export const POST: Handler<PostReqTypes, PostResTypes> = async (event) => {
   if (valid_json)
     return event.json({ message: event.valid.json }) // type checking
   else
-    return { message: 'Error' } // no type checking here, because we're not using event.json
+    return { message: 'Error' } // type checking
 }
 ```
