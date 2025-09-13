@@ -10,7 +10,7 @@ import {
 import type { SerializeOptions, ParseOptions } from 'cookie'
 import type { Plugin } from 'vite'
 import type { Config } from './lib/types/internal'
-import type { XinkVNode, Fragment } from './lib/runtime/jsx'
+import type { JSXNode, Fragment } from './lib/runtime/jsx'
 import * as CSS from 'csstype'
 import type { ApiReferenceConfiguration } from '@scalar/types'
 
@@ -107,7 +107,7 @@ declare global {
      * Represents a JSX element structure.
      * Corresponds to the return type of the jsx/jsxs functions.
      */
-    type Element = XinkVNode;
+    type Element = JSXNode;
 
     // TODO: change any to unknown when moving to TS v3
     interface BaseSyntheticEvent<E = object, C = any, T = any> {
