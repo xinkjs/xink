@@ -52,7 +52,7 @@ export type Handler<
   ReqSchema extends SchemaDefinition = SchemaDefinition,
   ResSchema = unknown,
   Path = unknown, 
-> = (event: RequestEvent<ReqSchema, ResSchema, Path>) => MaybePromise<unknown extends ResSchema ? Response | XinVNode | string | number | Record<string, unknown> | null | undefined : ResponseT<ResSchema> | ResSchema>;
+> = (event: RequestEvent<ReqSchema, ResSchema, Path>) => MaybePromise<unknown extends ResSchema ? Response | XinVNode | string | number | Record<string, any> | null | undefined : ResponseT<ResSchema> | ResSchema>;
 export type Hook<
   ReqSchema extends SchemaDefinition = SchemaDefinition,
   ResSchema extends unknown = unknown,
@@ -159,10 +159,6 @@ export interface OpenApiData extends OpenAPIV3.PathItemObject {
 }
 export type ResolveEvent = (event: RequestEvent) => MaybePromise<Response>;
 export type Route = { store: Store; params: Record<string, string | undefined>; } | null;
-// export interface PlatformContext {
-//   env: Record<string, any>;
-//   ctx: Record<string, any>;
-// }
 
 export interface CloudflareContext {
   waitUntil: (promise: Promise<unknown>) => void;
