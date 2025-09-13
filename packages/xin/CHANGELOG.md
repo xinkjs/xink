@@ -1,5 +1,11 @@
 # @xinkjs/xin
 
+## 1.0.10
+
+### Patch Changes
+
+- 23b5e04: fix Handler return type for objects
+
 ## 1.0.9
 
 ### Patch Changes
