@@ -4,7 +4,7 @@ const VNODE_TYPE = Symbol.for('xink.jsx.vnode')
 /**
  * Represents a virtual node created by JSX.
  */
-class XinkVNode {
+class JSXNode {
   type = VNODE_TYPE
   tag
   props
@@ -26,10 +26,10 @@ export const Fragment = Symbol.for('xink.jsx.fragment')
  * @param {string | symbol | function} tag HTML tag name or Fragment
  * @param {object} props Props object (children are under props.children)
  * @param {string | undefined} key Optional key
- * @returns {XinkVNode}
+ * @returns {JSXNode}
  */
 export function jsx(tag, props, key) {
-  return new XinkVNode(tag, props, key)
+  return new JSXNode(tag, props, key)
 }
 
 /**
@@ -43,7 +43,7 @@ export function jsx(tag, props, key) {
  * @param {boolean} isStaticChildren - Indicates if children are static (for jsxs optimization)
  * @param {object} sourceDebugInfo - { fileName, lineNumber, columnNumber }
  * @param {object} thisArg - The 'this' context
- * @returns {XinkVNode}
+ * @returns {JSXNode}
  */
 export function jsxDEV(tag, props, key, isStaticChildren, sourceDebugInfo, thisArg) {
   // Minimal implementation: Ignore dev-specific args and call the production jsx
@@ -58,17 +58,17 @@ export function jsxDEV(tag, props, key, isStaticChildren, sourceDebugInfo, thisA
  * @param {string | symbol | function} tag HTML tag name or Fragment
  * @param {object} props Props object (children are under props.children)
  * @param {string | undefined} key Optional key
- * @returns {XinkVNode}
+ * @returns {JSXNode}
  */
 export function jsxs(tag, props, key) {
     // In a more complex runtime, jsxs might optimize children array creation.
     // For basic rendering, it can be the same as jsx.
-    return new XinkVNode(tag, props, key)
+    return new JSXNode(tag, props, key)
 }
 
 /* Helper to check if something is one of our VNodes. */
 export function isVNode(value) {
-  return value instanceof XinkVNode || (typeof value === 'object' && value !== null && value.type === VNODE_TYPE)
+  return value instanceof JSXNode || (typeof value === 'object' && value !== null && value.type === VNODE_TYPE)
 }
 
 /* Basic HTML escaping. */

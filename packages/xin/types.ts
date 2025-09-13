@@ -3,7 +3,7 @@ import type { SerializeOptions, ParseOptions } from 'cookie'
 import type { ApiReferenceConfiguration } from '@scalar/types'
 import type { OpenAPIV3 } from "@scalar/types"
 import type { html, redirect, text } from "./lib/runtime/helpers"
-import type { XinVNode } from "./lib/runtime/jsx.js"
+import type { JSXNode } from "./lib/runtime/jsx.js"
 
 declare global {
   namespace Api {
@@ -52,7 +52,7 @@ export type Handler<
   ReqSchema extends SchemaDefinition = SchemaDefinition,
   ResSchema = unknown,
   Path = unknown, 
-> = (event: RequestEvent<ReqSchema, ResSchema, Path>) => MaybePromise<unknown extends ResSchema ? Response | XinVNode | string | number | Record<string, any> | null | undefined : ResponseT<ResSchema> | ResSchema>;
+> = (event: RequestEvent<ReqSchema, ResSchema, Path>) => MaybePromise<unknown extends ResSchema ? Response | JSXNode | string | number | Record<string, any> | null | undefined : ResponseT<ResSchema> | ResSchema>;
 export type Hook<
   ReqSchema extends SchemaDefinition = SchemaDefinition,
   ResSchema extends unknown = unknown,

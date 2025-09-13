@@ -1,7 +1,7 @@
 import type { isVNode } from "./jsx.js";
 import type { XinkRenderableChild } from "../../types.js"
 
-export interface XinkVNode {
+export interface JSXNode {
   type: symbol;
   tag: string | symbol | Function;
   props: JsxProps;
@@ -20,7 +20,7 @@ export declare function jsx(
   tag: string | symbol | Function,
   props: JsxProps,
   key?: string | number | undefined
-): XinkVNode;
+): JSXNode;
 
 export declare function jsxDEV(
   tag: string | symbol | Function,
@@ -33,12 +33,12 @@ export declare function jsxDEV(
     columnNumber?: number;
   },
   thisArg?: any
-): XinkVNode;
+): JSXNode;
 
 export declare function jsxs(
   tag: string | symbol | Function,
   props: JsxProps,
   key?: string | number | undefined
-): XinkVNode;
+): JSXNode;
 
-export declare function isVNode(value: any): value is XinkVNode;
+export declare function isVNode(value: any): value is JSXNode;

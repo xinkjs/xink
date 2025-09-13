@@ -12,7 +12,7 @@ export interface JsxProps extends Record<string, any>{
 /**
  * Represents a virtual node created by JSX.
  */
-export class XinVNode {
+export class JSXNode {
   type = VNODE_TYPE
   tag
   props
@@ -31,8 +31,8 @@ export const Fragment = Symbol.for('xin.jsx.fragment')
 /**
  * JSX transformer function (for single elements/components).
  */
-export function jsx(tag: string | symbol | Function, props: JsxProps, key: string | undefined): XinVNode {
-  return new XinVNode(tag, props, key)
+export function jsx(tag: string | symbol | Function, props: JsxProps, key: string | undefined): JSXNode {
+  return new JSXNode(tag, props, key)
 }
 
 /**
@@ -41,7 +41,7 @@ export function jsx(tag: string | symbol | Function, props: JsxProps, key: strin
  * For a minimal runtime, we can just call the regular jsx function.
  *
  */
-export function jsxDEV(tag: string | symbol | Function, props: JsxProps, key: string | undefined, isStaticChildren: boolean, sourceDebugInfo: object, thisArg: object): XinVNode {
+export function jsxDEV(tag: string | symbol | Function, props: JsxProps, key: string | undefined, isStaticChildren: boolean, sourceDebugInfo: object, thisArg: object): JSXNode {
   // Minimal implementation: Ignore dev-specific args and call the production jsx
   // You could add console.warn or checks using sourceDebugInfo here if desired
   return jsx(tag, props, key)
@@ -51,15 +51,15 @@ export function jsxDEV(tag: string | symbol | Function, props: JsxProps, key: st
  * JSX transformer function (optimized for multiple static children).
  * Same implementation as jsx for this minimal runtime.
  */
-export function jsxs(tag: string | symbol | Function, props: JsxProps, key: string | undefined): XinVNode {
+export function jsxs(tag: string | symbol | Function, props: JsxProps, key: string | undefined): JSXNode {
     // In a more complex runtime, jsxs might optimize children array creation.
     // For basic rendering, it can be the same as jsx.
-    return new XinVNode(tag, props, key)
+    return new JSXNode(tag, props, key)
 }
 
 /* Helper to check if something is one of our VNodes. */
-export function isVNode(value: XinVNode | Record<string, any>) {
-  return value instanceof XinVNode || (typeof value === 'object' && value !== null && value.type === VNODE_TYPE)
+export function isVNode(value: JSXNode | Record<string, any>) {
+  return value instanceof JSXNode || (typeof value === 'object' && value !== null && value.type === VNODE_TYPE)
 }
 
 /* Basic HTML escaping. */
@@ -214,7 +214,7 @@ declare global {
      * Represents a JSX element structure.
      * Corresponds to the return type of the jsx/jsxs functions.
      */
-    type Element = XinVNode;
+    type Element = JSXNode;
 
     // TODO: change any to unknown when moving to TS v3
     interface BaseSyntheticEvent<E = object, C = any, T = any> {
