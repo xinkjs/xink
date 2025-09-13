@@ -51,9 +51,6 @@ jobs:
           # This command pushes all local tags to the remote, using the configured credentials
           git push origin --tags
 
-      - name: Re-Install Dependencies for Workspace Info
-        run: bun install --frozen-lockfile
-
       - name: Create GitHub Releases
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
