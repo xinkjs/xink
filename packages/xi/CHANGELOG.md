@@ -1,5 +1,11 @@
 # @xinkjs/xi
 
+## 1.0.3
+
+### Patch Changes
+
+- cacf85b: use extensions with imports
+
 ## 1.0.2
 
 ### Patch Changes

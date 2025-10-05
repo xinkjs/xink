@@ -1,6 +1,6 @@
 {
   "name": "@xinkjs/xink",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "A directory-based javascript API router",
   "type": "module",
   "types": "types.d.ts",
@@ -30,7 +30,7 @@
   "dependencies": {
     "cookie": "^1.0.2",
     "set-cookie-parser": "^2.7.1",
-    "@xinkjs/xin": "^1.0.7",
+    "@xinkjs/xin": "^1.0.11",
     "strip-json-comments": "^5.0.2",
     "@scalar/types": "^0.2.7"
   },

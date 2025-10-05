@@ -1,5 +1,14 @@
 # @xinkjs/xin
 
+## 1.0.11
+
+### Patch Changes
+
+- a2af97e: rename jsx node type
+- cacf85b: use extensions with imports
+- Updated dependencies [cacf85b]
+  - @xinkjs/xi@1.0.3
+
 ## 1.0.10
 
 ### Patch Changes
