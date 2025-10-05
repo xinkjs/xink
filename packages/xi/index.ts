@@ -1,5 +1,13 @@
-import type { MatcherResult, MixedResult, ParsedSegment, XiConfig, Matcher, StoreConstructor, BaseStore } from "./types"
-import { validateConfig } from './lib/config'
+import type { 
+  MatcherResult, 
+  MixedResult, 
+  ParsedSegment, 
+  XiConfig, 
+  Matcher, 
+  StoreConstructor, 
+  BaseStore 
+} from "./types.js"
+import { validateConfig } from './lib/config.js'
 
 /**
  * Equivalent character class - /^[a-zA-Z0-9_]$/

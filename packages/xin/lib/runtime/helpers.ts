@@ -1,4 +1,4 @@
-import type { ResponseT } from "../../types"
+import type { ResponseT } from "../../types.js"
 
 export class StandardSchemaError extends Error {
   constructor(message: string, options?: ErrorOptions) {

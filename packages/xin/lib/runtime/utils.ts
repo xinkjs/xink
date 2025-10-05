@@ -1,4 +1,4 @@
-import type { Handle, MaybePromise, RequestEvent } from "../../types"
+import type { Handle, MaybePromise, RequestEvent } from "../../types.js"
 
 /* ATTR: SvelteKit */
 export function sequence(...handlers: Handle[]): Handle {
