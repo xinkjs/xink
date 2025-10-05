@@ -2,7 +2,7 @@ import type { BaseStore, XiConfig } from "@xinkjs/xi"
 import type { SerializeOptions, ParseOptions } from 'cookie'
 import type { ApiReferenceConfiguration } from '@scalar/types'
 import type { OpenAPIV3 } from "@scalar/types"
-import type { html, redirect, text } from "./lib/runtime/helpers"
+import type { html, redirect, text } from "./lib/runtime/helpers.js"
 import type { JSXNode } from "./lib/runtime/jsx.js"
 
 declare global {

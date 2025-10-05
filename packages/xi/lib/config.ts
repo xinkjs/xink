@@ -1,5 +1,5 @@
-import { CONFIG } from './constants'
-import type { XiConfig } from '../types'
+import { CONFIG } from './constants.js'
+import type { XiConfig } from '../types.js'
 
 /**
  * Generic utility which merges two objects.

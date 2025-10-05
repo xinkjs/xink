@@ -1,9 +1,9 @@
 import { Xi, Node, type BaseStore, type StoreConstructor } from "@xinkjs/xi"
-import { sequence } from "./lib/runtime/utils"
-import { validateConfig } from "./lib/config"
-import { addCookiesToHeaders, getCookies, isFormContentType, redirectResponse, resolve } from "./lib/runtime/fetch"
-import { json, text, html, redirect, Redirect } from './lib/runtime/helpers'
-import { openapi_template } from "./lib/runtime/openapi"
+import { sequence } from "./lib/runtime/utils.js"
+import { validateConfig } from "./lib/config.js"
+import { addCookiesToHeaders, getCookies, isFormContentType, redirectResponse, resolve } from "./lib/runtime/fetch.js"
+import { json, text, html, redirect, Redirect } from './lib/runtime/helpers.js'
+import { openapi_template } from "./lib/runtime/openapi.js"
 import type { 
   BasicRouteInfo,
   Cookie,
@@ -19,7 +19,7 @@ import type {
   OpenApiOptions,
   SchemaDefinition,
   XinConfig
-} from "./types"
+} from "./types.js"
 import { HANDLER_METHODS, HOOK_METHODS } from "./lib/constants.js"
 
 export class Store<Path extends string = string, ReqSchema extends SchemaDefinition = SchemaDefinition, ResSchema = unknown> implements BaseStore {

@@ -1,8 +1,8 @@
 import { parse, serialize, type ParseOptions, type SerializeOptions } from 'cookie'
-import { inferObjectValueTypes, isContentType } from './utils'
-import { DISALLOWED_METHODS } from '../constants'
-import { StandardSchemaError, json, text, html } from './helpers'
-import { isVNode, renderToString } from "./jsx"
+import { inferObjectValueTypes, isContentType } from './utils.js'
+import { DISALLOWED_METHODS } from '../constants.js'
+import { StandardSchemaError, json, text, html } from './helpers.js'
+import { isVNode, renderToString } from "./jsx.js"
 import type { 
   Cookie,
   Cookies,
@@ -10,7 +10,7 @@ import type {
   HookMethod,
   ResolveEvent,
   StandardSchemaV1
-} from '../../types'
+} from '../../types.js'
 
 /* ATTR: SvelteKit */
 export const addCookiesToHeaders = (headers: Headers, cookies: Cookie[]) => {
