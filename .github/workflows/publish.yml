@@ -66,11 +66,10 @@ jobs:
             exit 0
           fi
           echo "Tags found at HEAD: $TAGS_AT_HEAD"
-          # Use `bun ls --json` to get package information, which includes `name` and `location`.
-          # This is the most reliable way to map package name to its directory.
-          # Example output: [{"name": "@xinkjs/xin", "location": "/home/runner/work/repo/repo/packages/xin"}, ...]
-          PACKAGE_INFO_JSON=$(bun pm ls --json --workspace '*')
-          echo "Discovered package info: $PACKAGE_INFO_JSON"
+
+          PACKAGE_INFO_TEXT=$(bun pm ls)
+          echo "Discovered package info:"
+          echo "$PACKAGE_INFO_TEXT"
 
           for TAG in $TAGS_AT_HEAD; do
             echo "--- Processing tag: $TAG ---"
@@ -107,22 +106,17 @@ jobs:
 
             echo "Extracted: Package Name = '$PACKAGE_NAME', Version = '$VERSION'"
 
-            # Find the package's directory using `jq` to parse the `bun ls --json` output
-            PACKAGE_DIR=$(echo "$PACKAGE_INFO_JSON" | jq -r ".[] | select(.name == \"$PACKAGE_NAME\") | .location")
+            # Extract the directory for the matching package (handles @scope/pkg@workspace:path)
+            PACKAGE_DIR=$(echo "$PACKAGE_INFO_TEXT" | awk -v name="$PACKAGE_NAME" -F'@workspace:' '$1 ~ name {print $2; exit}')
+            
+            echo "Found package directory: $PACKAGE_DIR"
 
             if [ -z "$PACKAGE_DIR" ]; then
-                echo "::warning::Could not find directory for package '$PACKAGE_NAME'. Skipping release for tag $TAG."
-                continue
+              echo "::warning::Could not find directory for package '$PACKAGE_NAME'. Skipping release for tag $TAG."
+              continue
             fi
 
-            # `bun ls --json` gives absolute paths, we need relative to the repo root
-            # Assume GITHUB_WORKSPACE is the repo root.
-            REPO_ROOT="${GITHUB_WORKSPACE:-.}" # Use current dir as fallback if GITHUB_WORKSPACE not set
-            PACKAGE_DIR_RELATIVE=$(echo "$PACKAGE_DIR" | sed "s|^$REPO_ROOT/||")
-            
-            echo "Found package directory: $PACKAGE_DIR_RELATIVE"
-
-            CHANGELOG_PATH="$PACKAGE_DIR_RELATIVE/CHANGELOG.md"
+            CHANGELOG_PATH="$PACKAGE_DIR/CHANGELOG.md"
 
             echo "Looking for changelog at: $CHANGELOG_PATH"
 
