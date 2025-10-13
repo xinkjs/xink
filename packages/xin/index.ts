@@ -48,7 +48,15 @@ export class Store<Path extends string = string, ReqSchema extends SchemaDefinit
    * Get handler for a method
    */
   getHandler(method: HandlerMethod): Handler<ReqSchema, ResSchema, Path> | undefined {
-    return this.handlers.get(method)
+    // ensure HEAD can be handled by GET, per RFC9110
+    if (method === 'HEAD')
+      return (
+        this.handlers.get(method) ?? 
+        this.handlers.get('GET') ?? 
+        this.handlers.get('FALLBACK')
+      )
+    
+    return this.handlers.get(method) ?? this.handlers.get('FALLBACK')
   }
 
   /**
@@ -318,6 +326,7 @@ export class Xin extends Xi<Store> {
     let cookies_to_add: Record<string, Cookie> ={}
     /** @type {Record<string, string>} */
     const headers: Record<string, string> = {}
+    const method = request.method.toUpperCase()
 
     /* Handle OpenAPI docs request. */
     if (url.pathname === this.#openapi.path)
@@ -330,15 +339,15 @@ export class Xin extends Xi<Store> {
     /* CSRF Content Type and Origin Check. */
     if (this.#config.check_origin) {
       const forbidden = 
-        (request.method === 'POST' || request.method === 'DELETE' || request.method === 'PUT' || request.method === 'PATCH') &&  
+        (method === 'POST' || method === 'DELETE' || method === 'PUT' || method === 'PATCH') &&  
         request.headers.get('origin') !== url.origin &&  
         isFormContentType(request)
 
       if (forbidden) {
         if (request.headers.get('accept') === 'application/json') {
-          return json(`Cross-site ${request.method} form submissions are forbidden`, { status: 403 })
+          return json(`Cross-site ${method} form submissions are forbidden`, { status: 403 })
         }
-        return text(`Cross-site ${request.method} form submissions are forbidden`, { status: 403 })
+        return text(`Cross-site ${method} form submissions are forbidden`, { status: 403 })
       }
     }
 
