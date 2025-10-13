@@ -1,5 +1,11 @@
 # @xinkjs/xin
 
+## 1.0.12
+
+### Patch Changes
+
+- 27c4966: Handle HEAD request via GET handler
+
 ## 1.0.11
 
 ### Patch Changes
