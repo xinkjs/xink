@@ -211,22 +211,43 @@ export const redirectResponse = (status: number, location: string) => {
   return response
 }
 
-const processHandler = async (result: Response) => {
+/**
+ * Creates an RFC9110-compliant response for HEAD requests.
+ */
+const createHeadResponse = (response: Response): Response => {
+  const headers = new Headers(response.headers)
+
+  // Avoid any issues with recompression in runtimes.
+  headers.delete('content-encoding')
+  headers.delete('transfer-encoding')
+
+  return new Response(null, {
+    status: response.status,
+    statusText: response.statusText,
+    headers
+  })
+}
+
+const processResult = async (result: any, method: HandlerMethod) => {
+  let response: Response
+
   if (isVNode(result)) {
     // Handle JSX VNode result
-    return html(await renderToString(result))
+    response = html(await renderToString(result))
   } else if (result instanceof Response) {
-    return result
+    response = result
   } else if (typeof result === 'object' && result !== null) {
     // Handle plain objects -> JSON response
-    return json(result)
+    response = json(result)
   } else if (result !== undefined && result !== null) {
     // Handle strings, numbers, etc. -> Text response
-    return text(String(result))
+    response = text(String(result))
   } else {
     // Handle null/undefined result -> 204 No Content
-    return new Response(null, { status: 204 })
+    return new Response(null, { status: 204, headers: { 'content-length': '0' } })
   }
+
+  return method === 'HEAD' ? createHeadResponse(response) : response
 }
 
 /**
@@ -245,7 +266,7 @@ export const resolve: ResolveEvent = async (event) => {
     } 
   })
 
-  const handler = event.store.getHandler(event.request.method as HandlerMethod) ?? event.store.getHandler('FALLBACK')
+  const handler = event.store.getHandler(event.request.method as HandlerMethod)
 
   if (!handler) {
     const methods = event.store.getMethods().filter((m) => !DISALLOWED_METHODS.has(m)).join(', ')
@@ -345,7 +366,7 @@ export const resolve: ResolveEvent = async (event) => {
   }
 
   const method = event.request.method
-  const hooks = event.store.getHooks(method as HookMethod) ?? null
+  const hooks = event.store.getHooks(method as HookMethod)
   const schemas = event.store.getSchema(method as HandlerMethod)
 
   if (schemas) await validation(Object.entries(schemas))
@@ -365,5 +386,5 @@ export const resolve: ResolveEvent = async (event) => {
     }
   }
 
-  return await processHandler(await handler(event) as Response)
+  return processResult(await handler(event) as Response, method as HandlerMethod)
 }
