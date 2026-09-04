@@ -4,7 +4,6 @@
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "./",
-    "baseUrl": ".",
     "declaration": true,
     "declarationMap": true,
     "emitDeclarationOnly": false,
@@ -19,5 +18,5 @@
   // Tell the compiler which files to include in the build.
   "include": ["**/*.ts"],
   // Tell the compiler which files to ignore.
-  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"]
+  "exclude": ["node_modules", "dist", "bench", "**/*.test.ts", "**/*.spec.ts"]
 }

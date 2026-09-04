@@ -1,3 +1,3 @@
 export { Node, Xi } from "../../index.js"
 
-export type { BaseStore, StoreConstructor, XiConfig } from "../../types.js"
+export type { BaseStore, Matcher, StoreConstructor, XiConfig } from "../../types.js"

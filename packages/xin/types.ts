@@ -1,7 +1,7 @@
 import type { BaseStore, XiConfig } from "@xinkjs/xi"
 import type { SerializeOptions, ParseOptions } from 'cookie'
 import type { ApiReferenceConfiguration } from '@scalar/types'
-import type { OpenAPIV3 } from "@scalar/types"
+import type { OpenAPIV3 } from "@scalar/openapi-types"
 import type { html, redirect, text } from "./lib/runtime/helpers.js"
 import type { JSXNode } from "./lib/runtime/jsx.js"
 
@@ -22,6 +22,7 @@ type PathSegments<Path extends string> =
 // A utility to extract a param name from a single segment
 type ParamNameFromSegment<Segment extends string> =
   Segment extends `:${infer Param}=${string}` /* matcher */ ? Param :
+  Segment extends `${string}:${infer Param}=${string}` /* mixed matcher */ ? Param :
   Segment extends `${string}:${infer Param}` /* mixed */ ? Param :
   Segment extends `:${infer Param}` /* dynamic */ ? Param :
   Segment extends `*${infer Param}` /* wildcard */ ? Param :

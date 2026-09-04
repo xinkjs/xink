@@ -19,7 +19,7 @@ export const mergeObjects = (current: any, updates: any): any => {
     if (Array.isArray(current_value) && Array.isArray(update_value)) {
       /* Merge arrays. */
       merged[key] = [...new Set([...current_value, ...update_value])]
-    } else if (typeof update_value === 'object' && update_value !== null && Array.isArray(update_value) &&
+    } else if (typeof update_value === 'object' && update_value !== null && !Array.isArray(update_value) &&
       typeof current_value === 'object' && current_value !== null && !Array.isArray(current_value)) {
       /* Both are non-null, non-array objects, so recurse. */
       merged[key] = mergeObjects(current_value, update_value)
@@ -39,23 +39,20 @@ export const mergeObjects = (current: any, updates: any): any => {
  * Merge a user config with the default config.
  */
 export const mergeConfig = (default_config: XiConfig, config: Partial<XiConfig>): XiConfig => {
-  /**
-   * We need to make a deep copy of `dconfig`,
-   * otherwise we end up altering the original `CONFIG` because `dconfig` is a reference to it.
-   */
-  return mergeObjects(structuredClone(default_config), config)
+  return { ...default_config, ...config }
 }
 
 /**
  * Validate any passed-in config options and merge with CONFIG.
  */
 export const validateConfig = (config: Partial<XiConfig>): XiConfig => {
-  if (config === undefined || typeof config !== 'object') throw 'Config must be an object.'
+  if (config === null || Array.isArray(config) || typeof config !== 'object')
+    throw new Error('Config must be an object.')
 
   /* config empty? */
-  if (Object.entries(config).length = 0) return CONFIG
+  if (Object.keys(config).length === 0) return { ...CONFIG }
 
-  if (config.base_path && typeof config.base_path !== 'string')
+  if (config.base_path !== undefined && typeof config.base_path !== 'string')
     throw new Error(`base_path must be a string, but "${config.base_path}" is a ${typeof config.base_path}.`)
 
   if (config.base_path && !config.base_path.startsWith('/'))

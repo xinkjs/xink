@@ -479,27 +479,27 @@ export class Xin extends Xi<Store> {
     const traverse = (node: Node<Store>, path = '') => {
       if (node.store) {
         routes.push({ 
-          pattern: node.pattern || '',
+          pattern: node.pattern || path || '/',
           methods: node.store.getMethods(),
           store: node.store
         })
       }
       
-      for (const [segment, child] of node.static_children)
+      for (const [segment, child] of node.static_children_map ?? [])
         traverse(child, `${path}/${segment}`)
       
       if (node.dynamic_child)
         traverse(node.dynamic_child, `${path}/:${node.param_name}`)
 
-      for (const [pattern, child] of node.matcher_children) {
+      for (const [pattern, child] of node.matcher_children_map ?? []) {
         traverse(child, `${path}/${pattern}`)
       }
       
-      for (const [pattern, child] of node.mixed_children)
+      for (const [pattern, child] of node.mixed_children_map ?? [])
         traverse(child, `${path}/${pattern}`)
       
       if (node.wildcard_child)
-        traverse(node.wildcard_child, `${path}/*`)
+        traverse(node.wildcard_child, `${path}/*${node.wildcard_param_name}`)
     }
     
     traverse(this.root)
@@ -598,7 +598,15 @@ export class Xin extends Xi<Store> {
    */
   router(...routers: Xin[]) {
     const { base_path } = this.getConfig()
-    routers.forEach(router => this.#mergeNodes(this.root, router.root, base_path))
+    for (const router of routers) {
+      for (const [name, matcher] of router.matchers) {
+        const existing_matcher = this.matchers.get(name)
+        if (existing_matcher && existing_matcher !== matcher)
+          throw new Error(`Conflicting matcher: ${name}`)
+        this.matchers.set(name, matcher)
+      }
+      this.#mergeNodes(this.root, router.root, base_path)
+    }
   }
 
   /**
@@ -610,22 +618,17 @@ export class Xin extends Xi<Store> {
    */
   #mergeNodes(destination_node: Node<Store>, source_node: Node<Store>, base_path?: string): void {
     const path = base_path?.slice(1)
-    let target_node: Node<Store>
+    let target_node = destination_node
 
     if (path) {
-      let maybe_node = destination_node.static_children.get(path)
-      if (maybe_node) {
-        // child with path already exists
-        target_node = maybe_node
-      } else {
-        // create child node and use that
-        const new_node = new Node<Store>()
-        destination_node.static_children.set(path, new_node)
-        target_node = new_node
+      for (const segment of path.split('/').filter(Boolean)) {
+        let child = target_node.static_children.get(segment)
+        if (!child) {
+          child = new Node<Store>()
+          target_node.static_children.set(segment, child)
+        }
+        target_node = child
       }
-    } else {
-      // just use passed-in node
-      target_node = destination_node
     }
 
     // 1. Copy handler/store if it exists on the source node
@@ -658,7 +661,7 @@ export class Xin extends Xi<Store> {
     // 2. Recursively merge children (static, dynamic, matcher, mixed, wildcard)
 
     // Merge Static Children
-    for (const [segment, sourceChildNode] of source_node.static_children.entries()) {
+    for (const [segment, sourceChildNode] of source_node.static_children_map?.entries() ?? []) {
       let destChildNode = target_node.static_children.get(segment);
       if (!destChildNode) {
         destChildNode = new Node<Store>(); // Create if doesn't exist
@@ -672,27 +675,47 @@ export class Xin extends Xi<Store> {
       if (!target_node.dynamic_child) {
         target_node.dynamic_child = new Node<Store>();
         target_node.param_name = source_node.param_name; // Copy param name
+      } else if (target_node.param_name !== source_node.param_name) {
+        throw new Error(`Conflicting parameter names: ${target_node.param_name} and ${source_node.param_name}`)
       }
       this.#mergeNodes(target_node.dynamic_child, source_node.dynamic_child);
     }
 
     // Merge Matcher Children
-    for (const [pattern, sourceChildNode] of source_node.matcher_children.entries()) {
+    for (const [pattern, sourceChildNode] of source_node.matcher_children_map?.entries() ?? []) {
+      for (const targetChildNode of target_node.matcher_children.values()) {
+        if (targetChildNode.matcher_name === sourceChildNode.matcher_name &&
+          targetChildNode.static_part === sourceChildNode.static_part &&
+          targetChildNode.param_name !== sourceChildNode.param_name) {
+          throw new Error(`Conflicting parameter names: ${targetChildNode.param_name} and ${sourceChildNode.param_name}`)
+        }
+      }
+
       let destChildNode = target_node.matcher_children.get(pattern);
       if (!destChildNode) {
         destChildNode = new Node<Store>();
         destChildNode.param_name = sourceChildNode.param_name;
+        destChildNode.matcher_name = sourceChildNode.matcher_name;
+        destChildNode.static_part = sourceChildNode.static_part;
         target_node.matcher_children.set(pattern, destChildNode);
       }
       this.#mergeNodes(destChildNode, sourceChildNode);
     }
 
     // Merge Mixed Children
-    for (const [pattern, sourceChildNode] of source_node.mixed_children.entries()) {
+    for (const [pattern, sourceChildNode] of source_node.mixed_children_map?.entries() ?? []) {
+      for (const targetChildNode of target_node.mixed_children.values()) {
+        if (targetChildNode.static_part === sourceChildNode.static_part &&
+          targetChildNode.param_name !== sourceChildNode.param_name) {
+          throw new Error(`Conflicting parameter names: ${targetChildNode.param_name} and ${sourceChildNode.param_name}`)
+        }
+      }
+
       let destChildNode = target_node.mixed_children.get(pattern);
       if (!destChildNode) {
         destChildNode = new Node<Store>();
         destChildNode.param_name = sourceChildNode.param_name;
+        destChildNode.static_part = sourceChildNode.static_part;
         target_node.mixed_children.set(pattern, destChildNode);
       }
       this.#mergeNodes(destChildNode, sourceChildNode);
@@ -702,7 +725,11 @@ export class Xin extends Xi<Store> {
     if (source_node.wildcard_child) {
       if (!target_node.wildcard_child) {
         target_node.wildcard_child = new Node<Store>();
-        target_node.param_name = source_node.param_name; // Copy param name if applicable
+        target_node.wildcard_param_name = source_node.wildcard_param_name;
+        if (!target_node.dynamic_child)
+          target_node.param_name = source_node.wildcard_param_name;
+      } else if (target_node.wildcard_param_name !== source_node.wildcard_param_name) {
+        throw new Error(`Conflicting parameter names: ${target_node.wildcard_param_name} and ${source_node.wildcard_param_name}`)
       }
       this.#mergeNodes(target_node.wildcard_child, source_node.wildcard_child);
     }
