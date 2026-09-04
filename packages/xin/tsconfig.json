@@ -8,6 +8,9 @@
     "declarationMap": true,
     "emitDeclarationOnly": false,
     "noEmit": false,
+    "paths": {
+      "@xinkjs/xi": ["../xi/dist/lib/exports/index.d.ts"]
+    },
 
     // --- Module Settings for Libraries ---
     // These ensure your output is compatible with modern JavaScript environments.
@@ -18,5 +21,8 @@
   // Tell the compiler which files to include in the build.
   "include": ["**/*.ts"],
   // Tell the compiler which files to ignore.
-  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"]
+  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"],
+  "references": [
+    { "path": "../xi" }
+  ]
 }

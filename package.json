@@ -19,6 +19,7 @@
   "scripts": {
     "docs": "bun run --filter docs dev",
     "release": "bun run build && changeset publish --no-git-tag",
+    "version-packages": "changeset version && bun install",
     "build": "tsc -b && bun run --filter xk build",
     "prepare": "npx is-ci || husky"
   },
