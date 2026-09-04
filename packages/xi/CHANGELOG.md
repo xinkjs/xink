@@ -1,5 +1,11 @@
 # @xinkjs/xi
 
+## 1.1.0
+
+### Minor Changes
+
+- eb8b5ef: Improve route matching performance and route-table memory usage, enforce parameter conflicts, support mixed matcher routes, and align wildcard behavior with the documented contract.
+
 ## 1.0.3
 
 ### Patch Changes
