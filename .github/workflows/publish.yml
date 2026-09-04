@@ -1,18 +1,21 @@
 name: Publish Packages
 
 on:
-  push:
+  workflow_dispatch:
+  pull_request:
+    types:
+      - closed
     branches:
       - main
 
 jobs:
   publish:
     name: Publish Packages
-    # Add a condition to ONLY run this job if the commit message
-    # matches the one created by the changesets action.
-    # This prevents it from running on every feature PR merge.
-    if: |
-      ${{ contains(github.event.head_commit.message, 'chore: update versions and changelogs for release') }}
+    # changesets/action creates this branch for the release PR. Checking the
+    # merged PR avoids depending on a particular merge commit message.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.pull_request.merged == true && github.event.pull_request.head.ref == 'changeset-release/main')
     runs-on: ubuntu-latest
     permissions:
       contents: write # Needed for creating GitHub Releases
@@ -20,6 +23,7 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v4
         with:
+          ref: main
           fetch-tags: true
 
       - name: Setup Bun
