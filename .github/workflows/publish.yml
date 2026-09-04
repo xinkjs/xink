@@ -1,154 +1,77 @@
-name: Publish Packages
+name: Stage Packages
 
 on:
   workflow_dispatch:
+    inputs:
+      release_sha:
+        description: Release commit SHA; use the same SHA for every package in this release
+        required: true
+        type: string
   pull_request:
     types:
       - closed
     branches:
       - main
 
+concurrency:
+  group: npm-staged-publishing
+  cancel-in-progress: false
+
 jobs:
-  publish:
-    name: Publish Packages
+  stage:
+    name: Stage Packages
+    environment: npm
     # changesets/action creates this branch for the release PR. Checking the
     # merged PR avoids depending on a particular merge commit message.
     if: >-
-      github.event_name == 'workflow_dispatch' ||
-      (github.event.pull_request.merged == true && github.event.pull_request.head.ref == 'changeset-release/main')
+      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') ||
+      (github.event.pull_request.merged == true &&
+      github.event.pull_request.head.ref == 'changeset-release/main' &&
+      github.event.pull_request.head.repo.full_name == github.repository)
     runs-on: ubuntu-latest
     permissions:
-      contents: write # Needed for creating GitHub Releases
+      contents: read
+      id-token: write
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4
         with:
-          ref: main
-          fetch-tags: true
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.merge_commit_sha || inputs.release_sha }}
+          fetch-depth: 0
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.4.0
 
+      - name: Setup Node and npm registry
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+          scope: "@xinkjs"
+          package-manager-cache: false
+
+      - name: Install npm with staged publishing support
+        run: npm install --global npm@11
+
       - name: Install Dependencies
         run: bun install --frozen-lockfile
 
-      - name: Setup .npmrc file
-        run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
+      - name: Build Packages
+        run: bun run build
 
-      - name: Configure Git Credentials
+      - name: Pack Unpublished Packages
+        run: bunx changeset pack --out-dir .release
+
+      - name: Stage Packages on npm
+        run: bun .github/scripts/stage-packages.ts .release/publish-plan.json
+
+      - name: Record Release Commit
         run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-      - name: Publish to npm
-        run: bun run release # This runs 'bun run build && changeset publish'
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # For GitHub Releases step
-
-      - name: Create and Push Git Tags
-        run: |
-          # This command reads the package.json files and creates tags for the current versions
-          bunx changeset tag
-          # This command pushes all local tags to the remote, using the configured credentials
-          git push origin --tags
-
-      - name: Create GitHub Releases
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          # This script assumes 'changeset publish' creates tags.
-          # We find tags pointing to the current commit and create releases.
-          echo "Creating releases for tags pointing to HEAD..."
-          git fetch --tags
-
-          TAGS_AT_HEAD=$(git tag --points-at HEAD)
-          if [ -z "$TAGS_AT_HEAD" ]; then
-            echo "No tags found at HEAD to create releases for."
-            exit 0
-          fi
-          echo "Tags found at HEAD: $TAGS_AT_HEAD"
-
-          PACKAGE_INFO_TEXT=$(bun pm ls)
-          echo "Discovered package info:"
-          echo "$PACKAGE_INFO_TEXT"
-
-          for TAG in $TAGS_AT_HEAD; do
-            echo "--- Processing tag: $TAG ---"
-            
-            PACKAGE_NAME=""
-            VERSION=""
-
-            # Try to parse scoped tag first: @scope/package@version
-            if [[ "$TAG" =~ ^(@[^/]+/[^@]+)@([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
-                PACKAGE_NAME="${BASH_REMATCH[1]}"
-                VERSION="${BASH_REMATCH[2]}"
-            # Then try to parse unscoped tag: package@version
-            elif [[ "$TAG" =~ ^([^@/]+)@([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
-                PACKAGE_NAME="${BASH_REMATCH[1]}"
-                VERSION="${BASH_REMATCH[2]}"
-            # Finally, handle simple vVERSION tags, although less common for changesets in monorepos for individual packages
-            elif [[ "$TAG" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
-                VERSION="${BASH_REMATCH[1]}"
-                # For 'vVERSION' tags, we need a way to deduce the package name.
-                # If this is for a root package, we might need a fixed name.
-                # If it's a package whose name changes to 'vVERSION', this is complex.
-                # For now, let's assume 'vVERSION' tags are not for individual packages in this monorepo context.
-                echo "::warning::Tag '$TAG' is in 'vVERSION' format. This script assumes 'package@version' or '@scope/package@version' for monorepo packages. Skipping."
-                continue
-            else
-                echo "::warning::Tag format '$TAG' not recognized for changelog extraction. Skipping release for this tag."
-                continue
-            fi
-
-            if [ -z "$PACKAGE_NAME" ] || [ -z "$VERSION" ]; then
-                echo "::error::Failed to extract package name or version from tag '$TAG'. Skipping."
-                continue
-            fi
-
-            echo "Extracted: Package Name = '$PACKAGE_NAME', Version = '$VERSION'"
-
-            # Extract the directory for the matching package (handles @scope/pkg@workspace:path)
-            PACKAGE_DIR=$(echo "$PACKAGE_INFO_TEXT" | awk -v name="$PACKAGE_NAME" -F'@workspace:' '$1 ~ name {print $2; exit}')
-            
-            echo "Found package directory: $PACKAGE_DIR"
-
-            if [ -z "$PACKAGE_DIR" ]; then
-              echo "::warning::Could not find directory for package '$PACKAGE_NAME'. Skipping release for tag $TAG."
-              continue
-            fi
-
-            CHANGELOG_PATH="$PACKAGE_DIR/CHANGELOG.md"
-
-            echo "Looking for changelog at: $CHANGELOG_PATH"
-
-            RELEASE_NOTES=""
-
-            if [ ! -f "$CHANGELOG_PATH" ]; then
-              echo "::warning::Changelog file not found at $CHANGELOG_PATH for tag $TAG. Using generic release notes."
-              RELEASE_NOTES="Automatic release for $TAG (changelog file not found at $CHANGELOG_PATH)"
-            else
-              # The heading would be `## package@version` or `## @scope/package@version`
-              HEADING_TO_MATCH="## ${PACKAGE_NAME}@${VERSION}"
-              echo "Matching heading: '$HEADING_TO_MATCH'"
-
-              RELEASE_NOTES=$(awk -v heading="$HEADING_TO_MATCH" '
-                  BEGIN {p=0}
-                  $0 ~ heading {p=1; next} # Start capturing after the matching heading
-                  /^## / {if (p) exit}   # Stop capturing if another ## heading is found
-                  p {print}               # Print lines while capturing
-              ' "$CHANGELOG_PATH" | sed 's/^[[:space:]]*//' | sed '/^\s*$/d') # Trim leading whitespace and remove empty lines
-
-              if [ -z "$RELEASE_NOTES" ]; then
-                  echo "::warning::Could not find specific changelog entry for '$HEADING_TO_MATCH' in '$CHANGELOG_PATH'. Using generic notes."
-                  RELEASE_NOTES="Automatic release for $TAG (changelog entry '$HEADING_TO_MATCH' not found)"
-              fi
-            fi
-
-            # Create GitHub Release for the current tag
-            echo "Creating GitHub release for tag $TAG with notes from $CHANGELOG_PATH."
-            gh release create "$TAG" --notes "$RELEASE_NOTES" --title "$TAG" || \
-              echo "::warning::Failed to create release for $TAG. It might already exist, or there was another error."
-          done
+          RELEASE_SHA=$(git rev-parse HEAD)
+          echo "## Staged release commit" >> "$GITHUB_STEP_SUMMARY"
+          echo "\`$RELEASE_SHA\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Approve the staged package on npm, then rerun this workflow with the same SHA to stage the next package." >> "$GITHUB_STEP_SUMMARY"
+          echo "After all packages are approved, run **Finalize Release** with this commit SHA." >> "$GITHUB_STEP_SUMMARY"

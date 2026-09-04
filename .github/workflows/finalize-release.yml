@@ -1,0 +1,112 @@
+name: Finalize Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_sha:
+        description: Commit SHA recorded by the Stage Packages workflow
+        required: true
+        type: string
+
+concurrency:
+  group: npm-release-finalization
+  cancel-in-progress: false
+
+jobs:
+  finalize:
+    name: Create Tags and Releases
+    environment: npm
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.release_sha }}
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Verify Release Commit
+        run: |
+          git fetch origin main
+          RELEASE_SHA=$(git rev-parse HEAD)
+          git merge-base --is-ancestor "$RELEASE_SHA" origin/main
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.0
+
+      - name: Install Dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Verify Packages Were Approved
+        run: |
+          bunx changeset publish-plan --output /tmp/publish-plan.json
+          bun .github/scripts/assert-packages-published.ts /tmp/publish-plan.json
+
+      - name: Configure Git Credentials
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Create and Push Git Tags
+        run: |
+          bunx changeset tag
+          git push origin --tags
+
+      - name: Create GitHub Releases
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAGS_AT_HEAD=$(git tag --points-at HEAD)
+          if [ -z "$TAGS_AT_HEAD" ]; then
+            echo "No new tags found at HEAD."
+            exit 0
+          fi
+
+          PACKAGE_INFO_TEXT=$(bun pm ls)
+
+          for TAG in $TAGS_AT_HEAD; do
+            PACKAGE_NAME=""
+            VERSION=""
+
+            if [[ "$TAG" =~ ^(@[^/]+/[^@]+)@([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
+              PACKAGE_NAME="${BASH_REMATCH[1]}"
+              VERSION="${BASH_REMATCH[2]}"
+            elif [[ "$TAG" =~ ^([^@/]+)@([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
+              PACKAGE_NAME="${BASH_REMATCH[1]}"
+              VERSION="${BASH_REMATCH[2]}"
+            else
+              echo "::warning::Unrecognized package tag '$TAG'; skipping."
+              continue
+            fi
+
+            PACKAGE_DIR=$(echo "$PACKAGE_INFO_TEXT" | awk -v name="$PACKAGE_NAME" -F'@workspace:' '$1 ~ name {print $2; exit}')
+            if [ -z "$PACKAGE_DIR" ]; then
+              echo "::error::Could not find workspace for '$PACKAGE_NAME'."
+              exit 1
+            fi
+
+            CHANGELOG_PATH="$PACKAGE_DIR/CHANGELOG.md"
+            RELEASE_NOTES=""
+
+            if [ -f "$CHANGELOG_PATH" ]; then
+              RELEASE_NOTES=$(awk -v heading="## $VERSION" '
+                $0 == heading { capture=1; next }
+                /^## / && capture { exit }
+                capture { print }
+              ' "$CHANGELOG_PATH")
+            fi
+
+            if [ -z "$RELEASE_NOTES" ]; then
+              RELEASE_NOTES="Release $TAG"
+            fi
+
+            if gh release view "$TAG" > /dev/null 2>&1; then
+              echo "GitHub release '$TAG' already exists; skipping."
+            else
+              gh release create "$TAG" --verify-tag --notes "$RELEASE_NOTES" --title "$TAG"
+            fi
+          done
