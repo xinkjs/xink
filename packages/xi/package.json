@@ -13,6 +13,7 @@
   },
   "scripts": {
     "test": "vitest",
+    "bench": "bun run bench/router.ts",
     "build": "tsc",
     "dev": "tsc --watch"
   },

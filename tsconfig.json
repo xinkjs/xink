@@ -23,7 +23,6 @@
     "noUnusedParameters": false,
     "noPropertyAccessFromIndexSignature": false,
 
-    "baseUrl": ".",
     // Add composite to enable project references
     "composite": true
   },

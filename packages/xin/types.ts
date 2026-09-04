@@ -22,6 +22,7 @@ type PathSegments<Path extends string> =
 // A utility to extract a param name from a single segment
 type ParamNameFromSegment<Segment extends string> =
   Segment extends `:${infer Param}=${string}` /* matcher */ ? Param :
+  Segment extends `${string}:${infer Param}=${string}` /* mixed matcher */ ? Param :
   Segment extends `${string}:${infer Param}` /* mixed */ ? Param :
   Segment extends `:${infer Param}` /* dynamic */ ? Param :
   Segment extends `*${infer Param}` /* wildcard */ ? Param :

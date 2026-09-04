@@ -37,12 +37,21 @@ interface MixedSegment {
   pattern: string;
 }
 
+interface MixedMatcherSegment {
+  type: "mixed_matcher";
+  static_part: string;
+  param_name: string;
+  matcher_name: string;
+  pattern: string;
+}
+
 export type ParsedSegment =
   | StaticSegment
   | WildcardSegment
   | MatcherSegment
   | DynamicSegment
-  | MixedSegment;
+  | MixedSegment
+  | MixedMatcherSegment;
 
 interface MatcherSuccess {
   matches: true;
