@@ -28,7 +28,7 @@ export const validateConfig = (config) => {
   if (config === undefined || typeof config !== 'object') throw 'Config must be an object.'
 
   /* config empty? */
-  if (Object.entries(config).length = 0) return CONFIG
+  if (Object.entries(config).length === 0) return CONFIG
 
   const forbidden_dirs = new Set(['middleware_dir', 'params_dir', 'routes_dir'])
 
