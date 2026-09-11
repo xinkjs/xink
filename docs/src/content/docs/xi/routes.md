@@ -67,6 +67,14 @@ with each other:
 '/user/:userId/post'
 ```
 
+### *Mixed*
+A segment can have a combination of static and dynamic properties. You can even throw a matcher into the mix (see what we did there?).
+
+```js
+'/asset-:name' // Matches /asset-logo
+'/v:version=number' // Matches /v0
+```
+
 ### *Wildcard*
 Path ends with a `*`, followed by a param name. This will match any characters in the rest of the path, including `/` characters or no characters. The wildcard value will be set in the `params` object with the param name as the key.
 
