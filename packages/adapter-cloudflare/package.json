@@ -10,8 +10,8 @@
     "@xinkjs/xink": "^1.0.0"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20240403.0",
-    "@types/node": "^18.0.0",
+    "@cloudflare/workers-types": "^4.20260702.1",
+    "@types/node": "^18.19.130",
     "@types/bun": "latest"
   },
   "files": [
