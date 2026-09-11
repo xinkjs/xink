@@ -13,8 +13,10 @@ const api = new Xink()
 You can pass a configuration object when creating the new instance.
 ```ts
 {
-  check_origin: boolean; // protect against CSRF attacks; default true
+  allowed_origins: string[]; // additional trusted origins; default []
   base_path: string; // the router's base path for all created routes; default ''
+  public_origin?: string; // external origin when running behind a proxy
+  check_origin: boolean; // deprecated; use allowed_origins
 }
 ```
 

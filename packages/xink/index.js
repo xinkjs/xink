@@ -1,7 +1,7 @@
 /** @import { XinkConfig, XinkAdapter } from './types.js' */
 
 import { validateConfig } from './lib/utils/config.js'
-import { getRequest, setResponse } from './lib/utils/vite.js'
+import { getRequest, getRequestOrigin, setResponse } from './lib/utils/vite.js'
 import { createManifestVirtualModule } from './lib/utils/manifest.js'
 import { join, relative, resolve as path_resolve } from 'node:path'
 import { readFiles } from './lib/utils/main.js'
@@ -258,9 +258,7 @@ export function xink(xink_config = {}) {
           try {
             /** @type {{ default: { fetch: (request: Request) => Promise<Response> }}} */
             const api = await server.ssrLoadModule(entrypoint_path)
-            const base = `${
-              server.config.server.https ? 'https' : 'http'
-            }://${req.headers[':authority'] || req.headers.host}`
+            const base = getRequestOrigin(req, Boolean(server.config.server.https))
             const request = await getRequest(base, req)
             const response = await api.default.fetch(request)
             setResponse(res, response)
@@ -285,9 +283,7 @@ export function xink(xink_config = {}) {
               `${entrypoint.split('.')[0]}.js`,
             )
           )
-          const base = `${
-            server.config.server.https ? 'https' : 'http'
-          }://${req.headers[':authority'] || req.headers.host}`
+          const base = getRequestOrigin(req, Boolean(server.config.preview.https))
           const request = await getRequest(base, req)
           const response = await api.default.fetch(request)
           setResponse(res, response)

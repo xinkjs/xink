@@ -130,19 +130,31 @@ const api = new Xink({
 export default api
 ```
 
-## Check Origin
+## Allowed Origins
 
-You can tell Xink to not check origins for POST requests. The default is `true`.
+Form submissions are restricted to the request's own origin by default. Add exact, trusted origins when another site needs to submit forms to the API. This does not configure CORS.
 
 ```ts
 /* e.g. index.ts */
 import { Xink } from "@xinkjs/xink"
 
 const api = new Xink({
-  check_origin: false
+  allowed_origins: ['https://admin.example.com']
 })
 
 export default api
+```
+
+`check_origin` is deprecated but remains available for backwards compatibility. A non-empty `allowed_origins` array takes precedence over it.
+
+## Public Origin
+
+When HTTPS terminates at a trusted reverse proxy, configure the external origin so request URLs, secure cookies, and origin checks use the browser-facing URL.
+
+```ts
+const api = new Xink({
+  public_origin: 'https://api.example.com'
+})
 ```
 
 ## Cloudflare Workers

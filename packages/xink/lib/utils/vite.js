@@ -100,7 +100,7 @@ function getRawBody(req, body_size_limit) {
  */
 // eslint-disable-next-line @typescript-eslint/require-await
 export async function getRequest(base, request, body_size_limit) {
-	return new Request(base + request.url, {
+	return new Request(new URL(request.url || '/', base), {
 		duplex: "half",
 		method: request.method,
 		headers: /** @type {Record<string, string>} */ (request.headers),
@@ -109,6 +109,25 @@ export async function getRequest(base, request, body_size_limit) {
       	? undefined
       	: getRawBody(request, body_size_limit)
 	});
+}
+
+/**
+ * Construct the request origin from the actual connection and Vite's resolved
+ * HTTPS setting. Forwarded headers are intentionally not trusted here.
+ * @param {import('http').IncomingMessage} request
+ * @param {boolean} configured_https
+ */
+export function getRequestOrigin(request, configured_https = false) {
+	const authority = request.headers[':authority'] || request.headers.host
+	if (typeof authority !== 'string' || !authority)
+		throw new Error('Cannot construct request URL without a Host header.')
+
+	const encrypted = 'encrypted' in request.socket && request.socket.encrypted === true
+	const url = new URL(`${encrypted || configured_https ? 'https' : 'http'}://${authority}`)
+	if (url.username || url.password)
+		throw new Error('Cannot construct request URL from an invalid Host header.')
+
+	return url.origin
 }
 
 /**

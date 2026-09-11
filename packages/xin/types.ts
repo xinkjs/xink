@@ -98,7 +98,10 @@ export declare class Store<Path extends string = string, ReqSchema extends Schem
 }
 
 export interface XinConfig extends XiConfig {
+  allowed_origins: string[];
+  /** @deprecated Use `allowed_origins` instead. */
   check_origin: boolean;
+  public_origin?: string;
 }
 
 export type Cookie = {

@@ -3,8 +3,10 @@ export const DISALLOWED_METHODS = new Set([
 ])
 
 export const CONFIG = {
+  allowed_origins: [],
   base_path: '',
-  check_origin: true
+  check_origin: true,
+  public_origin: undefined
 }
 
 export const HANDLER_METHODS = new Set([
