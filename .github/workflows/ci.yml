@@ -18,6 +18,11 @@ jobs:
         with:
           bun-version: 1.4.0
 
+      - name: Setup Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
       - name: Install Dependencies
         run: bun install --frozen-lockfile
 

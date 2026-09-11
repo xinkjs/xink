@@ -1,5 +1,12 @@
 import type { XinkAdapter } from '@xinkjs/xink'
 
+export interface TLSOptions {
+  /** Path to a PEM-encoded certificate file. Defaults to `TLS_CERT_FILE`. */
+  cert_file?: string;
+  /** Path to a PEM-encoded private key file. Defaults to `TLS_KEY_FILE`. */
+  key_file?: string;
+}
+
 export interface ServeOptions {
   error?: (this: Server, error: unknown) => Response | Promise<Response> | void | Promise<void>;
   /**
@@ -41,6 +48,8 @@ export interface ServeOptions {
    * Default is `10` seconds.
    */
   idleTimeout?: number;
+  /** Load a certificate and private key when the generated server starts. */
+  tls?: TLSOptions;
 }
 
 declare module '@xinkjs/xink' {
