@@ -37,3 +37,7 @@ test('catches an invalid entrypoint', () => {
     'entrypoint must be a filename that ends with .js or .ts, but found "server".'
   )
 })
+
+test('requires an adapter', () => {
+  expect(() => xink({} as never)).toThrowError('adapter must be a function.')
+})

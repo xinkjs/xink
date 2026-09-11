@@ -6,7 +6,7 @@ import { mergeObjects } from './main.js'
 /**
  * Merge a user config with the default config.
  * 
- * @param {Config} dconfig
+ * @param {Omit<Config, 'adapter'>} dconfig
  * @param {XinkConfig} config
  * @returns {Config}
  */
@@ -25,10 +25,11 @@ export const mergeConfig = (dconfig, config) => {
  * @returns {Config}
  */
 export const validateConfig = (config) => {
-  if (config === undefined || typeof config !== 'object') throw 'Config must be an object.'
+  if (config === null || Array.isArray(config) || typeof config !== 'object')
+    throw new Error('Config must be an object.')
 
-  /* config empty? */
-  if (Object.entries(config).length === 0) return CONFIG
+  if (typeof config.adapter !== 'function')
+    throw new Error('adapter must be a function.')
 
   const forbidden_dirs = new Set(['middleware_dir', 'params_dir', 'routes_dir'])
 

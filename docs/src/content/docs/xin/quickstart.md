@@ -27,7 +27,7 @@ The following handler methods are available: `.get()`, `.post()`, `.put()`, `.pa
 
 ## Configuration
 
-Xin supports `allowed_origins`, `base_path`, and `public_origin`.
+Xin supports `allowed_origins`, `base_path`, and `public_origin`. All configuration options are optional.
 
 ### Allowed origins
 

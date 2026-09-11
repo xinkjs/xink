@@ -18,6 +18,7 @@ import type {
   OpenApiData,
   OpenApiOptions,
   SchemaDefinition,
+  ResolvedXinConfig,
   XinConfig
 } from "./types.js"
 import { HANDLER_METHODS, HOOK_METHODS } from "./lib/constants.js"
@@ -300,9 +301,9 @@ export class Xin extends Xi<Store> {
     },
     scalar: {}
   }
-  #config: XinConfig
+  #config: ResolvedXinConfig
 
-  constructor(options: Partial<XinConfig> = {}) {
+  constructor(options: XinConfig = {}) {
     super(options)
     this.#config = validateConfig(options)
 

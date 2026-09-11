@@ -1,5 +1,12 @@
 import { describe, expect, test } from 'vitest'
 import { validateConfig } from '../lib/config.js'
+import type { XiConfig } from '../types.js'
+
+test('accepts an empty public configuration', () => {
+  const config: XiConfig = {}
+
+  expect(validateConfig(config)).toStrictEqual({ base_path: '' })
+})
 
 describe('configuration', () => {
   test('returns the default configuration', () => {

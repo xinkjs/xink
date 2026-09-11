@@ -10,13 +10,13 @@ import { Xin } from "@xinkjs/xin"
 const api = new Xin()
 ```
 
-You can pass a configuration object when creating the new instance.
+You can pass a configuration object when creating the new instance. All options are optional.
 ```ts
 {
-  allowed_origins: string[]; // additional trusted origins; default []
-  base_path: string; // the router's base path for all created routes; default ''
+  allowed_origins?: string[]; // additional trusted origins; default []
+  base_path?: string; // the router's base path for all created routes; default ''
   public_origin?: string; // external origin when running behind a proxy
-  check_origin: boolean; // deprecated; use allowed_origins
+  check_origin?: boolean; // deprecated; use allowed_origins; default true
 }
 ```
 

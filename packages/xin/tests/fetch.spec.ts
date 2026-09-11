@@ -1,5 +1,6 @@
 import { afterEach, expect, test, vi } from 'vitest'
 import { Xin } from '../index.js'
+import type { XinConfig } from '../types.js'
 
 afterEach(() => {
   vi.restoreAllMocks()
@@ -12,6 +13,16 @@ const formRequest = (origin: string) => new Request('http://127.0.0.1/submit', {
     origin
   },
   body: 'value=test'
+})
+
+test('accepts an empty public configuration', () => {
+  const config: XinConfig = {}
+
+  expect(new Xin(config)).toBeInstanceOf(Xin)
+})
+
+test('rejects invalid configuration values', () => {
+  expect(() => new Xin(null as never)).toThrow('Config must be an object.')
 })
 
 test('allows the effective request origin by default', async () => {

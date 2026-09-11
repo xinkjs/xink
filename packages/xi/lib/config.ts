@@ -1,5 +1,5 @@
 import { CONFIG } from './constants.js'
-import type { XiConfig } from '../types.js'
+import type { ResolvedXiConfig, XiConfig } from '../types.js'
 
 /**
  * Generic utility which merges two objects.
@@ -38,14 +38,14 @@ export const mergeObjects = (current: any, updates: any): any => {
 /**
  * Merge a user config with the default config.
  */
-export const mergeConfig = (default_config: XiConfig, config: Partial<XiConfig>): XiConfig => {
+export const mergeConfig = (default_config: ResolvedXiConfig, config: XiConfig): ResolvedXiConfig => {
   return { ...default_config, ...config }
 }
 
 /**
  * Validate any passed-in config options and merge with CONFIG.
  */
-export const validateConfig = (config: Partial<XiConfig>): XiConfig => {
+export const validateConfig = (config: XiConfig): ResolvedXiConfig => {
   if (config === null || Array.isArray(config) || typeof config !== 'object')
     throw new Error('Config must be an object.')
 

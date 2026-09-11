@@ -6,6 +6,7 @@ export type {
   Handler,
   Hook,
   RequestEvent,
+  ResolvedXinConfig,
   XinConfig
 } from '../../types.js'
 

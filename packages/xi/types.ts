@@ -1,6 +1,9 @@
 export class BaseStore {}
 export type StoreConstructor<T extends BaseStore> = new () => T;
 export type XiConfig = {
+  base_path?: string;
+}
+export type ResolvedXiConfig = {
   base_path: string;
 }
 

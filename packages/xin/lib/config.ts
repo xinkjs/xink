@@ -1,4 +1,4 @@
-import type { XinConfig } from '../types.js'
+import type { ResolvedXinConfig, XinConfig } from '../types.js'
 import { CONFIG } from './constants.js'
 
 /**
@@ -38,7 +38,7 @@ export const mergeObjects = (current: any, updates: any): any => {
 /**
  * Merge a user config with the default config.
  */
-export const mergeConfig = (default_config: XinConfig, config: Partial<XinConfig>): XinConfig => {
+export const mergeConfig = (default_config: ResolvedXinConfig, config: XinConfig): ResolvedXinConfig => {
   /**
    * We need to make a deep copy of `dconfig`,
    * otherwise we end up altering the original `CONFIG` because `dconfig` is a reference to it.
@@ -49,11 +49,12 @@ export const mergeConfig = (default_config: XinConfig, config: Partial<XinConfig
 /**
  * Validate any passed-in config options and merge with CONFIG.
  *
- * @param {Partial<XinConfig>} config
- * @returns {XinConfig}
+ * @param {XinConfig} config
+ * @returns {ResolvedXinConfig}
  */
-export const validateConfig = (config: Partial<XinConfig>): XinConfig => {
-  if (config === undefined || typeof config !== 'object') throw 'Config must be an object.'
+export const validateConfig = (config: XinConfig): ResolvedXinConfig => {
+  if (config === null || Array.isArray(config) || typeof config !== 'object')
+    throw new Error('Config must be an object.')
 
   /* config empty? */
   if (Object.entries(config).length === 0) return structuredClone(CONFIG)

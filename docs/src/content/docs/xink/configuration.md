@@ -10,13 +10,13 @@ xink relies on build adapters for different runtimes and environments, so you ha
 - `@xinkjs/adapter-cloudflare`
 - `@xinkjs/adapter-deno`
 
-You can set the below options in the plugin's configuration.
+The `adapter` is required. All other plugin options are optional and use the defaults shown below.
 
 ```ts
 type XinkConfig = {
   adapter: (options?: ServeOptions) => XinkAdapter;
-  entrypoint?: string; 
-  out_dir?: string;
+  entrypoint?: string; // default 'index.ts'
+  out_dir?: string; // default 'build'
   serve_options?: { [key: string]: any; }; // for Bun and Deno users (see next section)
 }
 ```

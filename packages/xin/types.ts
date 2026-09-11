@@ -1,4 +1,4 @@
-import type { BaseStore, XiConfig } from "@xinkjs/xi"
+import type { BaseStore, ResolvedXiConfig, XiConfig } from "@xinkjs/xi"
 import type { SerializeOptions, ParseOptions } from 'cookie'
 import type { ApiReferenceConfiguration } from '@scalar/types'
 import type { OpenAPIV3 } from "@scalar/openapi-types"
@@ -98,8 +98,14 @@ export declare class Store<Path extends string = string, ReqSchema extends Schem
 }
 
 export interface XinConfig extends XiConfig {
-  allowed_origins: string[];
+  allowed_origins?: string[];
   /** @deprecated Use `allowed_origins` instead. */
+  check_origin?: boolean;
+  public_origin?: string;
+}
+
+export interface ResolvedXinConfig extends ResolvedXiConfig {
+  allowed_origins: string[];
   check_origin: boolean;
   public_origin?: string;
 }

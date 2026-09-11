@@ -4,10 +4,10 @@ title: API
 
 ### Xi class
 
-You can pass an object of configuration options when creating the new instance.
+You can pass an object of configuration options when creating the new instance. All options are optional.
 ```ts
 {
-  base_path: string; // the router's base path for all created routes
+  base_path?: string; // the router's base path for all created routes; default ''
 }
 ```
 
