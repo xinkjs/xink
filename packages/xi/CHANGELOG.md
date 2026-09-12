@@ -1,5 +1,11 @@
 # @xinkjs/xi
 
+## 1.1.1
+
+### Patch Changes
+
+- 3cebcf7: Create changesets
+
 ## 1.1.0
 
 ### Minor Changes

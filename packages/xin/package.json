@@ -1,6 +1,6 @@
 {
   "name": "@xinkjs/xin",
-  "version": "1.0.13",
+  "version": "1.1.0",
   "description": "A javascript API router",
   "main": "./dist/lib/exports/index.js",
   "type": "module",
@@ -26,7 +26,7 @@
     "cookie": "^1.0.2",
     "set-cookie-parser": "^2.7.1",
     "strip-json-comments": "^5.0.3",
-    "@xinkjs/xi": "1.1.0",
+    "@xinkjs/xi": "1.1.1",
     "@scalar/types": "^0.18.3",
     "@scalar/openapi-types": "^0.9.5"
   },

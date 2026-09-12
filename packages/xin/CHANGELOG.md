@@ -1,5 +1,16 @@
 # @xinkjs/xin
 
+## 1.1.0
+
+### Minor Changes
+
+- 3cebcf7: Create changesets
+
+### Patch Changes
+
+- Updated dependencies [3cebcf7]
+  - @xinkjs/xi@1.1.1
+
 ## 1.0.13
 
 ### Patch Changes

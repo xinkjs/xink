@@ -1,5 +1,16 @@
 # @xinkjs/adapter-bun
 
+## 0.8.0
+
+### Minor Changes
+
+- 3cebcf7: Create changesets
+
+### Patch Changes
+
+- Updated dependencies [3cebcf7]
+  - @xinkjs/xink@1.1.0
+
 ## 0.6.0
 
 ### Patch Changes
