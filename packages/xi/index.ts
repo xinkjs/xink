@@ -1,6 +1,7 @@
 import type { 
   ParsedSegment, 
-  XiConfig, 
+  XiConfig,
+  ResolvedXiConfig,
   Matcher, 
   StoreConstructor, 
   BaseStore 
@@ -96,16 +97,16 @@ export abstract class Xi<TStore extends BaseStore> {
     ['number', numberMatcher]
   ])
 
-  config: XiConfig
+  config: ResolvedXiConfig
 
-  constructor(options: Partial<XiConfig> = {}) {
+  constructor(options: XiConfig = {}) {
     this.config = validateConfig(options)
   }
 
   /**
    * Get xi's config 
    */
-  getConfig(): XiConfig { return this.config }
+  getConfig(): ResolvedXiConfig { return this.config }
 
   /**
    * Find a route and return its info

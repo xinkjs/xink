@@ -16,4 +16,4 @@ If a request header of `if-none-match` exists and matches the response `etag` he
 
 ## CSRF Protection
 
-Checks content type and origin ([ref](https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html#disallowing-simple-content-types)). If you don't want this, set `check_origin` to `false` in the Xin class configuration.
+Checks content type and origin ([ref](https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html#disallowing-simple-content-types)). The request's own origin is trusted by default; use `allowed_origins` to add other exact origins. The deprecated `check_origin: false` setting remains available for backwards compatibility when `allowed_origins` is empty.

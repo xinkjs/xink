@@ -1,5 +1,12 @@
 import type { XinkAdapter, XinkAdaptContext } from '@xinkjs/xink'
 
+export interface TLSOptions {
+  /** Path to a PEM-encoded certificate file. Defaults to `TLS_CERT_FILE`. */
+  cert_file?: string;
+  /** Path to a PEM-encoded private key file. Defaults to `TLS_KEY_FILE`. */
+  key_file?: string;
+}
+
 export interface ServeOptions {
   /** The port to listen on. @default 8000 */
   port?: number;
@@ -15,6 +22,8 @@ export interface ServeOptions {
   /** If the server should reuse the port.
    * @default false */
   reusePort?: boolean;
+  /** Load a certificate and private key when the generated server starts. */
+  tls?: TLSOptions;
 }
 
 declare module '@xinkjs/xink' {

@@ -1,10 +1,9 @@
 /** @import { Config } from './types/internal.js' */
 
 /**
- * @type {Config}
+ * @type {Omit<Config, 'adapter'>}
  */
 export const CONFIG = {
-  adapter: null,
   entrypoint: 'index.ts',
   middleware_dir: 'src/middleware',
   out_dir: 'build',

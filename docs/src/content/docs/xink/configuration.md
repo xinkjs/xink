@@ -10,13 +10,13 @@ xink relies on build adapters for different runtimes and environments, so you ha
 - `@xinkjs/adapter-cloudflare`
 - `@xinkjs/adapter-deno`
 
-You can set the below options in the plugin's configuration.
+The `adapter` is required. All other plugin options are optional and use the defaults shown below.
 
 ```ts
 type XinkConfig = {
   adapter: (options?: ServeOptions) => XinkAdapter;
-  entrypoint?: string; 
-  out_dir?: string;
+  entrypoint?: string; // default 'index.ts'
+  out_dir?: string; // default 'build'
   serve_options?: { [key: string]: any; }; // for Bun and Deno users (see next section)
 }
 ```
@@ -65,7 +65,7 @@ export default defineConfig(function () {
 
 ## `.serve()` options
 
-For Bun and Deno users, you can declare serve options in xink's plugin configuration. Any other runtimes will ignore these options. Be aware that they're only relevant for `build`, `preview` and `start`.
+For Bun and Deno users, you can declare serve options in xink's plugin configuration. Any other runtimes will ignore these options. They configure the generated production server; Vite's `server` and `preview` options configure development and preview.
 
 > Bun supports adding these within your entrypoint's default export, if you'd like to declare them there.
 
@@ -102,18 +102,65 @@ the resulting build server.js file would be:
 import api from './index.js';
 import { serve as bunServe } from 'bun';
 
-const options = {"port":3500,"hostname":"0.0.0.0"};
-
-console.log(`Starting server on port ${options.port}...`);
+const options = {"port":3500};
+const port = options.port ?? process.env.PORT ?? 3000;
+const hostname = options.hostname ?? process.env.HOST ?? '0.0.0.0';
 
 const server = bunServe({
   ...options,
+  hostname,
+  port,
   fetch: api.fetch,
   error: (err) => { /* ... */ }
 });
 
-console.log(`Server listening on http://${server.hostname}:${server.port}`);
+console.log(`Server listening on ${server.url}`);
 ```
+
+`HOST` and `PORT` are read when the generated server starts if they are not set in `serve_options`.
+
+## Local HTTPS
+
+Development and preview HTTPS use Vite's native configuration. Certificate files are loaded by Vite and are not Xink adapter options.
+
+```ts
+import { readFileSync } from 'node:fs'
+
+export default defineConfig({
+  server: {
+    https: {
+      cert: readFileSync('./certs/localhost.pem'),
+      key: readFileSync('./certs/localhost-key.pem')
+    }
+  },
+  preview: {
+    https: {
+      cert: readFileSync('./certs/localhost.pem'),
+      key: readFileSync('./certs/localhost-key.pem')
+    }
+  }
+})
+```
+
+Vite uses WSS for HMR on an HTTPS server. A reverse proxy in front of Vite must also proxy WebSocket connections.
+
+## Native HTTPS
+
+The Bun and Deno adapters can load a certificate and key when the generated server starts:
+
+```ts
+xink({
+  adapter,
+  serve_options: {
+    tls: {
+      cert_file: '/run/secrets/tls.crt',
+      key_file: '/run/secrets/tls.key'
+    }
+  }
+})
+```
+
+Alternatively, set `TLS_CERT_FILE` and `TLS_KEY_FILE` in the server's runtime environment. Both values are required. Xink embeds only paths in generated output, never certificate or private-key contents.
 
 ## API Basepath
 
@@ -130,19 +177,31 @@ const api = new Xink({
 export default api
 ```
 
-## Check Origin
+## Allowed Origins
 
-You can tell Xink to not check origins for POST requests. The default is `true`.
+Form submissions are restricted to the request's own origin by default. Add exact, trusted origins when another site needs to submit forms to the API. This does not configure CORS.
 
 ```ts
 /* e.g. index.ts */
 import { Xink } from "@xinkjs/xink"
 
 const api = new Xink({
-  check_origin: false
+  allowed_origins: ['https://admin.example.com']
 })
 
 export default api
+```
+
+`check_origin` is deprecated but remains available for backwards compatibility. A non-empty `allowed_origins` array takes precedence over it.
+
+## Public Origin
+
+When HTTPS terminates at a trusted reverse proxy, configure the external origin so request URLs, secure cookies, and origin checks use the browser-facing URL.
+
+```ts
+const api = new Xink({
+  public_origin: 'https://api.example.com'
+})
 ```
 
 ## Cloudflare Workers

@@ -70,7 +70,7 @@ export function xink<TAdapterFunc extends (options?: any) => XinkAdapter>(
 
 export function sequence(...handlers: Handle[]): Handle;
 export class Xink extends Xin {
-  constructor(options?: Partial<XinConfig>)
+  constructor(options?: XinConfig)
   fetch(request: Request, env?: Record<string, any>, ctx?: Record<string, any>): Promise<Response>;
 }
 

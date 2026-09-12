@@ -13,7 +13,7 @@ type BaseConfigFromPublic = PublicXinkConfig<
 
 export type Config = Expand<
   BaseConfigFromPublic &
-  Required<Pick<BaseConfigFromPublic, 'check_origin' | 'entrypoint' | 'out_dir'>> &
+  Required<Pick<BaseConfigFromPublic, 'entrypoint' | 'out_dir'>> &
   {
     middleware_dir: string;
     params_dir: string;

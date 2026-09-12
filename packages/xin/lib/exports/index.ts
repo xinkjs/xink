@@ -5,7 +5,9 @@ export type {
   Handle,
   Handler,
   Hook,
-  RequestEvent
+  RequestEvent,
+  ResolvedXinConfig,
+  XinConfig
 } from '../../types.js'
 
 export type { ApiReferenceConfiguration } from '@scalar/types'

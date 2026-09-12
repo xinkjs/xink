@@ -27,18 +27,30 @@ The following handler methods are available: `.get()`, `.post()`, `.put()`, `.pa
 
 ## Configuration
 
-There are two options: `check_origin` and `base_path`.
+Xin supports `allowed_origins`, `base_path`, and `public_origin`. All configuration options are optional.
 
-### Check origin
+### Allowed origins
 
-Determines CORS behavior, and default is `true`. Make sure you know what you're doing when setting this to `false`.
+Form submissions are restricted to the request's own origin by default. Add exact, trusted origins to `allowed_origins` when another site needs to submit forms to the API. This is CSRF protection and does not configure CORS.
 
 ```ts
 import { Xin } from "@xinkjs/xin"
 
-const api = new Xin({ check_origin: false })
+const api = new Xin({
+  allowed_origins: ['https://admin.example.com']
+})
 
 export default api
+```
+
+`check_origin` remains available for backwards compatibility, but is deprecated. A non-empty `allowed_origins` array enables origin checking even when `check_origin` is `false`.
+
+### Public origin
+
+Set `public_origin` to the external HTTPS origin when a trusted reverse proxy sends HTTP requests to Xin. This keeps `event.url`, secure cookies, and origin checks aligned with the browser-facing URL.
+
+```ts
+const api = new Xin({ public_origin: 'https://api.example.com' })
 ```
 
 ### Base path

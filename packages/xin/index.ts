@@ -18,6 +18,7 @@ import type {
   OpenApiData,
   OpenApiOptions,
   SchemaDefinition,
+  ResolvedXinConfig,
   XinConfig
 } from "./types.js"
 import { HANDLER_METHODS, HOOK_METHODS } from "./lib/constants.js"
@@ -300,9 +301,9 @@ export class Xin extends Xi<Store> {
     },
     scalar: {}
   }
-  #config: XinConfig
+  #config: ResolvedXinConfig
 
-  constructor(options: Partial<XinConfig> = {}) {
+  constructor(options: XinConfig = {}) {
     super(options)
     this.#config = validateConfig(options)
 
@@ -316,7 +317,14 @@ export class Xin extends Xi<Store> {
   }
 
   async fetch(request: Request, env: Record<string, any> = {}, ctx: Record<string, any> = {}): Promise<Response> { // must not be an arrow function!!
-    const url = new URL(request.url)
+    const request_url = new URL(request.url)
+    const url = this.#config.public_origin
+      ? new URL(request_url.pathname + request_url.search, this.#config.public_origin)
+      : request_url
+
+    if (url.href !== request.url)
+      request = new Request(url, request)
+
     const { store, params } = this.find(url.pathname)
     const middleware = this.middleware
     const handle = sequence(...middleware)
@@ -337,10 +345,11 @@ export class Xin extends Xi<Store> {
       return json({ ...this.#openapi.metadata, paths: this.#openapi.paths })
 
     /* CSRF Content Type and Origin Check. */
-    if (this.#config.check_origin) {
+    if (this.#config.allowed_origins.length > 0 || this.#config.check_origin) {
+      const allowed_origins = new Set([url.origin, ...this.#config.allowed_origins])
       const forbidden = 
         (method === 'POST' || method === 'DELETE' || method === 'PUT' || method === 'PATCH') &&  
-        request.headers.get('origin') !== url.origin &&  
+        !allowed_origins.has(request.headers.get('origin') ?? '') &&
         isFormContentType(request)
 
       if (forbidden) {

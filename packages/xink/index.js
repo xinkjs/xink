@@ -1,7 +1,7 @@
 /** @import { XinkConfig, XinkAdapter } from './types.js' */
 
 import { validateConfig } from './lib/utils/config.js'
-import { getRequest, setResponse } from './lib/utils/vite.js'
+import { getRequest, getRequestOrigin, setResponse } from './lib/utils/vite.js'
 import { createManifestVirtualModule } from './lib/utils/manifest.js'
 import { join, relative, resolve as path_resolve } from 'node:path'
 import { readFiles } from './lib/utils/main.js'
@@ -63,10 +63,10 @@ const getTsconfigPaths = (cwd) => {
 } 
 
 /**
- * @param {XinkConfig} [xink_config]
+ * @param {XinkConfig} xink_config
  * @returns {import('vite').Plugin}
  */
-export function xink(xink_config = {}) {
+export function xink(xink_config) {
   const cwd = process.cwd()
 
   const validated_config = validateConfig(xink_config)
@@ -115,22 +115,22 @@ export function xink(xink_config = {}) {
     },
 
     async closeBundle() {
-      if (vite_config.build.ssr && api_chunk_filename && stored_adapter) {
-        console.log(`[Xink Plugin] Running adapter: ${stored_adapter.name}`)
-        const context = {
-          entrypoint,
-          out_dir: vite_config.build.outDir,
-          api_chunk_filename,
-          log: (msg) => console.log(`[${stored_adapter.name}] ${msg}`)
-        };
-        try {
-          await stored_adapter.adapt(context);
-        } catch (error) {
-          console.error(`[Xink Plugin] Adapter ${stored_adapter.name} failed:`, error)
-          throw error
-        }
-      } else if (vite_config.build.ssr && !stored_adapter) {
-          console.warn('[Xink Plugin] SSR build finished, but no adapter was configured.')
+      if (!vite_config.build.ssr || !api_chunk_filename) return
+      if (!stored_adapter)
+        throw new Error('[Xink Plugin] Configured adapter was not initialized.')
+
+      console.log(`[Xink Plugin] Running adapter: ${stored_adapter.name}`)
+      const context = {
+        entrypoint,
+        out_dir: vite_config.build.outDir,
+        api_chunk_filename,
+        log: (msg) => console.log(`[${stored_adapter.name}] ${msg}`)
+      };
+      try {
+        await stored_adapter.adapt(context);
+      } catch (error) {
+        console.error(`[Xink Plugin] Adapter ${stored_adapter.name} failed:`, error)
+        throw error
       }
     },
 
@@ -258,9 +258,7 @@ export function xink(xink_config = {}) {
           try {
             /** @type {{ default: { fetch: (request: Request) => Promise<Response> }}} */
             const api = await server.ssrLoadModule(entrypoint_path)
-            const base = `${
-              server.config.server.https ? 'https' : 'http'
-            }://${req.headers[':authority'] || req.headers.host}`
+            const base = getRequestOrigin(req, Boolean(server.config.server.https))
             const request = await getRequest(base, req)
             const response = await api.default.fetch(request)
             setResponse(res, response)
@@ -285,9 +283,7 @@ export function xink(xink_config = {}) {
               `${entrypoint.split('.')[0]}.js`,
             )
           )
-          const base = `${
-            server.config.server.https ? 'https' : 'http'
-          }://${req.headers[':authority'] || req.headers.host}`
+          const base = getRequestOrigin(req, Boolean(server.config.preview.https))
           const request = await getRequest(base, req)
           const response = await api.default.fetch(request)
           setResponse(res, response)
